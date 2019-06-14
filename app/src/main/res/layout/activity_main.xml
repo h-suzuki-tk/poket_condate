@@ -15,5 +15,11 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" android:textSize="36sp" android:textColor="#1E88E5"/>
+    <Switch
+            android:text="スイッチ"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" tools:layout_editor_absoluteY="411dp"
+            tools:layout_editor_absoluteX="85dp" android:id="@+id/switch1" android:textSize="36sp"
+            android:textColor="#D81B60"/>
 
 </android.support.constraint.ConstraintLayout>
