@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">WSE2019</string>
+    <string name="app_name">ぽけっと献立</string>
+    <string name="user_name">〇〇〇〇〇 様</string>
+
+    <string name="top">トップ</string>
+    <string name="record">カレンダー</string>
+    <string name="eval">評価</string>
 </resources>
