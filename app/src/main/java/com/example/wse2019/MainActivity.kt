@@ -16,8 +16,8 @@ class MainActivity : AppCompatActivity() {
         // -------------------------------------------------------------------------------
         var toolbar: Toolbar = findViewById(R.id.toolBar)
 
-        toolbar.setNavigationIcon(R.mipmap.ic_launcher_round)
-        toolbar.setTitle("ほげほげ")
+        toolbar.setNavigationIcon(R.drawable.baseline_reorder_black_18dp)
+        toolbar.setTitle(R.string.app_name)
 
         setSupportActionBar(toolbar)
         // -------------------------------------------------------------------------------
