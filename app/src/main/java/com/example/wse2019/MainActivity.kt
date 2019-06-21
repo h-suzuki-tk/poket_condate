@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.design.widget.TabLayout
+import android.support.v4.content.res.TypedArrayUtils
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v4.view.ViewPager
@@ -34,24 +35,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
         nav_view.setNavigationItemSelectedListener(this)
 
-        // ViewPagerの設定
+        // タブとViewPagerをセット
         val tabsFragments = arrayListOf(
             TopFragment::class.java,
             CalenderFragment::class.java,
             EvaluationFragment::class.java
         )
-        val mTabsPagerAdapter = TabsPagerAdapter(supportFragmentManager, tabsFragments)
+        val tabLayout: TabLayout = findViewById(R.id.tab_layout)
         val container: ViewPager = findViewById(R.id.container)
-        container.adapter = mTabsPagerAdapter
-        container.addOnPageChangeListener(object : ViewPager.OnPageChangeListener{
-            override fun onPageScrollStateChanged(state: Int) {
-            }
-            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-            }
-            override fun onPageSelected(position: Int) {
-            }
-        })
-        tab_layout.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
+        container.adapter = TabsPagerAdapter(supportFragmentManager, tabsFragments)
+        tabLayout.setupWithViewPager(container)
     }
 
     // ナビゲーションメニューの各項目を選択した際の動作
