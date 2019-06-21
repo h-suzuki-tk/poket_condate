@@ -8,11 +8,11 @@
                 android:id="@+id/nav_top"
                 android:title="@string/top"/>
         <item
-                android:id="@+id/nav_record"
-                android:title="@string/record"/>
+                android:id="@+id/nav_calender"
+                android:title="@string/calender"/>
         <item
-                android:id="@+id/nav_eval"
-                android:title="@string/eval"/>
+                android:id="@+id/nav_evaluation"
+                android:title="@string/evaluation"/>
         <item
                 android:id="@+id/nav_mycondate"
                 android:title="@string/mycondate"/>

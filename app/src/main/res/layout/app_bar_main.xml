@@ -34,9 +34,9 @@
             <android.support.design.widget.TabItem
                     android:text="@string/top"/>
             <android.support.design.widget.TabItem
-                    android:text="@string/record"/>
+                    android:text="@string/calender"/>
             <android.support.design.widget.TabItem
-                    android:text="@string/eval"/>
+                    android:text="@string/evaluation"/>
 
         </android.support.design.widget.TabLayout>
 

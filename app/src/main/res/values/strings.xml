@@ -3,8 +3,8 @@
     <string name="user_name">〇〇〇〇〇 さん</string>
 
     <string name="top">トップ</string>
-    <string name="record">カレンダー</string>
-    <string name="eval">評価</string>
+    <string name="calender">カレンダー</string>
+    <string name="evaluation">評価</string>
     <string name="mycondate">My献立</string>
 
     <string name="regisration_inf_edit">登録情報の編集</string>

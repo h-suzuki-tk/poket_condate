@@ -24,11 +24,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         // ナビゲーションメニューをセット
         val drawerLayout: DrawerLayout = findViewById(R.id.drawerLayout)
-        val navView: NavigationView = findViewById(R.id.navView)
+        val nav_view: NavigationView = findViewById(R.id.nav_view)
         val toggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
-        navView.setNavigationItemSelectedListener(this)
+        nav_view.setNavigationItemSelectedListener(this)
     }
 
     // ナビゲーションメニューの各項目を選択した際の動作
@@ -37,10 +37,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.nav_top -> {
 
             }
-            R.id.nav_record -> {
+            R.id.nav_calender -> {
 
             }
-            R.id.nav_eval -> {
+            R.id.nav_evaluation -> {
 
             }
             R.id.nav_mycondate -> {
