@@ -1,16 +1,20 @@
 package com.example.wse2019
 
 
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.design.widget.TabLayout
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
+import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.support.v7.app.ActionBarDrawerToggle
 import android.view.MenuItem
 import android.view.View
+import kotlinx.android.synthetic.main.app_bar_main.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -19,7 +23,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setContentView(R.layout.activity_main)
 
         // ツールバーをセット
-        val toolbar: Toolbar = findViewById(R.id.toolBar)
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
         // ナビゲーションメニューをセット
@@ -29,6 +33,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
         nav_view.setNavigationItemSelectedListener(this)
+
+        // ViewPagerの設定
+        val tabsFragments = arrayListOf(
+            TopFragment::class.java,
+            CalenderFragment::class.java,
+            EvaluationFragment::class.java
+        )
+        val mTabsPagerAdapter = TabsPagerAdapter(supportFragmentManager, tabsFragments)
+        val container: ViewPager = findViewById(R.id.container)
+        container.adapter = mTabsPagerAdapter
+        container.addOnPageChangeListener(object : ViewPager.OnPageChangeListener{
+            override fun onPageScrollStateChanged(state: Int) {
+            }
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+            }
+            override fun onPageSelected(position: Int) {
+            }
+        })
+        tab_layout.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
     }
 
     // ナビゲーションメニューの各項目を選択した際の動作
@@ -54,5 +77,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
+
+
 
 }
