@@ -3,6 +3,13 @@ package com.example.wse2019
 import android.provider.BaseColumns
 
 class DBContract {
+    data class Column(val column:String, val type:String)
+
+    enum class Type(val type:String){
+        INT("Integer"),
+        TEXT("text"),
+        REAL("real"),
+    }
 
     //材料テーブル
     class Ingredient : BaseColumns {
@@ -18,6 +25,7 @@ class DBContract {
             const val FIBER = "fiber"           //繊維
             const val CALORIE = "calorie"       //カロリー
             const val UNIT = "unit"             //単位
+            const val ALLERGEN = "allergen"     //アレルギー
         }
     }
 
@@ -46,9 +54,9 @@ class DBContract {
     }
 
     //My献立テーブル
-    class MyMenu : BaseColumns {
+    class MyCondate : BaseColumns {
         companion object {
-            const val TABLE_NAME = "myMenu" //テーブル名
+            const val TABLE_NAME = "myCondate" //テーブル名
             const val ID = "id"             //My献立ID
             const val NAME = "name"         //My献立名
         }
@@ -76,7 +84,7 @@ class DBContract {
     }
 
     //献立内容テーブル
-    class MyMenu_Foods : BaseColumns {
+    class MyCondate_Foods : BaseColumns {
         companion object {
             const val TABLE_NAME = "myMenu_Foods"   //テーブル名
             const val MYMENU_ID = "myMenu_id"       //My献立ID
