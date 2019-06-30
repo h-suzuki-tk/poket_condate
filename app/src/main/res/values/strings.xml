@@ -3,7 +3,7 @@
     <string name="user_name">〇〇〇〇〇 さん</string>
 
     <string name="top">トップ</string>
-    <string name="calender">カレンダー</string>
+    <string name="calendar">カレンダー</string>
     <string name="evaluation">評価</string>
     <string name="mycondate">My献立</string>
 
@@ -22,4 +22,7 @@
     <string name="menu_tools">Tools</string>
     <string name="menu_share">Share</string>
     <string name="menu_send">Send</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
