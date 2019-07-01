@@ -3,9 +3,9 @@ package com.example.wse2019
 import android.provider.BaseColumns
 
 class DBContract {
-    data class Column(val column:String, val type:String)
+    data class Column(val column: String, val type: String)
 
-    enum class Type(val type:String){
+    enum class Type(val type: String) {
         INT("Integer"),
         TEXT("text"),
         REAL("real"),
