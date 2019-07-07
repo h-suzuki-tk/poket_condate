@@ -10,17 +10,30 @@
         tools:openDrawer="start">
 
     <!-- ヘッダー, フッター等とメインコンテンツ -->
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <include
-            layout="@layout/app_bar_main"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"/>
+        <!-- ヘッダー -->
+        <android.support.design.widget.AppBarLayout
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:theme="@style/AppTheme.AppBarOverlay"
+                android:id="@+id/appBarLayout">
 
+        <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                android:elevation="4dp"
+                android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+
+        </android.support.design.widget.AppBarLayout>
+
+        <!-- メインコンテンツ -->
         <FrameLayout
                 xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/frame_contents"
@@ -30,9 +43,6 @@
         </FrameLayout>
 
     </LinearLayout>
-
-
-
 
     <!-- ナビゲーションメニュー -->
     <android.support.design.widget.NavigationView
