@@ -30,7 +30,6 @@ class CalendarFragment() : Fragment() {
         // 当月の表示
         val currentYearMonth: TextView = v.findViewById(R.id.currentYearMonth)
         currentYearMonth.text = adapter.getCurrentYearMonth()
-
         // 先月ボタン・来月ボタンの処理
         val prevButton: Button = v.findViewById(R.id.prevMonth)
         val nextButton: Button = v.findViewById(R.id.nextMonth)

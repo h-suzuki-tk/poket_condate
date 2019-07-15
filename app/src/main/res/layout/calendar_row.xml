@@ -21,36 +21,33 @@
                 android:textSize="24sp"
                 android:textColor="@color/colorPrimary"/>
 
-        <!-- (仮)献立 -->
-        <!-- ListView を使うのがよいか -->
-        <TextView
+        <!-- 献立 -->
+        <!--
+        現時点では表示のみ。
+        表示を実装後、ボタン処理を追加し
+        画面遷移をできるようにする。
+        -->
+        <ListView
+                android:id="@+id/morningListView"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="New Text"
-                android:id="@+id/name"
-                android:textSize="30dp"
-                android:layout_weight="1" />
-        <TextView
+                android:layout_height="@dimen/calendar_row_height"
+                android:layout_weight="1"/>
+        <ListView
+                android:id="@+id/noonListView"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="New Text"
-                android:id="@+id/price"
-                android:textSize="30dp"
-                android:layout_weight="1" />
-        <TextView
+                android:layout_height="@dimen/calendar_row_height"
+                android:layout_weight="1"/>
+        <ListView
+                android:id="@+id/eveningListView"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="New Text"
-                android:id="@+id/name"
-                android:textSize="30dp"
-                android:layout_weight="1" />
-        <TextView
+                android:layout_height="@dimen/calendar_row_height"
+                android:layout_weight="1"/>
+        <ListView
+                android:id="@+id/snackListView"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="New Text"
-                android:id="@+id/name"
-                android:textSize="30dp"
-                android:layout_weight="1" />
+                android:layout_height="@dimen/calendar_row_height"
+                android:layout_weight="1"/>
+
     </LinearLayout>
 
 </LinearLayout>
