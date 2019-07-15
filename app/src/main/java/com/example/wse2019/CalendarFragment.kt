@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
+import java.lang.IllegalArgumentException
 
 
 class CalendarFragment() : Fragment() {
@@ -33,8 +34,20 @@ class CalendarFragment() : Fragment() {
 
         // ListView の処理
         val listView: ListView = v.findViewById(R.id.calendarListView)
-        val arrayAdapter = ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, foods)
-        listView.adapter = arrayAdapter
+        var list: ArrayList<Calendar> = ArrayList<Calendar>()
+        var adapter: CalendarAdapter = if (context != null) CalendarAdapter(context!!) else throw AssertionError()
+        adapter.foodList = list
+        listView.adapter = adapter
+        val food: Calendar = Calendar()
+        food.name = "りんご"
+        food.price = 100
+        list.add(food)
+        adapter.notifyDataSetChanged()
+        val food2: Calendar = Calendar()
+        food2.name = "みかん"
+        food2.price = 70
+        list.add(food2)
+        adapter.notifyDataSetChanged()
 
         return v
     }
