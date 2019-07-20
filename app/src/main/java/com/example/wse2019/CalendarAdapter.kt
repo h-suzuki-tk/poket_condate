@@ -1,5 +1,6 @@
 package com.example.wse2019
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.text.Layout
@@ -27,7 +28,7 @@ class CalendarAdapter(context: Context) : BaseAdapter() {
      * getView で各行 (各日) に対する表示処理ができるので
      * そこで DB 検索・下記配列にプッシュしていけばよいと思われる
      */
-    var morningCondate: ArrayList<String> = arrayListOf("やきそば", "牛乳")
+    var morning: ArrayList<String> = arrayListOf("やきそば", "牛乳")
     var noon: ArrayList<String> = arrayListOf("焼肉", "コーンポタージュ", "りんご", "みかん", "ぶどう")
     var evening: ArrayList<String> = arrayListOf("ジュース")
     var snack: ArrayList<String> = arrayListOf("ケーキ", "お好み焼き")
@@ -38,7 +39,7 @@ class CalendarAdapter(context: Context) : BaseAdapter() {
         return dateArray.size
     }
 
-    override fun getItem(position: Int): Any {
+    override fun getItem(position: Int): Date {
         return dateArray[position]
     }
 
@@ -46,6 +47,7 @@ class CalendarAdapter(context: Context) : BaseAdapter() {
         return 0
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val v: View = inflater.inflate(R.layout.calendar_row, parent, false)
 
@@ -53,25 +55,39 @@ class CalendarAdapter(context: Context) : BaseAdapter() {
         // setCondate(position)
 
         val parent: ListView = parent as ListView
-        val morning: ListView = v.findViewById(R.id.morningListView)
-        morning.adapter = ArrayAdapter<String>(context, R.layout.calendar_cell, morningCondate)
-        //morning.setOnClickListener { if (parent != null) parent.performItemClick(v, position, R.id.morningListView.toLong()) else throw AssertionError("parent is null") }
-        v.findViewById<FrameLayout>(R.id.morningLayout).setOnClickListener {
-            Toast.makeText(context, "おしましたね！", Toast.LENGTH_LONG).show()
-            if (parent != null) parent.performItemClick(v, position, R.id.morningListView.toLong()) else throw AssertionError("parent is null") }
 
         v.findViewById<TextView>(R.id.date).text = SimpleDateFormat("d", Locale.JAPAN).format(dateArray[position])
-        //v.findViewById<ListView>(R.id.morningListView).adapter = ArrayAdapter<String>(context, R.layout.calendar_cell, morning)
-        v.findViewById<ListView>(R.id.noonListView).adapter = ArrayAdapter<String>(context, R.layout.calendar_cell, noon)
-        v.findViewById<ListView>(R.id.eveningListView).adapter = ArrayAdapter<String>(context, R.layout.calendar_cell, evening)
-        v.findViewById<ListView>(R.id.snackListView).adapter = ArrayAdapter<String>(context, R.layout.calendar_cell, snack)
+        val morningListView: ListView = v.findViewById(R.id.morningListView)
+        val noonListView: ListView = v.findViewById(R.id.noonListView)
+        val eveningListView: ListView = v.findViewById(R.id.eveningListView)
+        val snackListView: ListView = v.findViewById(R.id.snackListView)
+        morningListView.adapter = ArrayAdapter<String>(context, R.layout.calendar_cell, morning)
+        noonListView.adapter = ArrayAdapter<String>(context, R.layout.calendar_cell, noon)
+        eveningListView.adapter = ArrayAdapter<String>(context, R.layout.calendar_cell, evening)
+        snackListView.adapter = ArrayAdapter<String>(context, R.layout.calendar_cell, snack)
+        morningListView.setOnTouchListener { view, _ ->
+            parent.performItemClick(view, position, R.id.morningListView.toLong())
+            true
+        }
+        noonListView.setOnTouchListener { view, _ ->
+            parent.performItemClick(view, position, R.id.noonListView.toLong())
+            true
+        }
+        eveningListView.setOnTouchListener { view, _ ->
+            parent.performItemClick(view, position, R.id.eveningListView.toLong())
+            true
+        }
+        snackListView.setOnTouchListener { view, _ ->
+            parent.performItemClick(view, position, R.id.snackListView.toLong())
+            true
+        }
 
         return v
     }
 
     fun setCondate(position: Int) {
 
-        morningCondate.clear()
+        morning.clear()
         noon.clear()
         evening.clear()
         snack.clear()

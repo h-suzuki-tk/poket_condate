@@ -10,6 +10,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import java.lang.IllegalArgumentException
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class CalendarFragment() : Fragment() {
@@ -25,7 +27,18 @@ class CalendarFragment() : Fragment() {
         var adapter: CalendarAdapter = if (context != null) CalendarAdapter(context!!) else throw AssertionError("Content is null.")
         listView.adapter = adapter
         listView.setOnItemClickListener { parent, view, position, id ->
-            Toast.makeText(activity, "おしましたね？", Toast.LENGTH_LONG).show()
+            val date: Date = adapter.getItem(position)
+            val year: String = SimpleDateFormat("yyyy", Locale.JAPAN).format(date)
+            val month: String = SimpleDateFormat("M", Locale.JAPAN).format(date)
+            val day: String = SimpleDateFormat("d", Locale.JAPAN).format(date)
+            var time: String = ""
+            when (id) {
+                R.id.morningListView.toLong() -> time = "朝"
+                R.id.noonListView.toLong() -> time = "昼"
+                R.id.eveningListView.toLong() -> time = "晩"
+                R.id.snackListView.toLong() -> time = "間食"
+            }
+            Toast.makeText(activity, "${year}年${month}月${day}日の${time}の献立をおしました", Toast.LENGTH_SHORT).show()
         }
 
         // 当月の表示
