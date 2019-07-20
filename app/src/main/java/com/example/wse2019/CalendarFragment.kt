@@ -4,13 +4,11 @@ package com.example.wse2019
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.ListView
-import android.widget.TextView
+import android.widget.*
 import java.lang.IllegalArgumentException
 
 
@@ -26,6 +24,9 @@ class CalendarFragment() : Fragment() {
         val listView: ListView = v.findViewById(R.id.calendarListView)
         var adapter: CalendarAdapter = if (context != null) CalendarAdapter(context!!) else throw AssertionError("Content is null.")
         listView.adapter = adapter
+        listView.setOnItemClickListener { parent, view, position, id ->
+            Toast.makeText(activity, "おしましたね？", Toast.LENGTH_LONG).show()
+        }
 
         // 当月の表示
         val currentYearMonth: TextView = v.findViewById(R.id.currentYearMonth)
