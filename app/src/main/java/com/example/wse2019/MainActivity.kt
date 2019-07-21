@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar
 import android.support.v7.app.ActionBarDrawerToggle
 import android.view.MenuItem
 import android.util.Log
+import android.widget.Button
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -21,7 +22,6 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
 
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -40,23 +40,9 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
         toggle.syncState()
         nav_view.setNavigationItemSelectedListener(this)
 
-
-        // タブとViewPagerをセット
-        val tabsFragments = arrayListOf(
-            TopFragment::class.java,
-            CalendarFragment::class.java,
-            EvaluationFragment::class.java
-        )
-
-        val tabLayout: TabLayout = findViewById(R.id.tab_layout)
-        val container: ViewPager = findViewById(R.id.container)
-
-        container.adapter = TabsPagerAdapter(supportFragmentManager, tabsFragments)
-        tabLayout.setupWithViewPager(container)
-
         //最初に表示する画面の設定
         val ft = supportFragmentManager.beginTransaction()
-        ft.replace(R.id.frame_contents, TopFragment())
+        ft.replace(R.id.frame_contents, TabFragment())
         ft.commit()
     }
 
@@ -66,20 +52,26 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
     // ナビゲーションメニューの各項目を選択した際の動作
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         var fragment:Fragment?=null
-
+        val arg = Bundle()
 
         //選択したメニューにしたがってfragmentを挿入
         when (item.itemId) {
             R.id.nav_top -> {
-                fragment=TopFragment()
+                fragment=TabFragment()
+                arg.putInt("PageIndex", 0)
+                fragment.arguments = arg
                 Log.d(TAG,"Nav top Selected!")
             }
             R.id.nav_calendar -> {
-                fragment=CalendarFragment()
+                fragment=TabFragment()
+                arg.putInt("PageIndex", 1)
+                fragment.arguments = arg
                 Log.d(TAG,"Nav calendar Selected!")
             }
             R.id.nav_evaluation -> {
-                fragment=EvaluationFragment()
+                fragment=TabFragment()
+                arg.putInt("PageIndex", 2)
+                fragment.arguments = arg
                 Log.d(TAG,"Nav evaluation Selected!")
             }
             R.id.nav_mycondate -> {

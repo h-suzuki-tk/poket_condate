@@ -1,14 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:app="http://schemas.android.com/apk/res-auto"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             tools:context=".CalendarFragment"
-             app:layout_behavior="@string/appbar_scrolling_view_behavior">
-    <TextView
-            android:layout_width="wrap_content"
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" tools:layout_editor_absoluteY="232dp" tools:layout_editor_absoluteX="88dp">
+
+    <!-- 各列要素名 -->
+    <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/calendar" tools:layout_editor_absoluteY="62dp" tools:layout_editor_absoluteX="16dp"/>
-</android.support.constraint.ConstraintLayout>
+            android:orientation="horizontal">
+
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="日付"
+                android:layout_weight="1"
+                android:background="@color/colorPrimary"
+                android:textColor="#fff"
+                android:textAlignment="center"/>
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="朝"
+                android:layout_weight="1"
+                android:background="@color/colorPrimary"
+                android:textColor="#fff"
+                android:textAlignment="center"/>
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="昼"
+                android:layout_weight="1"
+                android:background="@color/colorPrimary"
+                android:textColor="#fff"
+                android:textAlignment="center"/>
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="晩"
+                android:layout_weight="1"
+                android:background="@color/colorPrimary"
+                android:textColor="#fff"
+                android:textAlignment="center"/>
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="間"
+                android:layout_weight="1"
+                android:background="@color/colorPrimary"
+                android:textColor="#fff"
+                android:textAlignment="center"/>
+
+    </LinearLayout>
+
+    <!-- カレンダー内容 -->
+    <ListView
+            android:id="@+id/calendarListView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+    <!-- フッター -->
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+        <!-- 年月表示 -->
+        <!-- textの箇所は動的に変化させるため、そのうち消す -->
+        <Button
+                android:id="@+id/prevMonth"
+                android:text="昨月"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"/>
+        <TextView
+                android:id="@+id/currentYearMonth"
+                android:text="2019/7"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textAlignment="center"
+                android:gravity="center_vertical"
+                android:textSize="24sp"
+        />
+        <Button
+                android:id="@+id/nextMonth"
+                android:text="来月"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp" android:layout_marginRight="8dp"/>
+
+    </LinearLayout>
+
+</LinearLayout>

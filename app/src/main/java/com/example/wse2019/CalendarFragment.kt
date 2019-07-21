@@ -7,14 +7,36 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.ListView
 
 
 class CalendarFragment() : Fragment() {
+
+    // (仮) ListView に表示する項目
+    private val foods = arrayOf(
+        "りんご", "ばなな", "パイナップル", "いちご"
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_calendar, container, false)
+        val v: View = inflater.inflate(R.layout.fragment_calendar, container, false)
+
+        // 先月ボタン・来月ボタンの処理
+        val prevButton: Button = v.findViewById(R.id.prevMonth)
+        val nextButton: Button = v.findViewById(R.id.nextMonth)
+        prevButton.setOnClickListener { /* 動作をここに記述 */ }
+        nextButton.setOnClickListener { /* 動作をここに記述 */ }
+
+        // ListView の処理
+        val listView: ListView = v.findViewById(R.id.calendarListView)
+        val arrayAdapter = ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, foods)
+        listView.adapter = arrayAdapter
+
+        return v
     }
     override fun onAttach(context: Context?) {
         super.onAttach(context)
