@@ -1,11 +1,11 @@
-package com.example.wse2019
+package com.example.sample
 
 import android.provider.BaseColumns
 
 class DBContract {
-    data class Column(val column: String, val type: String)
+    data class Column(val column:String, val type:String)
 
-    enum class Type(val type: String) {
+    enum class Type(val type:String){
         INT("Integer"),
         TEXT("text"),
         REAL("real"),
@@ -24,6 +24,7 @@ class DBContract {
             const val MINERAL = "mineral"       //ミネラル
             const val FIBER = "fiber"           //繊維
             const val CALORIE = "calorie"       //カロリー
+            const val QUANTITY = "quantity"     //量
             const val UNIT = "unit"             //単位
             const val ALLERGEN = "allergen"     //アレルギー
         }
@@ -37,6 +38,7 @@ class DBContract {
             const val NAME = "name"         //品目名
             const val FAVORITE = "favorite" //お気に入り
             const val MEMO = "memo"         //メモ
+            const val CATEGORY = "category"
         }
     }
 
@@ -77,8 +79,8 @@ class DBContract {
     class Foods_Ingredients : BaseColumns {
         companion object {
             const val TABLE_NAME = "foods_ingredients"  //テーブル名
-            const val INGREDIENT_ID = "ingredient_id"   //材料ID
             const val FOOD_ID = "food_id"               //品目ID
+            const val INGREDIENT_ID = "ingredient_id"   //材料ID
             const val NUMBER = "number"                 //数量
         }
     }
@@ -86,8 +88,8 @@ class DBContract {
     //献立内容テーブル
     class MyCondate_Foods : BaseColumns {
         companion object {
-            const val TABLE_NAME = "myMenu_Foods"   //テーブル名
-            const val MYMENU_ID = "myMenu_id"       //My献立ID
+            const val TABLE_NAME = "myCondate_Foods"   //テーブル名
+            const val MYCONDATE_ID = "myCondate_id"       //My献立ID
             const val FOOD_ID = "food_id"           //品目ID
             const val NUMBER = "number"             //何人前
         }
