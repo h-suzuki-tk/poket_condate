@@ -18,7 +18,11 @@ import android.widget.Button
 import kotlinx.android.synthetic.main.activity_main.*
 
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, CalendarFragment.OnCellSelectedListener {
+class MainActivity :
+    AppCompatActivity(),
+    NavigationView.OnNavigationItemSelectedListener,
+    CalendarFragment.OnCellSelectedListener,
+    TabFragment.OnRegisterCondateSelectedListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,16 +99,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return true
     }
 
-    fun replaceFragment(fragment: Fragment) {
+    override fun replaceFragment(fragment: Fragment) {
         val ft: FragmentTransaction = supportFragmentManager.beginTransaction()
         ft.replace(R.id.frame_contents, fragment)
-        ft.commit()
-    }
-
-    override fun onCellSelected(year: Int, month: Int, date: Int, time: String) {
-        val f: Fragment = CondateRegistrationFragment.newInstance(year, month, date, time)
-        val ft: FragmentTransaction = supportFragmentManager.beginTransaction()
-        ft.replace(R.id.frame_contents, f)
         ft.commit()
     }
 }

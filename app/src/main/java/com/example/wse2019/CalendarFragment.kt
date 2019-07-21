@@ -1,11 +1,9 @@
 package com.example.wse2019
 
 
-import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentTransaction
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,6 +21,10 @@ class CalendarFragment() : Fragment() {
             val fragment = CalendarFragment()
             return fragment
         }
+    }
+
+    interface OnCellSelectedListener {
+        fun replaceFragment(fragment: Fragment)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,15 +51,12 @@ class CalendarFragment() : Fragment() {
                 R.id.snackListView.toLong() -> time = "間食"
             }
             when (mListener) {
-                null -> true//throw NullPointerException("mListener must be non-null")
-                else -> mListener!!.onCellSelected(year, month, date, time)
+                null -> throw NullPointerException("mListener must be non-null")
+                else -> {
+                    val f: Fragment = CondateRegistrationFragment.newInstance(year, month, date, time)
+                    mListener!!.replaceFragment(f)
+                }
             }
-            /*
-            val f: Fragment = CondateRegistrationFragment.newInstance(year, month, date, time)
-            val ft: FragmentTransaction = fragmentManager?.beginTransaction() ?: throw java.lang.AssertionError("fragmentManager is null")
-            ft.replace(R.id.frame_contents, f)
-            ft.commit()
-            */
         }
 
         // 当月の表示
@@ -91,7 +90,4 @@ class CalendarFragment() : Fragment() {
         super.onDetach()
     }
 
-    interface OnCellSelectedListener {
-        fun onCellSelected(year: Int, month: Int, date: Int, time: String)
-    }
 }

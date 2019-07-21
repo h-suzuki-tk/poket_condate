@@ -12,9 +12,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import java.lang.ClassCastException
 
 
 class TabFragment() : Fragment() {
+    var mListener: OnRegisterCondateSelectedListener? = null
+
+    companion object {
+        fun newInstance(): TabFragment {
+            val fragment = TabFragment()
+            return fragment
+        }
+    }
+
+    interface OnRegisterCondateSelectedListener {
+        fun replaceFragment(fragment: Fragment)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -36,25 +50,28 @@ class TabFragment() : Fragment() {
         // 「献立を登録する !」ボタンの設定
         val addNewCondateButton: Button = v.findViewById(R.id.addNewCondate)
         addNewCondateButton.setOnClickListener {
-            /* 動作をここに記述 */
-            val f: Fragment = CondateRegistrationFragment()
-            val ft: FragmentTransaction = fragmentManager?.beginTransaction() ?: throw java.lang.AssertionError("fragmentManager is null")
-            ft.replace(R.id.frame_contents, f)
-            ft.commit()
+            when (mListener) {
+                null -> throw NullPointerException("mListener must be non-null")
+                else -> {
+                    val f: Fragment = CondateRegistrationFragment()
+                    mListener!!.replaceFragment(f)
+                }
+            }
         }
 
         return v
     }
     override fun onAttach(context: Context?) {
         super.onAttach(context)
+
+        when (context) {
+            is OnRegisterCondateSelectedListener -> this.mListener = context
+            else -> throw ClassCastException("${context.toString()} must implement OnCellSelectedListener")
+        }
     }
     override fun onDetach() {
         super.onDetach()
     }
-    companion object {
-        fun newInstance(): TabFragment {
-            val fragment = TabFragment()
-            return fragment
-        }
-    }
+
+
 }
