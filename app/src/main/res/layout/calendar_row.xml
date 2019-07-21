@@ -18,47 +18,25 @@
             android:textColor="@color/colorPrimary"/>
 
     <!-- 献立 -->
-    <!--
-    現時点では表示のみ。
-    表示を実装後、ボタン処理を追加し
-    画面遷移をできるようにする。
-    -->
-    <FrameLayout
-            android:id="@+id/morningLayout"
+    <ListView
+            android:id="@+id/morningListView"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1">
-        <ListView
-                android:id="@+id/morningListView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-    </FrameLayout>
-    <FrameLayout
+            android:layout_weight="1"/>
+    <ListView
+            android:id="@+id/noonListView"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1">
-        <ListView
-                android:id="@+id/noonListView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-    </FrameLayout>
-    <FrameLayout
+            android:layout_weight="1"/>
+    <ListView
+            android:id="@+id/eveningListView"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1">
-        <ListView
-                android:id="@+id/eveningListView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-    </FrameLayout>
-    <FrameLayout
+            android:layout_weight="1"/>
+    <ListView
+            android:id="@+id/snackListView"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1">
-        <ListView
-                android:id="@+id/snackListView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-    </FrameLayout>
+            android:layout_weight="1"/>
 
 </LinearLayout>

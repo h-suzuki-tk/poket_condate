@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentTransaction
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v4.view.ViewPager
@@ -17,7 +18,7 @@ import android.widget.Button
 import kotlinx.android.synthetic.main.activity_main.*
 
 
-class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, CalendarFragment.OnCellSelectedListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,6 +95,16 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
         return true
     }
 
+    fun replaceFragment(fragment: Fragment) {
+        val ft: FragmentTransaction = supportFragmentManager.beginTransaction()
+        ft.replace(R.id.frame_contents, fragment)
+        ft.commit()
+    }
 
-
+    override fun onCellSelected(year: Int, month: Int, date: Int, time: String) {
+        val f: Fragment = CondateRegistrationFragment.newInstance(year, month, date, time)
+        val ft: FragmentTransaction = supportFragmentManager.beginTransaction()
+        ft.replace(R.id.frame_contents, f)
+        ft.commit()
+    }
 }

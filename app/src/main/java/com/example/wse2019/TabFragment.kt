@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.support.v4.view.ViewPager
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentTransaction
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -34,7 +35,13 @@ class TabFragment() : Fragment() {
 
         // 「献立を登録する !」ボタンの設定
         val addNewCondateButton: Button = v.findViewById(R.id.addNewCondate)
-        addNewCondateButton.setOnClickListener { /* 動作をここに記述 */ }
+        addNewCondateButton.setOnClickListener {
+            /* 動作をここに記述 */
+            val f: Fragment = CondateRegistrationFragment()
+            val ft: FragmentTransaction = fragmentManager?.beginTransaction() ?: throw java.lang.AssertionError("fragmentManager is null")
+            ft.replace(R.id.frame_contents, f)
+            ft.commit()
+        }
 
         return v
     }

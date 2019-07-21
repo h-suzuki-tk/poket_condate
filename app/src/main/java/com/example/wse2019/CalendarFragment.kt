@@ -1,24 +1,34 @@
 package com.example.wse2019
 
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.util.Log
+import android.support.v4.app.FragmentTransaction
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import java.lang.IllegalArgumentException
+import java.lang.ClassCastException
 import java.text.SimpleDateFormat
 import java.util.*
 
 
 class CalendarFragment() : Fragment() {
+    var mListener: OnCellSelectedListener? = null
+
+    companion object {
+        fun newInstance(): CalendarFragment {
+            val fragment = CalendarFragment()
+            return fragment
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v: View = inflater.inflate(R.layout.fragment_calendar, container, false)
 
@@ -27,10 +37,10 @@ class CalendarFragment() : Fragment() {
         var adapter: CalendarAdapter = if (context != null) CalendarAdapter(context!!) else throw AssertionError("Content is null.")
         listView.adapter = adapter
         listView.setOnItemClickListener { parent, view, position, id ->
-            val date: Date = adapter.getItem(position)
-            val year: String = SimpleDateFormat("yyyy", Locale.JAPAN).format(date)
-            val month: String = SimpleDateFormat("M", Locale.JAPAN).format(date)
-            val day: String = SimpleDateFormat("d", Locale.JAPAN).format(date)
+            val mDate: Date = adapter.getItem(position)
+            val year: Int = SimpleDateFormat("yyyy", Locale.JAPAN).format(mDate).toInt()
+            val month: Int = SimpleDateFormat("M", Locale.JAPAN).format(mDate).toInt()
+            val date: Int = SimpleDateFormat("d", Locale.JAPAN).format(mDate).toInt()
             var time: String = ""
             when (id) {
                 R.id.morningListView.toLong() -> time = "朝"
@@ -38,7 +48,16 @@ class CalendarFragment() : Fragment() {
                 R.id.eveningListView.toLong() -> time = "晩"
                 R.id.snackListView.toLong() -> time = "間食"
             }
-            Toast.makeText(activity, "${year}年${month}月${day}日の${time}の献立をおしました", Toast.LENGTH_SHORT).show()
+            when (mListener) {
+                null -> true//throw NullPointerException("mListener must be non-null")
+                else -> mListener!!.onCellSelected(year, month, date, time)
+            }
+            /*
+            val f: Fragment = CondateRegistrationFragment.newInstance(year, month, date, time)
+            val ft: FragmentTransaction = fragmentManager?.beginTransaction() ?: throw java.lang.AssertionError("fragmentManager is null")
+            ft.replace(R.id.frame_contents, f)
+            ft.commit()
+            */
         }
 
         // 当月の表示
@@ -58,16 +77,21 @@ class CalendarFragment() : Fragment() {
 
         return v
     }
+
     override fun onAttach(context: Context?) {
         super.onAttach(context)
+
+        when (context) {
+            is OnCellSelectedListener -> this.mListener = context
+            else -> throw ClassCastException("${context.toString()} must implement OnCellSelectedListener")
+        }
     }
+
     override fun onDetach() {
         super.onDetach()
     }
-    companion object {
-        fun newInstance(): CalendarFragment {
-            val fragment = CalendarFragment()
-            return fragment
-        }
+
+    interface OnCellSelectedListener {
+        fun onCellSelected(year: Int, month: Int, date: Int, time: String)
     }
 }
