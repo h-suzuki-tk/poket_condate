@@ -16,7 +16,7 @@ import java.lang.ClassCastException
 
 
 class TabFragment() : Fragment() {
-    var mListener: OnRegisterCondateSelectedListener? = null
+    var listener: OnRegisterNewCondateSelectedListener? = null
 
     companion object {
         fun newInstance(): TabFragment {
@@ -25,7 +25,7 @@ class TabFragment() : Fragment() {
         }
     }
 
-    interface OnRegisterCondateSelectedListener {
+    interface OnRegisterNewCondateSelectedListener {
         fun replaceFragment(fragment: Fragment)
     }
 
@@ -48,13 +48,13 @@ class TabFragment() : Fragment() {
         tabLayout.setupWithViewPager(container)
 
         // 「献立を登録する !」ボタンの設定
-        val addNewCondateButton: Button = v.findViewById(R.id.addNewCondate)
-        addNewCondateButton.setOnClickListener {
-            when (mListener) {
-                null -> throw NullPointerException("mListener must be non-null")
+        val registerNewCondateButton: Button = v.findViewById(R.id.registerNewCondate)
+        registerNewCondateButton.setOnClickListener {
+            when (this.listener) {
+                null -> throw NullPointerException("listener must be non-null")
                 else -> {
                     val f: Fragment = CondateRegistrationFragment()
-                    mListener!!.replaceFragment(f)
+                    this.listener!!.replaceFragment(f)
                 }
             }
         }
@@ -65,7 +65,7 @@ class TabFragment() : Fragment() {
         super.onAttach(context)
 
         when (context) {
-            is OnRegisterCondateSelectedListener -> this.mListener = context
+            is OnRegisterNewCondateSelectedListener -> this.listener = context
             else -> throw ClassCastException("${context.toString()} must implement OnCellSelectedListener")
         }
     }

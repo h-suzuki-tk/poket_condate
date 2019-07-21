@@ -14,7 +14,7 @@ import java.util.*
 
 
 class CalendarFragment() : Fragment() {
-    var mListener: OnCellSelectedListener? = null
+    var listener: OnCellSelectedListener? = null
 
     companion object {
         fun newInstance(): CalendarFragment {
@@ -40,9 +40,9 @@ class CalendarFragment() : Fragment() {
         listView.adapter = adapter
         listView.setOnItemClickListener { parent, view, position, id ->
             val mDate: Date = adapter.getItem(position)
-            val year: Int = SimpleDateFormat("yyyy", Locale.JAPAN).format(mDate).toInt()
-            val month: Int = SimpleDateFormat("M", Locale.JAPAN).format(mDate).toInt()
-            val date: Int = SimpleDateFormat("d", Locale.JAPAN).format(mDate).toInt()
+            val year: Int = SimpleDateFormat("yyyy", Locale.US).format(mDate).toInt()
+            val month: Int = SimpleDateFormat("M", Locale.US).format(mDate).toInt()
+            val date: Int = SimpleDateFormat("d", Locale.US).format(mDate).toInt()
             var time: String = ""
             when (id) {
                 R.id.morningListView.toLong() -> time = "朝"
@@ -50,11 +50,11 @@ class CalendarFragment() : Fragment() {
                 R.id.eveningListView.toLong() -> time = "晩"
                 R.id.snackListView.toLong() -> time = "間食"
             }
-            when (mListener) {
-                null -> throw NullPointerException("mListener must be non-null")
+            when (this.listener) {
+                null -> throw NullPointerException("listener must be non-null")
                 else -> {
                     val f: Fragment = CondateRegistrationFragment.newInstance(year, month, date, time)
-                    mListener!!.replaceFragment(f)
+                    this.listener!!.replaceFragment(f)
                 }
             }
         }
@@ -81,7 +81,7 @@ class CalendarFragment() : Fragment() {
         super.onAttach(context)
 
         when (context) {
-            is OnCellSelectedListener -> this.mListener = context
+            is OnCellSelectedListener -> this.listener = context
             else -> throw ClassCastException("${context.toString()} must implement OnCellSelectedListener")
         }
     }

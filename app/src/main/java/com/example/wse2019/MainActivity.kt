@@ -22,7 +22,7 @@ class MainActivity :
     AppCompatActivity(),
     NavigationView.OnNavigationItemSelectedListener,
     CalendarFragment.OnCellSelectedListener,
-    TabFragment.OnRegisterCondateSelectedListener {
+    TabFragment.OnRegisterNewCondateSelectedListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,6 +101,7 @@ class MainActivity :
 
     override fun replaceFragment(fragment: Fragment) {
         val ft: FragmentTransaction = supportFragmentManager.beginTransaction()
+        ft.addToBackStack(null)
         ft.replace(R.id.frame_contents, fragment)
         ft.commit()
     }

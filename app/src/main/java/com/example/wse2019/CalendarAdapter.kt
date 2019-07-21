@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import kotlinx.android.synthetic.main.calendar_row.view.*
 import org.w3c.dom.Text
 import java.lang.AssertionError
 import java.text.SimpleDateFormat
@@ -16,6 +17,13 @@ import kotlin.collections.ArrayList
 
 
 class CalendarAdapter(context: Context) : BaseAdapter() {
+
+    enum class Time(val listViewId: Int, val areaId: Int, var condate: ArrayList<String>) {
+        MORNING(R.id.morningListView, R.id.morningArea, arrayListOf()),
+        NOON(R.id.noonListView, R.id.noonArea, arrayListOf()),
+        EVENING(R.id.eveningListView, R.id.eveningArea, arrayListOf()),
+        SNACK(R.id.snackListView, R.id.snackArea, arrayListOf())
+    }
 
     val context: Context = context
     val inflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -50,36 +58,28 @@ class CalendarAdapter(context: Context) : BaseAdapter() {
     @SuppressLint("ClickableViewAccessibility")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val v: View = inflater.inflate(R.layout.calendar_row, parent, false)
-
-        // DB 検索・配列に追加処理
-        // setCondate(position)
-
         val parent: ListView = parent as ListView
 
-        v.findViewById<TextView>(R.id.date).text = SimpleDateFormat("d", Locale.JAPAN).format(dateArray[position])
-        val morningListView: ListView = v.findViewById(R.id.morningListView)
-        val noonListView: ListView = v.findViewById(R.id.noonListView)
-        val eveningListView: ListView = v.findViewById(R.id.eveningListView)
-        val snackListView: ListView = v.findViewById(R.id.snackListView)
-        morningListView.adapter = ArrayAdapter<String>(context, R.layout.calendar_cell, morning)
-        noonListView.adapter = ArrayAdapter<String>(context, R.layout.calendar_cell, noon)
-        eveningListView.adapter = ArrayAdapter<String>(context, R.layout.calendar_cell, evening)
-        snackListView.adapter = ArrayAdapter<String>(context, R.layout.calendar_cell, snack)
-        morningListView.setOnTouchListener { view, _ ->
-            parent.performItemClick(view, position, R.id.morningListView.toLong())
-            true
-        }
-        noonListView.setOnTouchListener { view, _ ->
-            parent.performItemClick(view, position, R.id.noonListView.toLong())
-            true
-        }
-        eveningListView.setOnTouchListener { view, _ ->
-            parent.performItemClick(view, position, R.id.eveningListView.toLong())
-            true
-        }
-        snackListView.setOnTouchListener { view, _ ->
-            parent.performItemClick(view, position, R.id.snackListView.toLong())
-            true
+        // 日付のセット
+        val date: TextView = v.findViewById(R.id.date)
+        date.text = SimpleDateFormat("d", Locale.US).format(dateArray[position])
+
+        // 仮にデータをセット
+        /*
+         * SetCondate() 処理を実装後、削除
+         */
+        Time.MORNING.condate = this.morning
+        Time.NOON.condate = this.noon
+        Time.EVENING.condate = this.evening
+        Time.SNACK.condate = this.snack
+
+        // 各セルのセット
+        Time.values().forEach { time ->
+            val listView: ListView = v.findViewById(time.listViewId)
+            val area: FrameLayout = v.findViewById(time.areaId)
+            /* setCondate(position) */
+            listView.adapter = ArrayAdapter<String>(context, R.layout.calendar_cell, time.condate)
+            area.setOnClickListener { parent.performItemClick(v, position, time.listViewId.toLong()) }
         }
 
         return v
@@ -97,7 +97,7 @@ class CalendarAdapter(context: Context) : BaseAdapter() {
     }
 
     fun getCurrentYearMonth(): String {
-        return SimpleDateFormat("yyyy/M", Locale.JAPAN).format(dateManager.calendar.time)
+        return SimpleDateFormat("yyyy/M", Locale.US).format(dateManager.calendar.time)
     }
 
     fun nextMonth() {
