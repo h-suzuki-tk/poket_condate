@@ -6,14 +6,29 @@ import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.support.v4.view.ViewPager
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentTransaction
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import java.lang.ClassCastException
 
 
 class TabFragment() : Fragment() {
+    var listener: OnRegisterNewCondateSelectedListener? = null
+
+    companion object {
+        fun newInstance(): TabFragment {
+            val fragment = TabFragment()
+            return fragment
+        }
+    }
+
+    interface OnRegisterNewCondateSelectedListener {
+        fun replaceFragment(fragment: Fragment)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -33,21 +48,30 @@ class TabFragment() : Fragment() {
         tabLayout.setupWithViewPager(container)
 
         // 「献立を登録する !」ボタンの設定
-        val addNewCondateButton: Button = v.findViewById(R.id.addNewCondate)
-        addNewCondateButton.setOnClickListener { /* 動作をここに記述 */ }
+        val registerNewCondateButton: Button = v.findViewById(R.id.registerNewCondate)
+        registerNewCondateButton.setOnClickListener {
+            when (this.listener) {
+                null -> throw NullPointerException("listener must be non-null")
+                else -> {
+                    val f: Fragment = CondateRegistrationFragment()
+                    this.listener!!.replaceFragment(f)
+                }
+            }
+        }
 
         return v
     }
     override fun onAttach(context: Context?) {
         super.onAttach(context)
+
+        when (context) {
+            is OnRegisterNewCondateSelectedListener -> this.listener = context
+            else -> throw ClassCastException("${context.toString()} must implement OnCellSelectedListener")
+        }
     }
     override fun onDetach() {
         super.onDetach()
     }
-    companion object {
-        fun newInstance(): TabFragment {
-            val fragment = TabFragment()
-            return fragment
-        }
-    }
+
+
 }

@@ -7,47 +7,87 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.ListView
+import android.widget.*
+import java.lang.ClassCastException
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class CalendarFragment() : Fragment() {
+    var listener: OnCellSelectedListener? = null
 
-    // (仮) ListView に表示する項目
-    private val foods = arrayOf(
-        "りんご", "ばなな", "パイナップル", "いちご"
-    )
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val v: View = inflater.inflate(R.layout.fragment_calendar, container, false)
-
-        // 先月ボタン・来月ボタンの処理
-        val prevButton: Button = v.findViewById(R.id.prevMonth)
-        val nextButton: Button = v.findViewById(R.id.nextMonth)
-        prevButton.setOnClickListener { /* 動作をここに記述 */ }
-        nextButton.setOnClickListener { /* 動作をここに記述 */ }
-
-        // ListView の処理
-        val listView: ListView = v.findViewById(R.id.calendarListView)
-        val arrayAdapter = ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, foods)
-        listView.adapter = arrayAdapter
-
-        return v
-    }
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-    }
-    override fun onDetach() {
-        super.onDetach()
-    }
     companion object {
         fun newInstance(): CalendarFragment {
             val fragment = CalendarFragment()
             return fragment
         }
     }
+
+    interface OnCellSelectedListener {
+        fun replaceFragment(fragment: Fragment)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val v: View = inflater.inflate(R.layout.fragment_calendar, container, false)
+
+        // ListView の処理
+        val listView: ListView = v.findViewById(R.id.calendarListView)
+        var adapter: CalendarAdapter = if (context != null) CalendarAdapter(context!!) else throw AssertionError("Content is null.")
+        listView.adapter = adapter
+        listView.setOnItemClickListener { parent, view, position, id ->
+            val mDate: Date = adapter.getItem(position)
+            val year: Int = SimpleDateFormat("yyyy", Locale.US).format(mDate).toInt()
+            val month: Int = SimpleDateFormat("M", Locale.US).format(mDate).toInt()
+            val date: Int = SimpleDateFormat("d", Locale.US).format(mDate).toInt()
+            var time: String = ""
+            when (id) {
+                R.id.morningListView.toLong() -> time = "朝"
+                R.id.noonListView.toLong() -> time = "昼"
+                R.id.eveningListView.toLong() -> time = "晩"
+                R.id.snackListView.toLong() -> time = "間食"
+            }
+            when (this.listener) {
+                null -> throw NullPointerException("listener must be non-null")
+                else -> {
+                    val f: Fragment = CondateRegistrationFragment.newInstance(year, month, date, time)
+                    this.listener!!.replaceFragment(f)
+                }
+            }
+        }
+
+        // 当月の表示
+        val currentYearMonth: TextView = v.findViewById(R.id.currentYearMonth)
+        currentYearMonth.text = adapter.getCurrentYearMonth()
+        // 先月ボタン・来月ボタンの処理
+        val prevButton: Button = v.findViewById(R.id.prevMonth)
+        val nextButton: Button = v.findViewById(R.id.nextMonth)
+        prevButton.setOnClickListener {
+            adapter.prevMonth()
+            currentYearMonth.text = adapter.getCurrentYearMonth()
+        }
+        nextButton.setOnClickListener {
+            adapter.nextMonth()
+            currentYearMonth.text = adapter.getCurrentYearMonth()
+        }
+
+        return v
+    }
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+
+        when (context) {
+            is OnCellSelectedListener -> this.listener = context
+            else -> throw ClassCastException("${context.toString()} must implement OnCellSelectedListener")
+        }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+    }
+
 }

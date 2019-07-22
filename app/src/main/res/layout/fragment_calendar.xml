@@ -14,45 +14,45 @@
             android:orientation="horizontal">
 
         <TextView
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="日付"
-                android:layout_weight="1"
+                android:layout_weight="0.5"
                 android:background="@color/colorPrimary"
                 android:textColor="#fff"
-                android:textAlignment="center"/>
+                android:gravity="center"/>
         <TextView
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="朝"
                 android:layout_weight="1"
                 android:background="@color/colorPrimary"
                 android:textColor="#fff"
-                android:textAlignment="center"/>
+                android:gravity="center"/>
         <TextView
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="昼"
                 android:layout_weight="1"
                 android:background="@color/colorPrimary"
                 android:textColor="#fff"
-                android:textAlignment="center"/>
+                android:gravity="center"/>
         <TextView
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="晩"
                 android:layout_weight="1"
                 android:background="@color/colorPrimary"
                 android:textColor="#fff"
-                android:textAlignment="center"/>
+                android:gravity="center"/>
         <TextView
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="間"
                 android:layout_weight="1"
                 android:background="@color/colorPrimary"
                 android:textColor="#fff"
-                android:textAlignment="center"/>
+                android:gravity="center"/>
 
     </LinearLayout>
 
@@ -70,7 +70,6 @@
             android:orientation="horizontal">
 
         <!-- 年月表示 -->
-        <!-- textの箇所は動的に変化させるため、そのうち消す -->
         <Button
                 android:id="@+id/prevMonth"
                 android:text="昨月"
@@ -80,7 +79,7 @@
                 android:layout_marginStart="8dp"/>
         <TextView
                 android:id="@+id/currentYearMonth"
-                android:text="2019/7"
+                android:text="YYYY/MM"
                 android:layout_weight="1"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
