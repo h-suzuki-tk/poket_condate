@@ -15,6 +15,8 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.view.MenuItem
 import android.util.Log
 import android.widget.Button
+import com.example.sample.SampleDBOpenHelper
+import com.example.sample.Table
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -28,6 +30,10 @@ class MainActivity :
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // データベースの初期化
+        initDB()
+
+        // ツールバーをセット
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
@@ -50,7 +56,6 @@ class MainActivity :
         ft.replace(R.id.frame_contents, TabFragment())
         ft.commit()
     }
-
 
     var TAG = "MainActivity"
 
@@ -104,5 +109,53 @@ class MainActivity :
         ft.addToBackStack(null)
         ft.replace(R.id.frame_contents, fragment)
         ft.commit()
+    }
+
+
+    // ----------------------------------------------------------------------
+    //  initDB - データベース初期化
+    // ----------------------------------------------------------------------
+    /*
+    内容: 仮のデータをいれる
+    目的: テストをしたいとき、各自で insert するのは手間であるため共有できるようにする
+    編集: 自由に追加可
+     */
+    private fun initDB() {
+        val db = SampleDBOpenHelper(this).writableDatabase
+        val DB = SampleDBOpenHelper(this)
+
+        DB.dropTables(db)
+        DB.onCreate(db)
+
+        insertIngredient(DB)
+        insertFood(DB)
+        insertRecord(DB)
+    }
+
+    private fun insertIngredient(DB: SampleDBOpenHelper) {
+        DB.insertRecord(
+            Table.Ingredient(
+                "お米", 38.1f, 0.3f, 3.5f, 0f, 0f,
+                0f, 168f, 100f, "グラム",0
+            )
+        ) // 1 (id)
+        DB.insertRecord(
+            Table.Ingredient(
+                "いくら", 0.12f, 9.36f, 19.56f, null, 0f,
+                null, 163f, 60f, "グラム",1
+            )
+        ) // 2
+    }
+
+    private fun insertFood(DB: SampleDBOpenHelper) {
+        DB.insertRecord(
+            Table.Food("いくらご飯", 0, null, 8)
+        ) // 1 (id)
+    }
+
+    private fun insertRecord(DB: SampleDBOpenHelper) {
+        DB.insertRecord(
+            Table.Record(1, 2019, 7, 4, 1)
+        ) // 1 (id)
     }
 }

@@ -2,12 +2,17 @@ package com.example.wse2019
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.database.Cursor
+import android.database.sqlite.SQLiteException
 import android.support.v7.widget.RecyclerView
 import android.text.Layout
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.example.sample.DBContract
+import com.example.sample.SampleDBOpenHelper
 import kotlinx.android.synthetic.main.calendar_row.view.*
 import org.w3c.dom.Text
 import java.lang.AssertionError
@@ -18,37 +23,28 @@ import kotlin.collections.ArrayList
 
 class CalendarAdapter(context: Context) : BaseAdapter() {
 
-    enum class Time(val listViewId: Int, val areaId: Int, var condate: ArrayList<String>) {
-        MORNING(R.id.morningListView, R.id.morningArea, arrayListOf()),
-        NOON(R.id.noonListView, R.id.noonArea, arrayListOf()),
-        EVENING(R.id.eveningListView, R.id.eveningArea, arrayListOf()),
-        SNACK(R.id.snackListView, R.id.snackArea, arrayListOf())
+    enum class Time(
+        val id: Int,
+        val listViewId: Int,
+        val areaId: Int)
+    {
+        MORNING (0, R.id.morningListView,   R.id.morningArea),
+        NOON    (1, R.id.noonListView,      R.id.noonArea),
+        EVENING (2, R.id.eveningListView,   R.id.eveningArea),
+        SNACK   (3, R.id.snackListView,     R.id.snackArea)
     }
 
     val context: Context = context
     val inflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-    val dateManager: DateManager = DateManager()
-
-    // 1 行分の各セルの内容
-    /*
-     * 現在は仮の固定データをいれてある
-     *
-     * getView で各行 (各日) に対する表示処理ができるので
-     * そこで DB 検索・下記配列にプッシュしていけばよいと思われる
-     */
-    var morning: ArrayList<String> = arrayListOf("やきそば", "牛乳")
-    var noon: ArrayList<String> = arrayListOf("焼肉", "コーンポタージュ", "りんご", "みかん", "ぶどう")
-    var evening: ArrayList<String> = arrayListOf("ジュース")
-    var snack: ArrayList<String> = arrayListOf("ケーキ", "お好み焼き")
-
-    var dateArray: ArrayList<Date> = dateManager.getDays()
+    val dm: DateManager = DateManager()
+    var days: ArrayList<Date> = dm.getDays()
 
     override fun getCount(): Int {
-        return dateArray.size
+        return days.size
     }
 
     override fun getItem(position: Int): Date {
-        return dateArray[position]
+        return days[position]
     }
 
     override fun getItemId(position: Int): Long {
@@ -62,53 +58,56 @@ class CalendarAdapter(context: Context) : BaseAdapter() {
 
         // 日付のセット
         val date: TextView = v.findViewById(R.id.date)
-        date.text = SimpleDateFormat("d", Locale.US).format(dateArray[position])
-
-        // 仮にデータをセット
-        /*
-         * SetCondate() 処理を実装後、削除
-         */
-        Time.MORNING.condate = this.morning
-        Time.NOON.condate = this.noon
-        Time.EVENING.condate = this.evening
-        Time.SNACK.condate = this.snack
+        date.text = dm.getDate(days[position])
 
         // 各セルのセット
         Time.values().forEach { time ->
             val listView: ListView = v.findViewById(time.listViewId)
             val area: FrameLayout = v.findViewById(time.areaId)
-            /* setCondate(position) */
-            listView.adapter = ArrayAdapter<String>(context, R.layout.calendar_cell, time.condate)
-            area.setOnClickListener { parent.performItemClick(v, position, time.listViewId.toLong()) }
+            val condate: List<String> = getCondate(days[position], time.id)
+            listView.adapter = ArrayAdapter<String>(context, R.layout.calendar_cell, condate)
+            area.setOnClickListener { parent.performItemClick(v, position, time.id.toLong()) }
         }
 
         return v
     }
 
-    fun setCondate(position: Int) {
+    // ------------------------------------------------------------
+    //  getCondate - その日の献立をセット
+    // ------------------------------------------------------------
+    /*
+    position で与えられた日付の献立を condate にセットする
+     */
+    fun getCondate(day: Date, time: Int): List<String> {
+        val db = SampleDBOpenHelper(context).readableDatabase
+        var result: MutableList<String> = mutableListOf()
 
-        morning.clear()
-        noon.clear()
-        evening.clear()
-        snack.clear()
+        val query: String =
+            "select foods.name " +
+                "from foods inner join records " +
+                    "on records.year == ${dm.getYear(day)} and records.month == ${dm.getMonth(day)} and records.date == ${dm.getDate(day)} and records.time == ${time} and foods.id == records.food_id"
+        val cursor: Cursor = db.rawQuery(query, null) ?: throw SQLiteException()
+        while (cursor.moveToNext()) {
+            val food: String? = cursor.getString(cursor.getColumnIndex(DBContract.Food.NAME))
+            if (food != null) { result.add(food) }
+        }
 
-        /* ここに処理を記述 */
-
+        return result
     }
 
     fun getCurrentYearMonth(): String {
-        return SimpleDateFormat("yyyy/M", Locale.US).format(dateManager.calendar.time)
+        return SimpleDateFormat("yyyy/M", Locale.US).format(dm.calendar.time)
     }
 
     fun nextMonth() {
-        dateManager.nextMonth()
-        dateArray = dateManager.getDays()
+        dm.nextMonth()
+        days = dm.getDays()
         this.notifyDataSetChanged()
     }
 
     fun prevMonth() {
-        dateManager.prevMonth()
-        dateArray = dateManager.getDays()
+        dm.prevMonth()
+        days = dm.getDays()
         this.notifyDataSetChanged()
     }
 

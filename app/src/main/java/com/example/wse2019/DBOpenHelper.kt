@@ -307,6 +307,7 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
     fun updateRecord(tableName: String, column: Array<String>, convert: Array<String>, condition: String, selectionArgs : Array<String>) : Boolean{
         //書き込み可能なデータベースを開く
         val db = readableDatabase
+        return true
     }
 
     //データの削除を行う関数
@@ -317,6 +318,7 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
     fun deleteRecord(tableName : String, condition: String, selectionArgs : Array<String>) : Boolean{
         //書き込み可能なデータベースを開く
         val db = readableDatabase
+        return true
     }
 
     //テーブル全削除機能

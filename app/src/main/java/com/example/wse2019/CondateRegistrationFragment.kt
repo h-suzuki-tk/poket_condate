@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import java.lang.AssertionError
 import java.sql.Date
 
 class CondateRegistrationFragment(): Fragment() {
@@ -14,16 +15,16 @@ class CondateRegistrationFragment(): Fragment() {
     var year: Int = -1
     var month: Int = -1
     var date: Int = -1
-    var time: String = ""
+    var time: Int = -1
 
     companion object {
-        fun newInstance(year: Int, month: Int, date: Int, time: String) : CondateRegistrationFragment {
+        fun newInstance(year: Int, month: Int, date: Int, time: Int) : CondateRegistrationFragment {
             val f = CondateRegistrationFragment()
             val args = Bundle()
             args.putInt("year", year)
             args.putInt("month", month)
             args.putInt("date", date)
-            args.putString("time", time)
+            args.putInt("time", time)
             f.arguments = args
             return f
         }
@@ -38,10 +39,19 @@ class CondateRegistrationFragment(): Fragment() {
                 this.year = args.getInt("year")
                 this.month = args.getInt("month")
                 this.date = args.getInt("date")
-                this.time = args.getString("time")
+                this.time = args.getInt("time")
             }
         }
-        Toast.makeText(activity, "${this.year}年${this.month}月${this.date}日の${this.time}の献立をおしました", Toast.LENGTH_SHORT).show()
+        val timeStr: String =
+            when(time) {
+                0 -> "朝"
+                1 -> "昼"
+                2 -> "晩"
+                3 -> "間"
+                -1 -> "指定なし"
+                else -> throw AssertionError()
+            }
+        Toast.makeText(activity, "${this.year}年${this.month}月${this.date}日の${timeStr}の献立をおしました", Toast.LENGTH_SHORT).show()
 
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

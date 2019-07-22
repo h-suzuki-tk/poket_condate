@@ -37,4 +37,14 @@ class DateManager() {
         calendar.add(Calendar.MONTH, -1)
     }
 
+    fun getYear(date: Date): String {
+        return SimpleDateFormat("yyyy", Locale.US).format(date)
+    }
+    fun getMonth(date: Date): String {
+        return SimpleDateFormat("M", Locale.US).format(date)
+    }
+    fun getDate(date: Date): String {
+        return SimpleDateFormat("d", Locale.US).format(date)
+    }
+
 }

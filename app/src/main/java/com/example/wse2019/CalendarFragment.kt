@@ -4,6 +4,8 @@ package com.example.wse2019
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.util.Log
+import android.view.Display
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +17,8 @@ import java.util.*
 
 class CalendarFragment() : Fragment() {
     var listener: OnCellSelectedListener? = null
+    private val dm: DateManager = DateManager()
+    private val calendar_selection_offset: Int = 3
 
     companion object {
         fun newInstance(): CalendarFragment {
@@ -36,24 +40,15 @@ class CalendarFragment() : Fragment() {
 
         // ListView の処理
         val listView: ListView = v.findViewById(R.id.calendarListView)
-        var adapter: CalendarAdapter = if (context != null) CalendarAdapter(context!!) else throw AssertionError("Content is null.")
+        var adapter: CalendarAdapter = if (context != null) CalendarAdapter(context!!) else throw AssertionError("Context is null.")
         listView.adapter = adapter
-        listView.setOnItemClickListener { parent, view, position, id ->
-            val mDate: Date = adapter.getItem(position)
-            val year: Int = SimpleDateFormat("yyyy", Locale.US).format(mDate).toInt()
-            val month: Int = SimpleDateFormat("M", Locale.US).format(mDate).toInt()
-            val date: Int = SimpleDateFormat("d", Locale.US).format(mDate).toInt()
-            var time: String = ""
-            when (id) {
-                R.id.morningListView.toLong() -> time = "朝"
-                R.id.noonListView.toLong() -> time = "昼"
-                R.id.eveningListView.toLong() -> time = "晩"
-                R.id.snackListView.toLong() -> time = "間食"
-            }
+        listView.setSelection(dm.getDate(dm.calendar.time).toInt() - calendar_selection_offset)
+        listView.setOnItemClickListener { _, _, position, time ->
+            val day: Date = adapter.getItem(position)
             when (this.listener) {
-                null -> throw NullPointerException("listener must be non-null")
+                null -> throw NullPointerException()
                 else -> {
-                    val f: Fragment = CondateRegistrationFragment.newInstance(year, month, date, time)
+                    val f: Fragment = CondateRegistrationFragment.newInstance(dm.getYear(day).toInt(), dm.getMonth(day).toInt(), dm.getDate(day).toInt(), time.toInt())
                     this.listener!!.replaceFragment(f)
                 }
             }
