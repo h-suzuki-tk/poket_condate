@@ -46,7 +46,7 @@
 
     <!-- フッター -->
     <Button
-            android:id="@+id/addNewCondate"
+            android:id="@+id/registerNewCondate"
             android:text="献立を登録する !"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

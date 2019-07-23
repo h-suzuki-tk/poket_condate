@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/calendar_row_height">
+
+    <!-- 食事記録表示用レイアウト -->
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <!-- 日付 -->
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:id="@+id/date"
+                android:text="日付"
+                android:layout_weight="0.5"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:textSize="24sp"
+                android:textColor="@color/colorPrimary"/>
+
+        <!-- 献立 -->
+        <ListView
+                android:id="@+id/morningListView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"/>
+        <ListView
+                android:id="@+id/noonListView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"/>
+        <ListView
+                android:id="@+id/eveningListView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"/>
+        <ListView
+                android:id="@+id/snackListView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"/>
+
+    </LinearLayout>
+
+    <!-- イベント処理用レイアウト -->
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <!-- 日付 -->
+        <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"/>
+
+        <!-- 献立 -->
+        <FrameLayout
+                android:id="@+id/morningArea"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"/>
+        <FrameLayout
+                android:id="@+id/noonArea"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"/>
+        <FrameLayout
+                android:id="@+id/eveningArea"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"/>
+        <FrameLayout
+                android:id="@+id/snackArea"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"/>
+
+    </LinearLayout>
+
+</FrameLayout>

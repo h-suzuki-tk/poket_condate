@@ -217,21 +217,40 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
     }
 
     //テーブル検索
-    // 変数：テーブル名、抽出するコラム、where句、ブレースホルダの値(条件の変数)、
-    //       グルーピング条件、having、 order、 数制限
-    // 返す型：List<String>
-    // テーブル名以降は全て省略可能。その場合の動作はざっくり「SELECT * FROM TABLE_NAME」という全抽出
-    // where句と条件の変数の書き方は、例えば名前が"さんまの塩焼き"であるレコードを探す場合、
-    // condition = "name -> ?"、selectionArgs = arrayOf("'さんまの塩焼き'")となる。詳しくはtest_1st.ktにも。
-    fun searchRecord(tableName: String, column: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null,
-                     group: String? = null, having: String? = null, order: String? = null, limit:String? = null): List<String> {
+    //変数：テーブル名(String)、コラム(Array<String>)、where文(String、省略可)
+    //返す型：List<String>
+    //全部抜き出し(select TABLE_NAME from *)をやりたいときはコラムの変数に「arrayOf("*")」を入れてください
+    fun searchRecord(tableName: String, column: Array<String>, condition: String? = null, selectionArgs : Array<String>? = null): List<String> {
         //読み込み可能なデータベースを開く
         val db = readableDatabase
+
+        var selectQuery = "select"  //SELECTのクエリ文を作成する
+                                     //ここのエラー表示は原因分からず
+                                    //ちょっと今のところはシステムの早とちりとしか思えてません
+        var columnHead = true   //先頭か否かでコンマを打つかどうかを判断するため
+        //求めるコラムの選択
+        column.forEach {
+            if (columnHead) {
+                selectQuery += " $it"
+                columnHead = false
+            } else {
+                selectQuery += " ,$it"
+            }
+        }
+        selectQuery += " from $tableName"
+
+        //条件が入力されていなければクエリ文作成終了
+        //されていた場合はWHERE文も入力する。
+        if (condition == null) {
+            selectQuery += ";"
+        } else if (condition != null) {
+            selectQuery += " where $condition;"
+        }
 
         //データベースから検索を行う
         val cursor: Cursor?
         try {
-            cursor = db.query(tableName, column, condition, selectionArgs, group, having, order, limit)
+            cursor = db.rawQuery(selectQuery, selectionArgs)
         } catch (ex: SQLiteException) {
             //クエリ文が失敗した場合は空の文字列を返す。
             //エラー文を添えることが出来ればなおよい
@@ -240,8 +259,8 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
         }
 
         val results = mutableListOf<String>()   //返す文字リスト
-        //コラム指定が無かった場合はテーブルのコラムの数だけ取得
-        if (column == null) {
+        //コラム指定が「*」だった場合はテーブルのコラムの数だけ取得
+        if (column[0] == "*") {
             //全部取り出す場合の処理
             //カーソルで順次処理していく
             cursor.use {
@@ -285,27 +304,9 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
     //例えば、
     // updateRecord("Food", arrayOf("name", "calorie"), arrayOf("アユの塩焼き", "410f"), "name -> ?", arrayOf("さんまの塩焼き"))
     //では、name=='さんまの塩焼き'のレコードの食品名とカロリーをそれぞれアユの塩焼き、410カロリーと書き換えている
-    fun updateRecord(tablename: String, column: Array<String>, convert: Array<String>, condition: String, selectionArgs : Array<String>) : Boolean{
+    fun updateRecord(tableName: String, column: Array<String>, convert: Array<String>, condition: String, selectionArgs : Array<String>) : Boolean{
         //書き込み可能なデータベースを開く
-        val db = writableDatabase
-
-        val update = ContentValues().apply{
-            for(i in 0 until column.size-1){
-                put(column[i], convert[i])
-            }
-        }
-
-        try {
-            db.update(tablename, update, condition, selectionArgs)
-        } catch (ex: SQLiteException) {
-            //クエリ文が失敗した場合は空のFALSEを返す。
-            //エラー文を添えることが出来ればなおよい
-            Log.e(TAG, "SQLite execution failed" + ex.localizedMessage)
-            return false
-        }
-
-        //更新に成功したのでTRUEを返す
-        return true
+        val db = readableDatabase
     }
 
     //データの削除を行う関数
@@ -313,21 +314,9 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
     //例えば、
     //deleteRecord("Food", "name -> ? AND name -> ?", Array("カルボナーラ", "ジェノベーゼ"))
     //では、Fooｄテーブルの名前がカルボナーラかジェノベーゼのレコードを破壊する
-    fun deleteRecord(tablename : String, condition: String, selectionArgs : Array<String>) : Boolean{
+    fun deleteRecord(tableName : String, condition: String, selectionArgs : Array<String>) : Boolean{
         //書き込み可能なデータベースを開く
-        val db = writableDatabase
-
-        try {
-            db.delete(tablename, condition, selectionArgs)
-        } catch (ex: SQLiteException) {
-            //クエリ文が失敗した場合は空のFALSEを返す。
-            //エラー文を添えることが出来ればなおよい
-            Log.e(TAG, "SQLite execution failed" + ex.localizedMessage)
-            return false
-        }
-
-        //削除に成功したのでTRUEを返す
-        return true
+        val db = readableDatabase
     }
 
     //テーブル全削除機能
