@@ -30,25 +30,39 @@ fun test1(context: Context) {
         )
     )
 
-    //変数を使ったり使わなかったりで検索を実行している。
-    //searchRecordでは、頭から「テーブル名」、「求めるコラム(array<String>)」、「条件文」、「条件の変数」となっている。
-    //後半の2つは省略可能で、その場合は全ての値が返される。
-    //また、この関数で返すのは列がいくつあろうが型が何であろうがとlist<String>なので、変換を忘れないように
-    val columns = arrayOf("name")
-    val result1 = DB.searchRecord("ingredients", columns)
+    // 変数を使ったり使わなかったりで検索を実行している。
+    // searchRecordでは、頭から「テーブル名」、「求めるコラム(array<String>)」、「条件文」、「条件の変数」、「検索の方式」あれこれ
+    // となっている。
+    // テーブル名以外は省略可能で、その場合は全ての値が返される。(つまりは「select * from TABLE_NAME」の形になる)
+    // また、現在この関数で返すのは列がいくつあろうが型が何であろうがとlist<String>なので、変換を忘れないように
+
+    // 下の例は材料テーブルから'name'のコラムを抽出したもの
+    // つまり材料テーブルの持つ材料名一覧が返される形になる。
+    val column = arrayOf("name")
+    val result1 = DB.searchRecord("ingredients", column)
     result1.forEach {
         Log.d("result1", it)
     }
 
-    //上と似たような操作
-    //変数ではなく直接値を指定しているくらい
-    val result2 = DB.searchRecord("ingredients", arrayOf("name"))
+    // カラムをわざわざ配列に指定してるあたり当たり前だが、抽出するカラムは複数でも可能
+    // 上と似たような操作だが今回は材料テーブルの持つ材料名とカロリーが抽出される。
+    val columns = arrayOf("name", "calorie")
+    val result2 = DB.searchRecord("ingredients", columns)
     result2.forEach {
         Log.d("result2", it)
     }
-    //おなじみ楽々検索の「select * from "table_name"」の形
-    //要は全コラムの抽出です。
-    val result3 = DB.searchRecord("ingredients", arrayOf("*"))
+
+    // 繰り返しになるが、コラムを全抽出する場合は第二変数にnullを与えればよい
+    // 第２変数はデフォルトでnullに設定してあるので、テーブル名だけ渡す形でも可
+    // searchRecord("ingredients", null)
+
+    // 下の三つは全て同じ動作である。
+    // result5のようなことはさすがにしないだろうが
+    val result3 = DB.searchRecord("ingredients")
+    val result4 = DB.searchRecord("ingredients", null)
+    val result5 = DB.searchRecord("ingredients", arrayOf("id", "name", "sugar", "fat", "protein", "vitamin",
+                                                                     "mineral", "fiber", "calorie", "quantity", "unit", "allergen"))
+
     result3.forEach {
         Log.d("id", it)
     }
@@ -58,25 +72,23 @@ fun test1(context: Context) {
     DB.insertRecord(
         Table.Food(makeFood, 0, null, 8)
     )
-    val result4 = DB.searchRecord("foods", arrayOf("*"))
-    result4.forEach {
+    val resulter = DB.searchRecord("foods")
+    resulter.forEach {
         Log.d("result4", it)
     }
 
 
-    //これも同じような操作だが、DBContractで設定した値を用いている。
-    //多少入力が面倒かもしれないが、一番安全。
-    //なんなら、後でテーブル名カラム名いじくり回すかもしれないので、
-    // 基本的にテーブルの操作にはDBContract使ってください。
+    // 実際テーブル名やカラム名を指定する場合は、直接入れずにDBContractを参照してください。
+    // 多少入力が面倒かもしれないが、一番安全。
+    // 後でテーブル名やカラム名いじくり回すかもしれないので。
     val oldFood = DB.searchRecord(DBContract.Food.TABLE_NAME, arrayOf(DBContract.Food.ID))
     oldFood.forEach {
         Log.d("food", it)
     }
 
-    //さっきまでのに加えて条件を設定した検索
-    //conditionには「?」を用いた条件文を入れ、selectionArgsには「?」に入れる値もしくは変数を渡す。
-    //下の例では、つまり「name = 'いくらご飯'」という条件を設定している。
-    //「where」の追加は関数でやっているので考えなくてもよい
+    // さっきまでのに加えてwhere句(条件)を設定した検索
+    // 第三変数conditionには「?」を用いた条件文を入れ、第四変数selectionArgsには「?」に入れる値もしくは変数を渡す。
+    // 下の例では、つまり「name = 'いくらご飯'」という条件を設定している。
     val newFood = DB.searchRecord(DBContract.Food.TABLE_NAME, arrayOf(DBContract.Food.ID),
         "name = ?", arrayOf("'いくらご飯'"))
 
@@ -84,18 +96,23 @@ fun test1(context: Context) {
     //このフードIDは後でリレーションに使います。
     val foodID : Int = Integer.parseInt(newFood.get(0))
 
-    //ここで設定された条件は、「name = 'お米' or name = 'いくら'」である。
-    //つまり、「いくらご飯」の材料のIDを一気に検索してる。
+    // もちろん条件も複数の指定は可能である。
+    // 例えば、下で設定された条件は「name = 'お米' or name = 'いくら'」、
+    // つまり材料名が'お米'あるいわ'いくら'であるレコードのIDを返す形になる。
     val ingredientList = DB.searchRecord(DBContract.Ingredient.TABLE_NAME, arrayOf(DBContract.Ingredient.ID),
         "name = ? or name = ?", arrayOf("'お米'", "'いくら'"))
 
-    ingredientList.forEach {
-        Log.d("List", it)
-    }
 
-    //いくらご飯の材料IDが「ingredientList」に集まったので
-    //forEach文を使ってFood_Ingredientテーブルに入れちゃいましょう
-    //先ほどfoodIDも確保済みで不変なので楽
+    // 条件を担当するのは第三変数と第四変数と決まっているので、
+    // 条件をwhere句を加える場合は全カラム抽出であっても第二変数は省略せずnullを指定するように。
+    // 不正であるためコメントアウトしているが、下のNGの表記は間違い
+    // val NG = DB.searchRecord((DBContract.Ingredient.TABLE_NAME, "name = ? or name = ?", arrayOf("'お米'", "'いくら'"))
+    // val OK = DB.searchRecord((DBContract.Ingredient.TABLE_NAME, null, "name = ? or name = ?", arrayOf("'お米'", "'いくら'"))
+
+
+    // いくらご飯の材料IDが「ingredientList」に集まったので
+    // forEach文を使ってFood_Ingredientテーブルに入れちゃいましょう
+    // 先ほどfoodIDも確保済みで不変なので楽
     ingredientList.forEach {
         val ingredientID : Int = Integer.parseInt(it)
         DB.insertRecord(Table.Food_Ingredient(foodID, ingredientID, 1))
