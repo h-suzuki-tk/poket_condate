@@ -225,6 +225,7 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
     // condition = "name -> ?"、selectionArgs = arrayOf("'さんまの塩焼き'")となる。詳しくはtest_1st.ktにも。
     fun searchRecord(tableName: String, column: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null,
                      group: String? = null, having: String? = null, order: String? = null, limit:String? = null): List<String>? {
+
         //読み込み可能なデータベースを開く
         val db = readableDatabase
 
