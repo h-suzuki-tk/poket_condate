@@ -235,45 +235,42 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
         } catch (ex: SQLiteException) {
             //クエリ文が失敗した場合は空の文字列を返す。
             //エラー文を添えることが出来ればなおよい
+            //エラー時の返す値は他の関数とそろえる
+            //テーブルの間違い、カラムの間違い党も表示できるとよい
             Log.e(TAG, "SQLite execution failed" + ex.localizedMessage)
             return null
         }
 
         val results = mutableListOf<String>()   //返す文字リスト
         //コラム指定が無かった場合はテーブルのコラムの数だけ取得
-        if (column == null) {
-            //全部取り出す場合の処理
-            //カーソルで順次処理していく
-            cursor.use {
-                while (cursor.moveToNext()) {
-                    //要求されたコラムごとに処理していく
-                    val columnNum = cursor.columnCount
-                    for (i in 0 until columnNum) {
+        cursor.use {
+            while (cursor.moveToNext()) {
+                if(column == null) {
+                    //コラム指定がなかった場合は全コラムを格納
+                    for (i in 0 until cursor.columnCount) {
                         if (cursor.getString(i) != null) {
                             val result : String = cursor.getString(i)
                             results.add(result)
                         } else {
+                            //データがnullだった場合はから文字列を入れておく。
                             results.add("")
                         }
                     }
-                }
-            }
-        } else {
-            //個別にコラムが指定された場合の処理
-            //こちらで一致するものを取得
-            cursor.use {
-                while (cursor.moveToNext()) {
+                } else {
+                    //コラム指定された場合は、指定されたコラムを確認してresultsに格納
                     column.forEach {
-                        if(cursor.getString(cursor.getColumnIndex(it)) != null) {
-                            val result : String = cursor.getString(cursor.getColumnIndex(it))
+                        if (cursor.getString(cursor.getColumnIndex(it)) != null) {
+                            val result: String = cursor.getString(cursor.getColumnIndex(it))
                             results.add(result)
                         } else {
+                            //データがnullだった場合はから文字列を入れておく。
                             results.add("")
                         }
                     }
                 }
             }
         }
+
         return results
     }
     //searchRecord終わり
