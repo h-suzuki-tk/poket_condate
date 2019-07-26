@@ -224,7 +224,7 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
     // where句と条件の変数の書き方は、例えば名前が"さんまの塩焼き"であるレコードを探す場合、
     // condition = "name -> ?"、selectionArgs = arrayOf("'さんまの塩焼き'")となる。詳しくはtest_1st.ktにも。
     fun searchRecord(tableName: String, column: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null,
-                     group: String? = null, having: String? = null, order: String? = null, limit:String? = null): List<String> {
+                     group: String? = null, having: String? = null, order: String? = null, limit:String? = null): List<String>/*?*//*(null対応用)*/{
 
         //読み込み可能なデータベースを開く
         val db = readableDatabase
@@ -239,6 +239,7 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
             //エラー時の返す値は他の関数とそろえる
             //テーブルの間違い、カラムの間違い党も表示できるとよい
             Log.e(TAG, "SQLite execution failed" + ex.localizedMessage)
+//            return null (null対応用)
             return emptyList()
         }
 
