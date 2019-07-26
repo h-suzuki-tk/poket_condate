@@ -17,6 +17,7 @@ import android.util.Log
 import android.widget.Button
 import com.example.sample.SampleDBOpenHelper
 import com.example.sample.Table
+import com.example.sample.initializer
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -31,7 +32,8 @@ class MainActivity :
         setContentView(R.layout.activity_main)
 
         // データベースの初期化
-        initDB()
+        //initDB()  //初期化案1
+        initializer(this)   //初期化案Ⅱ(かじむら大明神作)
 
         // ツールバーをセット
         val toolbar: Toolbar = findViewById(R.id.toolbar)
