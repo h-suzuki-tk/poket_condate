@@ -90,5 +90,6 @@ val default = listOf(
     Table.Record(4, 2019, 7, 14, 2),
     Table.Record(3, 2019, 7, 14, 3),
 
+
     Table.UserInfo("かじむら大明神", 195f, 75.7f, 16, 1)
 )

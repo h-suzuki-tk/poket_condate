@@ -196,6 +196,28 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
         return true
     }
 
+    private fun insertUserInfo(userInfo: Table.UserInfo): Boolean {
+        //書き込み可能なデータベースを開く
+        val db = writableDatabase
+
+        val record = ContentValues().apply {
+            put(DBContract.UserInfo.NAME, userInfo.name)
+            put(DBContract.UserInfo.HEIGHT, userInfo.height)
+            put(DBContract.UserInfo.WEIGHT, userInfo.weight)
+            put(DBContract.UserInfo.AGE, userInfo.age)
+            put(DBContract.UserInfo.SEX, userInfo.sex)
+        }
+
+        //データベースに挿入する
+        try {
+            db.insert(DBContract.UserInfo.TABLE_NAME, null, record)
+        } catch (ex: SQLiteException) {
+            Log.e(TAG, "SQLite execution failed" + ex.localizedMessage)
+            return false
+        }
+        return true
+    }
+
     //データのへの挿入を行う関数
     //TableModelにあるクラスとして変数を受け取り
     //結果はtrueかfalseで返す。
@@ -210,7 +232,8 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
                 is Table.Category -> insertCategory(table)
                 is Table.Food_Ingredient -> insertFood_Ingredient(table)
                 is Table.MyCondate_Food -> insertMyCondate_Food(table)
-                is Table.UserInfo -> false
+                is Table.UserInfo -> insertUserInfo(table)
+                else -> false
             }
 
         return result
@@ -224,23 +247,64 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
     // where句と条件の変数の書き方は、例えば名前が"さんまの塩焼き"であるレコードを探す場合、
     // condition = "name -> ?"、selectionArgs = arrayOf("'さんまの塩焼き'")となる。詳しくはtest_1st.ktにも。
     fun searchRecord(tableName: String, column: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null,
-                     group: String? = null, having: String? = null, order: String? = null, limit:String? = null): List<String>/*?*//*(null対応用)*/{
-
+                     group: String? = null, having: String? = null, order: String? = null, limit:String? = null, innerJoin: Join? = null): List<String>? {
+        Log.d("select", "start")
         //読み込み可能なデータベースを開く
         val db = readableDatabase
+
+        // db.queryによるDB接続はJoinに対応してない(多分。。。)ため、
+        // 面倒ですがセレクトはクエリ文を作って実行します。
+        // ここでは先頭から単語を徐々に追加していく感じでクエリ文作っていきます。
+        var sql = "SELECT"
+
+        //抽出するコラムをクエリ文に追加
+        if(column != null){
+            var Head : Boolean = true   //先頭か否かで前コンマの有無を決めるため
+            column.forEach {
+                if(Head) {
+                    sql += " $it"
+                    Head = false
+                } else {
+                    sql += " ,$it"
+                }
+            }
+        } else {
+            //コラム指定がnullの場合は*、つまり全コラムを抽出します。
+            sql += " *"
+        }
+
+        //FROMと検索するテーブル名を追加
+        sql += " FROM $tableName"
+
+        //内部結合が指定された場合はここでJoin文の作成・追加を行う。
+        if(innerJoin != null){
+            sql += " INNER JOIN ${innerJoin.tablename} ON $tableName.${innerJoin.column1} = ${innerJoin.tablename}.${innerJoin.column2} "
+        }
+
+        //条件が指定されている場合はここでWHERE文の作成・追加を行う。
+        if(condition != null){
+            sql += " WHERE $condition"
+        }
 
         //データベースから検索を行う
         val cursor: Cursor?
         try {
-            cursor = db.query(tableName, column, condition, selectionArgs, group, having, order, limit)
+            // db.query機能どこまで使っているか分からないので一応取っありてます。
+            // 前述した通り、内部結合には対応していないため使うか否かでかき分けておきますが、
+            // まぁ望ましくないので徐々に全機能をクエリ文作成のほうに統一していきます。
+            if(innerJoin == null) {
+                cursor = db.query(tableName, column, condition, selectionArgs, group, having, order, limit)
+            } else {
+                cursor = db.rawQuery(sql, selectionArgs)
+            }
+            Log.d("check", sql)
         } catch (ex: SQLiteException) {
             //クエリ文が失敗した場合は空の文字列を返す。
             //エラー文を添えることが出来ればなおよい
             //エラー時の返す値は他の関数とそろえる
-            //テーブルの間違い、カラムの間違い党も表示できるとよい
+            //テーブルの間違い、カラムの間違い等も表示できるといいなぁ
             Log.e(TAG, "SQLite execution failed" + ex.localizedMessage)
-//            return null (null対応用)
-            return emptyList()
+            return null
         }
 
         val results = mutableListOf<String>()   //返す文字リスト
@@ -273,10 +337,10 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
             }
         }
 
+        //List<String>?で返す
         return results
     }
     //searchRecord終わり
-
 
     //データの更新を行う関数
     //変数は(テーブル名、変更するコラム(array)、新たに挿入するデータ(array)、条件(string)、条件(selectionArgs))
@@ -341,6 +405,11 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
         db.execSQL("DROP TABLE IF EXISTS " + DBContract.UserInfo.TABLE_NAME)
     }
 }
+
+// searchSelectを内部結合に対応させるために用いるクラス
+// searchRecordを呼び出す際に関数の指定に(TABLE_NAME, COLUMNS, innerJoin = 「Joinクラス」という形で呼び出してください)
+// 第1変数:結合先テーブル名、第2変数:結合する第１テーブルのコラム、第3変数:結合する第2テーブルのコラム
+class Join(val tablename: String, val column1: String, val column2: String)
 
 //テーブル名からそのテーブルのコラム数が欲しいを返す関数
 //もっとスマートに作りたい

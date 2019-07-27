@@ -2,19 +2,22 @@ package com.example.sample
 
 import android.provider.BaseColumns
 
+open class KBaseColumns(val TABLE_NAME : String){
+    //ここでDB機能呼び出さるようにする
+}
+
 class DBContract {
     data class Column(val column:String, val type:String)
 
     enum class Type(val type:String){
         INT("Integer"),
-        TEXT("text"),
         REAL("real"),
+        TEXT("text"),
     }
 
     //材料テーブル
-    class Ingredient : BaseColumns {
-        companion object {
-            const val TABLE_NAME = "ingredients"//テーブル名
+    class Ingredient : BaseColumns{
+        companion object : KBaseColumns("ingredients") {
             const val ID = "id"                 //材料ID
             const val NAME = "name"             //材料名
             const val SUGAR = "sugar"           //糖質
@@ -32,8 +35,7 @@ class DBContract {
 
     //品目テーブル
     class Food : BaseColumns {
-        companion object {
-            const val TABLE_NAME = "foods"   //テーブル名
+        companion object : KBaseColumns("foods"){  //テーブル名
             const val ID = "id"             //品目ID
             const val NAME = "name"         //品目名
             const val FAVORITE = "favorite" //お気に入り
@@ -44,8 +46,7 @@ class DBContract {
 
     //食事記録テーブル
     class Record : BaseColumns {
-        companion object {
-            const val TABLE_NAME = "records" //テーブル名
+        companion object : KBaseColumns("records"){ //テーブル名
             const val ID = "id"             //食事記録ID
             const val FOOD_ID = "food_id"   //品目ID
             const val YEAR = "year"  //年
@@ -57,17 +58,15 @@ class DBContract {
 
     //My献立テーブル
     class MyCondate : BaseColumns {
-        companion object {
-            const val TABLE_NAME = "myCondate" //テーブル名
-            const val ID = "id"             //My献立ID
+        companion object : KBaseColumns("myCondate") {  //テーブル名
+            const val ID = "id"             //My献立I
             const val NAME = "name"         //My献立名
         }
     }
 
     //分類テーブル
     class Category : BaseColumns {
-        companion object {
-            const val TABLE_NAME = "category"   //テーブル名
+        companion object : KBaseColumns("category"){    //テーブル名
             const val ID = "id"                 //分類ID
             const val NAME = "name"             //分類名
             const val HIGHER_ID = "higher_id"   //親カテゴリ
@@ -77,8 +76,7 @@ class DBContract {
 
     //品目材料テーブル
     class Foods_Ingredients : BaseColumns {
-        companion object {
-            const val TABLE_NAME = "foods_ingredients"  //テーブル名
+        companion object : KBaseColumns("foods_ingredients"){ //テーブル名
             const val FOOD_ID = "food_id"               //品目ID
             const val INGREDIENT_ID = "ingredient_id"   //材料ID
             const val NUMBER = "number"                 //数量
@@ -87,8 +85,7 @@ class DBContract {
 
     //献立内容テーブル
     class MyCondate_Foods : BaseColumns {
-        companion object {
-            const val TABLE_NAME = "myCondate_Foods"   //テーブル名
+        companion object : KBaseColumns("myCondate_Foods"){
             const val MYCONDATE_ID = "myCondate_id"       //My献立ID
             const val FOOD_ID = "food_id"           //品目ID
             const val NUMBER = "number"             //何人前
@@ -97,8 +94,7 @@ class DBContract {
 
     //ユーザー情報テーブル
     class UserInfo : BaseColumns {
-        companion object {
-            const val TABLE_NAME = "user_info"          //テーブル名
+        companion object : KBaseColumns("user_info"){
             const val ID = "id"                         //ユーザーID
             const val NAME = "name"                     //ユーザー名
             const val HEIGHT = "height"                 //身長

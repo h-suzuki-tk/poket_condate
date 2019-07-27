@@ -40,7 +40,7 @@ fun test1(context: Context) {
     // つまり材料テーブルの持つ材料名一覧が返される形になる。
     val column = arrayOf("name")
     val result1 = DB.searchRecord("ingredients", column)
-    result1.forEach {
+    result1?.forEach {
         Log.d("result1", it)
     }
 
@@ -48,7 +48,7 @@ fun test1(context: Context) {
     // 上と似たような操作だが今回は材料テーブルの持つ材料名とカロリーが抽出される。
     val columns = arrayOf("name", "calorie")
     val result2 = DB.searchRecord("ingredients", columns)
-    result2.forEach {
+    result2?.forEach {
         Log.d("result2", it)
     }
 
@@ -61,9 +61,9 @@ fun test1(context: Context) {
     val result3 = DB.searchRecord("ingredients")
     val result4 = DB.searchRecord("ingredients", null)
     val result5 = DB.searchRecord("ingredients", arrayOf("id", "name", "sugar", "fat", "protein", "vitamin",
-                                                                     "mineral", "fiber", "calorie", "quantity", "unit", "allergen"))
+        "mineral", "fiber", "calorie", "quantity", "unit", "allergen"))
 
-    result3.forEach {
+    result3?.forEach {
         Log.d("id", it)
     }
 
@@ -73,7 +73,7 @@ fun test1(context: Context) {
         Table.Food(makeFood, 0, null, 8)
     )
     val resulter = DB.searchRecord("foods")
-    resulter.forEach {
+    resulter?.forEach {
         Log.d("result4", it)
     }
 
@@ -81,7 +81,7 @@ fun test1(context: Context) {
     // 実際テーブル名やカラム名を指定する場合は、直接入れずにDBContractを参照してください。
     // 多少入力が面倒かもしれないが、一番安全。
     // 後でテーブル名やカラム名いじくり回すかもしれないので。
-    val oldFood = DB.searchRecord(DBContract.Food.TABLE_NAME, arrayOf(DBContract.Food.ID))
+    val oldFood = DB.searchRecord(DBContract.Food.TABLE_NAME, arrayOf(DBContract.Food.ID)) ?: return
     oldFood.forEach {
         Log.d("food", it)
     }
@@ -94,13 +94,13 @@ fun test1(context: Context) {
 
     //Listから文字列を抽出する一例。
     //このフードIDは後でリレーションに使います。
-    val foodID : Int = Integer.parseInt(newFood.get(0))
+    val foodID : Int = Integer.parseInt(newFood?.get(0))
 
     // もちろん条件も複数の指定は可能である。
     // 例えば、下で設定された条件は「name = 'お米' or name = 'いくら'」、
     // つまり材料名が'お米'あるいわ'いくら'であるレコードのIDを返す形になる。
     val ingredientList = DB.searchRecord(DBContract.Ingredient.TABLE_NAME, arrayOf(DBContract.Ingredient.ID),
-        "name = ? or name = ?", arrayOf("'お米'", "'いくら'"))
+        "name = ? or name = ?", arrayOf("'お米'", "'いくら'")) ?: return
 
 
     // 条件を担当するのは第三変数と第四変数と決まっているので、
@@ -121,16 +121,27 @@ fun test1(context: Context) {
     //ここまでの操作で「いくらご飯」、まぁいくら丼が完成したはずです。
     //確認のため検索
     val last = DB.searchRecord(DBContract.Foods_Ingredients.TABLE_NAME, arrayOf(DBContract.Foods_Ingredients.INGREDIENT_ID),
-        "${DBContract.Foods_Ingredients.FOOD_ID} = ?", arrayOf("$foodID"))
+        "${DBContract.Foods_Ingredients.FOOD_ID} = ?", arrayOf("$foodID")) ?: return
 
     last.forEach {
         val last_id : Int = Integer.parseInt(it)
         val IngredientName = DB.searchRecord(DBContract.Ingredient.TABLE_NAME, arrayOf(DBContract.Ingredient.NAME),
             "${DBContract.Ingredient.ID} = ?", arrayOf("$last_id"))
 
-        Log.d("last", IngredientName.get(0))
+        Log.d("last", IngredientName?.get(0))
     }
-    //多分何かが変わってなければ'お米''いくら'の2つの単語が検索されるはずです。
-    //ざっくりとした使い方はこんな感じです。
-    //まだまだ不便な箇所が多くて申し訳ないですが、よろぴくです。
+    // 多分何かが変わってなければ'お米''いくら'の2つの単語が検索されるはずです。
+    // ざっくりとした使い方はこんな感じです。
+    // まだまだ不便な箇所が多くて申し訳ないですが、よろぴくです。
+
+    // 内部結合使用例
+    // searchSelectを用いる際、下のように「innerJoin = "Joinクラス"」を加えて使います。
+    // 今のところ抽出するコラムを指定する場合は各自で「テーブル名.カラム名」を作成してもらう形になっています。
+
+    val join = Join(DBContract.Foods_Ingredients.TABLE_NAME, DBContract.Food.ID, DBContract.Foods_Ingredients.FOOD_ID)
+    val joincheck = DB.searchRecord(DBContract.Food.TABLE_NAME, innerJoin = join) ?: return
+
+    joincheck.forEach {
+        Log.d("join", it)
+    }
 }
