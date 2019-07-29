@@ -39,8 +39,11 @@ class CalendarFragment() : Fragment() {
         val v: View = inflater.inflate(R.layout.fragment_calendar, container, false)
 
         // ListView の処理
-        val listView: ListView = v.findViewById(R.id.calendarListView)
-        var adapter: CalendarAdapter = if (context != null) CalendarAdapter(context!!) else throw AssertionError("Context is null.")
+        val listView: ListView          = v.findViewById(R.id.calendarListView)
+        var adapter: CalendarAdapter    = when (context) {
+                null -> throw NullPointerException()
+                else -> CalendarAdapter(context!!)
+            }
         listView.adapter = adapter
         listView.setSelection(dm.getDate(dm.calendar.time).toInt() - calendar_selection_offset)
         listView.setOnItemClickListener { _, _, position, time ->
@@ -48,8 +51,11 @@ class CalendarFragment() : Fragment() {
             when (this.listener) {
                 null -> throw NullPointerException()
                 else -> {
-                    val f: Fragment = CondateRegistrationFragment.newInstance(dm.getYear(day).toInt(), dm.getMonth(day).toInt(), dm.getDate(day).toInt(), time.toInt())
-                    this.listener!!.replaceFragment(f)
+                    this.listener!!.replaceFragment(CondateRegistrationFragment.newInstance(
+                        dm.getYear(day) .toInt(),
+                        dm.getMonth(day).toInt(),
+                        dm.getDate(day) .toInt(),
+                        time            .toInt()))
                 }
             }
         }
