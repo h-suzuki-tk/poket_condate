@@ -7,7 +7,6 @@ import android.view.View
 import android.widget.*
 import kotlinx.android.synthetic.main.activity_main.*
 
-/*
 class DBViewer : AppCompatActivity() {
 
     //保存されている文字列をリスト表示するメソッド
@@ -80,4 +79,3 @@ class DBViewer : AppCompatActivity() {
         }
     }
 }
-*/
