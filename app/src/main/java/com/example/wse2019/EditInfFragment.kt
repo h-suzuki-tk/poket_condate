@@ -37,21 +37,20 @@ class EditInfFragment() : Fragment() {
 
         //入力ボックスの初期値設定のため、search
         val DB=SampleDBOpenHelper(requireContext())
-        val userInfo=DB.searchRecord(DBContract.UserInfo.TABLE_NAME)
+        val userInfo=DB.searchRecord(DBContract.UserInfo.TABLE_NAME)?:TODO()
 
-        if(userInfo==null){
-            //エラー処理
-        }
 
         //入力ボックスの初期値設定.
         nameEditText.setText(userInfo?.get(1).toString())
         ageEditText.setText(userInfo?.get(4).toString())
+        //defineして名前つけておくべき
         if(userInfo?.get(5).toString()=="1"){
             sexRadioGroup.check(R.id.male)
         }else if(userInfo?.get(5).toString()=="0"){
             sexRadioGroup.check(R.id.female)
         }else{
             //エラー処理
+            TODO()
         }
         heightEditText.setText(userInfo?.get(2).toString())
         weightEditText.setText(userInfo?.get(3).toString())
@@ -69,46 +68,60 @@ class EditInfFragment() : Fragment() {
 
                 val RadioButtonId=sexRadioGroup.checkedRadioButtonId
                 val radioButton=sexRadioGroup.findViewById<RadioButton>(RadioButtonId)
-                val sexIndex=sexRadioGroup.indexOfChild(radioButton).toString()
+                val sexIndex=sexRadioGroup.indexOfChild(radioButton)
 
+
+                //define
                 var sex=-1
-                if(sexIndex=="男性"){
+                if(sexIndex==0){
                     sex=1
-                }else if(sexIndex=="女性"){
+                }else if(sexIndex==1){
                     sex=0
                 }
 
                 //男性または女性の規定値が入っていなかったら、エラー処理
                 if(sex!=0 || sex!=1){
                     //エラー処理
+                    TODO()
                 }
 
                 val height=heightEditText.text.toString()
                 val weight=weightEditText.text.toString()
 
 
-                //値が適切であるかを確認
-                val regex = "^[0-9]*[¥.]?[0-9]+$"
-                val regex2="[0-120]"
+                //値が適切であるかを正規表現により確認(予定)
+                val regex =""""""
+                val regex2=""""""
                 val regHeight=height.toRegex()
                 val regWeight=weight.toRegex()
                 val regAge=age.toRegex()
 
-                if(regex.matches(regWeight)==false || regex.matches(regHeight)==false || regex2.matches(regAge)==false){
-                    //エラー処理
+                if(false/*regex.matches(regWeight)==false || regex.matches(regHeight)==false || regex2.matches(regAge)==false*/){
+                    //エラー処理,ポップアップを書く
+
+                }else{
+                    //ここにupdate文とfragmentの張替えを記述
+                    //update文の処理,変更する項目の配列と内容の配列をそれぞれ用意
+                    //省略形があれば使ったほうがいい
+                    val str=arrayOf(DBContract.UserInfo.NAME,DBContract.UserInfo.HEIGHT,DBContract.UserInfo.WEIGHT,DBContract.UserInfo.AGE,DBContract.UserInfo.SEX)
+                    val str2=arrayOf(name,height,weight,age,sex.toString())
+                    if(DB.updateRecord(DBContract.UserInfo.TABLE_NAME,str,str2,"${DBContract.UserInfo.NAME} = ?",arrayOf(userInfo?.get(1).toString()))==false){
+                        //エラー処理
+                        TODO()
+                    }
+
+                    Log.d("EditInfsexInt",sex.toString())
+
+                    //fragmentの張り替え
+                    val fragmentManager1 = fragmentManager
+                    val transaction1 = fragmentManager1!!.beginTransaction()
+                    transaction1.replace(R.id.frame_contents,FinishEditInfFragment())
+                    transaction1.commit()
                 }
 
 
-                //update文の処理,変更する項目の配列と内容の配列をそれぞれ用意
-                val str=arrayOf(DBContract.UserInfo.NAME,DBContract.UserInfo.HEIGHT,DBContract.UserInfo.WEIGHT,DBContract.UserInfo.AGE,DBContract.UserInfo.SEX)
-                val str2=arrayOf(name,height,weight,age,sex.toString())
-                DB.updateRecord(DBContract.UserInfo.TABLE_NAME,str,str2,"${DBContract.UserInfo.NAME} = ?",arrayOf(userInfo?.get(1).toString()))
 
-                //fragmentの張り替え
-                val fragmentManager1 = fragmentManager
-                val transaction1 = fragmentManager1!!.beginTransaction()
-                transaction1.replace(R.id.frame_contents,FinishEditInfFragment())
-                transaction1.commit()
+
             }
 
         }

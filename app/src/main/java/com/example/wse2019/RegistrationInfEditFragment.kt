@@ -12,6 +12,7 @@ import android.widget.TextView
 import com.example.sample.DBContract
 import com.example.sample.SampleDBOpenHelper
 import android.widget.Button
+import android.widget.RadioGroup
 
 
 class RegistrationInfEditFragment(): Fragment() {
@@ -31,23 +32,32 @@ class RegistrationInfEditFragment(): Fragment() {
         //ユーザー情報を取り出す
         val DB= SampleDBOpenHelper(requireContext())
 
-        val result = DB.searchRecord(DBContract.UserInfo.TABLE_NAME)
-        if(result==null){
-            //エラー処理
+        val result = DB.searchRecord(DBContract.UserInfo.TABLE_NAME)?: TODO()
 
-        }
+
+        Log.d("RegistrationInfsexInt",result?.get(5).toString())
 
         //ユーザー情報を代入する 今回はユーザー情報が1人分しかないという仮定のもと、作成
-        name.setText(result?.get(1).toString())
-        height.setText(result?.get(2).toString())
-        weight.setText(result?.get(3).toString())
-        age.setText(result?.get(4).toString())
-        if(result?.get(5).toString()=="1"){
-            sex.setText("男性")
-        }else if(result?.get(5).toString()=="0"){
-            sex.setText("女性")
+        if(result?.get(0)==""){
+            //未設定と表示
+            name.setText("未設定")
+            height.setText("未設定")
+            weight.setText("未設定")
+            age.setText("未設定")
+            sex.setText("未設定")
         }else{
-            //エラー処理
+            name.setText(result?.get(1))
+            height.setText(result?.get(2))
+            weight.setText(result?.get(3))
+            age.setText(result?.get(4))
+            if(result?.get(5)=="1"){
+                sex.setText("男性")
+            }else if(result?.get(5)=="0"){
+                sex.setText("女性")
+            }else{
+                //エラー処理
+                TODO()
+            }
         }
 
         val btn=v.findViewById<Button>(R.id.button)

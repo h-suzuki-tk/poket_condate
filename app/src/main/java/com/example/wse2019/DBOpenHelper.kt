@@ -352,7 +352,7 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
         val db = writableDatabase
 
         val update = ContentValues().apply{
-            for(i in 0 until column.size-1){
+            for(i in 0 until column.size){
                 put(column[i], convert[i])
             }
         }
