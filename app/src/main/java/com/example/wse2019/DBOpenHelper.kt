@@ -257,6 +257,7 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
         // ここでは先頭から単語を徐々に追加していく感じでクエリ文作っていきます。
         var sql = "SELECT"
 
+
         //抽出するコラムをクエリ文に追加
         if(column != null){
             var Head : Boolean = true   //先頭か否かで前コンマの有無を決めるため
