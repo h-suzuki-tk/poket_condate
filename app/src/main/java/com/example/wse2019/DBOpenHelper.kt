@@ -7,11 +7,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
-import android.provider.BaseColumns
-import android.renderscript.Sampler
-import android.support.v4.widget.TintableImageSourceView
 import android.util.Log
-import java.util.concurrent.locks.Condition
 
 private const val DB_NAME = "FoodManage"
 private const val DB_VERSION = 1
@@ -247,7 +243,8 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
     // where句と条件の変数の書き方は、例えば名前が"さんまの塩焼き"であるレコードを探す場合、
     // condition = "name -> ?"、selectionArgs = arrayOf("'さんまの塩焼き'")となる。詳しくはtest_1st.ktにも。
     fun searchRecord(tableName: String, column: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null,
-                     group: String? = null, having: String? = null, order: String? = null, limit:String? = null, innerJoin: Join? = null): List<String>? {
+                     group: String? = null, having: String? = null, order: String? = null, limit:String? = null, innerJoin: Join? = null,
+                     multiJoin: Array<Join>? = null): List<String>? {
         Log.d("select", "start")
         //読み込み可能なデータベースを開く
         val db = readableDatabase
@@ -255,16 +252,15 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
         // db.queryによるDB接続はJoinに対応してない(多分。。。)ため、
         // 面倒ですがセレクトはクエリ文を作って実行します。
         // ここでは先頭から単語を徐々に追加していく感じでクエリ文作っていきます。
-        var sql = "SELECT"
-
+        var sql = "SELECT "
 
         //抽出するコラムをクエリ文に追加
         if(column != null){
-            var Head : Boolean = true   //先頭か否かで前コンマの有無を決めるため
+            var columnHead : Boolean = true   //先頭か否かで前コンマの有無を決めるため
             column.forEach {
-                if(Head) {
+                if(columnHead) {
                     sql += " $it"
-                    Head = false
+                    columnHead = false
                 } else {
                     sql += " ,$it"
                 }
@@ -274,12 +270,21 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
             sql += " *"
         }
 
-        //FROMと検索するテーブル名を追加
+       //FROMと検索するテーブル名を追加
         sql += " FROM $tableName"
+
+//        if(multiJoin == null) {
+//            sql += " FROM $tableName"
+//        } else {
+//            var joinHead: Boolean = true
+//
+//            multiJoin.forEach{}
+//
+//        }
 
         //内部結合が指定された場合はここでJoin文の作成・追加を行う。
         if(innerJoin != null){
-            sql += " INNER JOIN ${innerJoin.tablename} ON $tableName.${innerJoin.column1} = ${innerJoin.tablename}.${innerJoin.column2} "
+            sql += " INNER JOIN ${innerJoin.tablename} ON $tableName.${innerJoin.column1} = ${innerJoin.tablename}.${innerJoin.column2}"
         }
 
         //条件が指定されている場合はここでWHERE文の作成・追加を行う。
@@ -298,6 +303,7 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
             } else {
                 cursor = db.rawQuery(sql, selectionArgs)
             }
+
             Log.d("check", sql)
         } catch (ex: SQLiteException) {
             //クエリ文が失敗した場合は空の文字列を返す。
@@ -353,7 +359,7 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
         val db = writableDatabase
 
         val update = ContentValues().apply{
-            for(i in 0 until column.size-1){
+            for(i in 0 until column.size){
                 put(column[i], convert[i])
             }
         }
