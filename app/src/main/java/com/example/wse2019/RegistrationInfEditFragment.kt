@@ -15,6 +15,9 @@ import android.widget.Button
 import android.widget.RadioGroup
 
 
+private val SEX_MALE = "1"
+private val SEX_FEMALE="0"
+
 class RegistrationInfEditFragment(): Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,9 +53,9 @@ class RegistrationInfEditFragment(): Fragment() {
             height.setText(result?.get(2))
             weight.setText(result?.get(3))
             age.setText(result?.get(4))
-            if(result?.get(5)=="1"){
+            if(result?.get(5)==SEX_MALE){
                 sex.setText("男性")
-            }else if(result?.get(5)=="0"){
+            }else if(result?.get(5)== SEX_FEMALE){
                 sex.setText("女性")
             }else{
                 //エラー処理
