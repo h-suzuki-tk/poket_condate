@@ -1,12 +1,43 @@
 package com.example.sample
 
+import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
 
-open class KBaseColumns(val TABLE_NAME : String){
-    //ここでDB機能呼び出さるようにする
-}
 
-class DBContract {
+sealed class DBContract {
+
+    open class KBaseColumns(val TABLE_NAME : String){
+        //ここでDB機能呼び出さるようにする
+        fun SEARCH(db: SampleDBOpenHelper, columns: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null, innerJoin: Join? = null){
+            db.searchRecord(TABLE_NAME, column = columns, condition = condition, selectionArgs = selectionArgs, innerJoin = innerJoin)
+        }
+
+        fun INSERT(db: SampleDBOpenHelper){
+
+        }
+
+        fun getColumn(): Array<String>{
+            val fields =
+                when(TABLE_NAME){
+                    Ingredient.TABLE_NAME -> Ingredient.FIELD
+                    Food.TABLE_NAME -> Food.FIELD
+                    Record.TABLE_NAME -> Record.FIELD
+                    MyCondate.TABLE_NAME -> MyCondate.FIELD
+                    Category.TABLE_NAME -> Category.FIELD
+                    Foods_Ingredients.TABLE_NAME -> Foods_Ingredients.FIELD
+                    MyCondate_Foods.TABLE_NAME -> MyCondate_Foods.FIELD
+                    UserInfo.TABLE_NAME -> UserInfo.FIELD
+                    else -> return emptyArray()
+                }
+            return fields
+        }
+
+        fun DataSet(db: SampleDBOpenHelper){
+
+        }
+    }
+
+
     data class Column(val column:String, val type:String)
 
     enum class Type(val type:String){
@@ -16,7 +47,7 @@ class DBContract {
     }
 
     //材料テーブル
-    class Ingredient : BaseColumns{
+    class Ingredient : BaseColumns {
         companion object : KBaseColumns("ingredients") {
             const val ID = "id"                 //材料ID
             const val NAME = "name"             //材料名
@@ -30,6 +61,7 @@ class DBContract {
             const val QUANTITY = "quantity"     //量
             const val UNIT = "unit"             //単位
             const val ALLERGEN = "allergen"     //アレルギー
+            val FIELD = arrayOf(ID, NAME, SUGAR, FAT, PROTEIN, VITAMIN, MINERAL, FIBER, CALORIE, QUANTITY, UNIT, ALLERGEN)
         }
     }
 
@@ -41,6 +73,7 @@ class DBContract {
             const val FAVORITE = "favorite" //お気に入り
             const val MEMO = "memo"         //メモ
             const val CATEGORY = "category"
+            val FIELD = arrayOf(ID, NAME, FAVORITE, MEMO, CATEGORY)
         }
     }
 
@@ -53,6 +86,7 @@ class DBContract {
             const val MONTH = "month"//月
             const val DATE = "date"  //日にち
             const val TIME = "time"  //時間帯
+            val FIELD = arrayOf(ID, FOOD_ID, YEAR, MONTH, DATE, TIME)
         }
     }
 
@@ -61,6 +95,7 @@ class DBContract {
         companion object : KBaseColumns("myCondate") {  //テーブル名
             const val ID = "id"             //My献立I
             const val NAME = "name"         //My献立名
+            val FIELD = arrayOf(ID, NAME)
         }
     }
 
@@ -70,6 +105,7 @@ class DBContract {
             const val ID = "id"                 //分類ID
             const val NAME = "name"             //分類名
             const val HIGHER_ID = "higher_id"   //親カテゴリ
+            val FIELD = arrayOf(ID, NAME, HIGHER_ID)
         }
     }
 
@@ -80,6 +116,7 @@ class DBContract {
             const val FOOD_ID = "food_id"               //品目ID
             const val INGREDIENT_ID = "ingredient_id"   //材料ID
             const val NUMBER = "number"                 //数量
+            val FIELD = arrayOf(FOOD_ID, INGREDIENT_ID, NUMBER)
         }
     }
 
@@ -89,6 +126,7 @@ class DBContract {
             const val MYCONDATE_ID = "myCondate_id"       //My献立ID
             const val FOOD_ID = "food_id"           //品目ID
             const val NUMBER = "number"             //何人前
+            val FIELD = arrayOf(MYCONDATE_ID, FOOD_ID, NUMBER)
         }
     }
 
@@ -101,6 +139,7 @@ class DBContract {
             const val WEIGHT = "weight"                 //体重
             const val AGE = "age"                       //年齢
             const val SEX = "sex"                       //性別
+            val FIELD = arrayOf(ID, NAME, HEIGHT, WEIGHT, AGE, SEX)
         }
     }
 }
