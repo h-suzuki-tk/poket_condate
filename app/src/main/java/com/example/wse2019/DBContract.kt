@@ -8,12 +8,33 @@ sealed class DBContract {
 
     open class KBaseColumns(val TABLE_NAME : String){
         //ここでDB機能呼び出さるようにする
-        fun SEARCH(db: SampleDBOpenHelper, columns: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null, innerJoin: Join? = null){
-            db.searchRecord(TABLE_NAME, column = columns, condition = condition, selectionArgs = selectionArgs, innerJoin = innerJoin)
+        fun SEARCH(db: SampleDBOpenHelper, columns: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null,
+                   innerJoin: Join? = null, multiJoin: Array<Join>? = null)
+                : List<String>? {
+            val result = db.searchRecord(
+                TABLE_NAME, column = columns, condition = condition, selectionArgs = selectionArgs,
+                innerJoin = innerJoin, multiJoin = multiJoin)
+            return result
         }
 
-        fun INSERT(db: SampleDBOpenHelper){
+        fun SEARCH_DIC(db: SampleDBOpenHelper, columns: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null,
+                   innerJoin: Join? = null, multiJoin: Array<Join>? = null)
+                : List<Dictionary>? {
+            val result = db.searchRecord_dic(
+                TABLE_NAME, column = columns, condition = condition, selectionArgs = selectionArgs,
+                innerJoin = innerJoin, multiJoin = multiJoin)
+            return result
+        }
 
+        fun UPDATE(db: SampleDBOpenHelper, tablename: String, column: Array<String>, convert: Array<String>,
+                   condition: String, selectionArgs : Array<String>): Boolean{
+            val result = db.updateRecord(tablename, column, convert, condition, selectionArgs)
+            return result
+        }
+
+        fun DELETE(db: SampleDBOpenHelper, tablename : String, condition: String, selectionArgs : Array<String>): Boolean{
+            val result = db.deleteRecord(tablename, condition, selectionArgs)
+            return result
         }
 
         fun getColumn(): Array<String>{
@@ -32,9 +53,6 @@ sealed class DBContract {
             return fields
         }
 
-        fun DataSet(db: SampleDBOpenHelper){
-
-        }
     }
 
 
