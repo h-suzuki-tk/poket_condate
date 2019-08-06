@@ -248,47 +248,64 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
         Log.d("select", "start")
         //読み込み可能なデータベースを開く
         val db = readableDatabase
+        val dic = mutableListOf<Dictionary>()
 
         // db.queryによるDB接続はJoinに対応してない(多分。。。)ため、
         // 面倒ですがセレクトはクエリ文を作って実行します。
         // ここでは先頭から単語を徐々に追加していく感じでクエリ文作っていきます。
-        var sql = "SELECT "
+        var sql = "SELECT"
 
         //抽出するコラムをクエリ文に追加
-        if(column != null){
-            var columnHead : Boolean = true   //先頭か否かで前コンマの有無を決めるため
+        if (column != null) {
+            var columnHead: Boolean = true   //先頭か否かで前コンマの有無を決めるため
             column.forEach {
-                if(columnHead) {
+                if (columnHead) {
                     sql += " $it"
                     columnHead = false
                 } else {
-                    sql += " ,$it"
+                    sql += ", $it"
                 }
+                dic.add(Dictionary(mutableListOf(), it))
             }
         } else {
             //コラム指定がnullの場合は*、つまり全コラムを抽出します。
             sql += " *"
+
+            selectTable(tableName).getColumn().forEach {
+                dic.add(Dictionary(mutableListOf(), it))
+            }
         }
 
-       //FROMと検索するテーブル名を追加
-        sql += " FROM $tableName"
+        //FROMと検索するテーブル名を追加
+        if (multiJoin == null) {
+            sql += " FROM $tableName"
+        } else {
+            var joinHead: Boolean = true
+            var joinSql: String = tableName
 
-//        if(multiJoin == null) {
-//            sql += " FROM $tableName"
-//        } else {
-//            var joinHead: Boolean = true
-//
-//            multiJoin.forEach{}
-//
-//        }
+            multiJoin.forEach {
+                val table1 = it.connected ?: tableName
+                val table2 = it.tablename
+
+                if (joinHead) {
+                    joinSql = "$joinSql INNER JOIN $table2 ON $table1.${it.column1} = $table2.${it.column2}"
+                    joinHead = false
+                } else {
+                    joinSql = "($joinSql) INNER JOIN $table2 ON $table1.${it.column1} = $table2.${it.column2}"
+                }
+            }
+
+            sql += " FROM $joinSql"
+            Log.d("join check", sql)
+        }
 
         //内部結合が指定された場合はここでJoin文の作成・追加を行う。
-        if(innerJoin != null){
+        if (innerJoin != null) {
             sql += " INNER JOIN ${innerJoin.tablename} ON $tableName.${innerJoin.column1} = ${innerJoin.tablename}.${innerJoin.column2}"
         }
 
         //条件が指定されている場合はここでWHERE文の作成・追加を行う。
-        if(condition != null){
+        if (condition != null) {
             sql += " WHERE $condition"
         }
 
@@ -298,12 +315,7 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
             // db.query機能どこまで使っているか分からないので一応取っありてます。
             // 前述した通り、内部結合には対応していないため使うか否かでかき分けておきますが、
             // まぁ望ましくないので徐々に全機能をクエリ文作成のほうに統一していきます。
-            if(innerJoin == null) {
-                cursor = db.query(tableName, column, condition, selectionArgs, group, having, order, limit)
-            } else {
-                cursor = db.rawQuery(sql, selectionArgs)
-            }
-
+            cursor = db.rawQuery(sql, selectionArgs)
             Log.d("check", sql)
         } catch (ex: SQLiteException) {
             //クエリ文が失敗した場合は空の文字列を返す。
@@ -318,34 +330,163 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
         //コラム指定が無かった場合はテーブルのコラムの数だけ取得
         cursor.use {
             while (cursor.moveToNext()) {
-                if(column == null) {
-                    //コラム指定がなかった場合は全コラムを格納
-                    for (i in 0 until cursor.columnCount) {
-                        if (cursor.getString(i) != null) {
-                            val result : String = cursor.getString(i)
-                            results.add(result)
-                        } else {
-                            //データがnullだった場合はから文字列を入れておく。
-                            results.add("")
-                        }
+                //コラム指定がなかった場合は全コラムを格納
+                if (innerJoin != null && multiJoin != null) {
+                    dic.forEach {
+                        val result: String = cursor.getString(cursor.getColumnIndex(it.field)) ?: ""
+                        results.add(result)
+                        it.data.add(result)
                     }
                 } else {
-                    //コラム指定された場合は、指定されたコラムを確認してresultsに格納
-                    column.forEach {
-                        if (cursor.getString(cursor.getColumnIndex(it)) != null) {
-                            val result: String = cursor.getString(cursor.getColumnIndex(it))
+                    var num: Int = 0
+                    dic.forEach {
+                        if (cursor.getString(num) != null) {
+                            val result: String = cursor.getString(num) ?: ""
                             results.add(result)
-                        } else {
-                            //データがnullだった場合はから文字列を入れておく。
-                            results.add("")
+                            it.data.add(result)
+                            num++
                         }
                     }
                 }
             }
         }
-
         //List<String>?で返す
+
+        dic.forEach {
+            println("${it.field} | ")
+            it.data.forEach {
+                println("$it, ")
+            }
+            println("\n")
+        }
+
         return results
+    }
+    //searchRecord終わり
+
+    //テーブル検索
+    // 変数：テーブル名、抽出するコラム、where句、ブレースホルダの値(条件の変数)、
+    //       グルーピング条件、having、 order、 数制限
+    // 返す型：List<String>
+    // テーブル名以降は全て省略可能。その場合の動作はざっくり「SELECT * FROM TABLE_NAME」という全抽出
+    // where句と条件の変数の書き方は、例えば名前が"さんまの塩焼き"であるレコードを探す場合、
+    // condition = "name -> ?"、selectionArgs = arrayOf("'さんまの塩焼き'")となる。詳しくはtest_1st.ktにも。
+    fun searchRecord_dic(tableName: String, column: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null,
+                     group: String? = null, having: String? = null, order: String? = null, limit:String? = null, innerJoin: Join? = null,
+                     multiJoin: Array<Join>? = null): List<Dictionary>? {
+        Log.d("select", "start")
+        //読み込み可能なデータベースを開く
+        val db = readableDatabase
+        val dic = mutableListOf<Dictionary>()
+
+        // db.queryによるDB接続はJoinに対応してない(多分。。。)ため、
+        // 面倒ですがセレクトはクエリ文を作って実行します。
+        // ここでは先頭から単語を徐々に追加していく感じでクエリ文作っていきます。
+        var sql = "SELECT"
+
+        //抽出するコラムをクエリ文に追加
+        if (column != null) {
+            var columnHead: Boolean = true   //先頭か否かで前コンマの有無を決めるため
+            column.forEach {
+                if (columnHead) {
+                    sql += " $it"
+                    columnHead = false
+                } else {
+                    sql += ", $it"
+                }
+                dic.add(Dictionary(mutableListOf(), it))
+            }
+        } else {
+            //コラム指定がnullの場合は*、つまり全コラムを抽出します。
+            sql += " *"
+
+            selectTable(tableName).getColumn().forEach {
+                dic.add(Dictionary(mutableListOf(), it))
+            }
+        }
+
+        //FROMと検索するテーブル名を追加
+        if (multiJoin == null) {
+            sql += " FROM $tableName"
+        } else {
+            var joinHead: Boolean = true
+            var joinSql: String = tableName
+
+            multiJoin.forEach {
+                val table1 = it.connected ?: tableName
+                val table2 = it.tablename
+
+                if (joinHead) {
+                    joinSql = "$joinSql INNER JOIN $table2 ON $table1.${it.column1} = $table2.${it.column2}"
+                    joinHead = false
+                } else {
+                    joinSql = "($joinSql) INNER JOIN $table2 ON $table1.${it.column1} = $table2.${it.column2}"
+                }
+            }
+
+            sql += " FROM $joinSql"
+            Log.d("join check", sql)
+        }
+
+        //内部結合が指定された場合はここでJoin文の作成・追加を行う。
+        if (innerJoin != null) {
+            sql += " INNER JOIN ${innerJoin.tablename} ON $tableName.${innerJoin.column1} = ${innerJoin.tablename}.${innerJoin.column2}"
+        }
+
+        //条件が指定されている場合はここでWHERE文の作成・追加を行う。
+        if (condition != null) {
+            sql += " WHERE $condition"
+        }
+
+        //データベースから検索を行う
+        val cursor: Cursor?
+        try {
+            // db.query機能どこまで使っているか分からないので一応取っありてます。
+            // 前述した通り、内部結合には対応していないため使うか否かでかき分けておきますが、
+            // まぁ望ましくないので徐々に全機能をクエリ文作成のほうに統一していきます。
+            cursor = db.rawQuery(sql, selectionArgs)
+            Log.d("check", sql)
+        } catch (ex: SQLiteException) {
+            //クエリ文が失敗した場合は空の文字列を返す。
+            //エラー文を添えることが出来ればなおよい
+            //エラー時の返す値は他の関数とそろえる
+            //テーブルの間違い、カラムの間違い等も表示できるといいなぁ
+            Log.e(TAG, "SQLite execution failed" + ex.localizedMessage)
+            return null
+        }
+
+        //コラム指定が無かった場合はテーブルのコラムの数だけ取得
+        cursor.use {
+            while (cursor.moveToNext()) {
+                //コラム指定がなかった場合は全コラムを格納
+                if (innerJoin != null && multiJoin != null) {
+                    dic.forEach {
+                        val result: String = cursor.getString(cursor.getColumnIndex(it.field)) ?: ""
+                        it.data.add(result)
+                    }
+                } else {
+                    var num: Int = 0
+                    dic.forEach {
+                        if (cursor.getString(num) != null) {
+                            val result: String = cursor.getString(num) ?: ""
+                            it.data.add(result)
+                            num++
+                        }
+                    }
+                }
+            }
+        }
+        //List<Dictionary>?で返す
+
+        dic.forEach {
+            println("${it.field} | ")
+            it.data.forEach {
+                println("$it, ")
+            }
+            println("\n")
+        }
+
+        return dic
     }
     //searchRecord終わり
 
@@ -358,9 +499,11 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
         //書き込み可能なデータベースを開く
         val db = writableDatabase
 
+        Log.d("program check", "update start")
         val update = ContentValues().apply{
             for(i in 0 until column.size){
                 put(column[i], convert[i])
+                Log.d("update check", "$column[i], $convert[i]")
             }
         }
 
@@ -374,6 +517,7 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
         }
 
         //更新に成功したのでTRUEを返す
+        Log.d("program check", "update success")
         return true
     }
 
@@ -416,7 +560,9 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
 // searchSelectを内部結合に対応させるために用いるクラス
 // searchRecordを呼び出す際に関数の指定に(TABLE_NAME, COLUMNS, innerJoin = 「Joinクラス」という形で呼び出してください)
 // 第1変数:結合先テーブル名、第2変数:結合する第１テーブルのコラム、第3変数:結合する第2テーブルのコラム
-class Join(val tablename: String, val column1: String, val column2: String)
+class Join(val tablename: String, val column1: String, val column2: String, val connected: String? = null)
+
+class Dictionary(val data: MutableList<String>, val field: String)
 
 //テーブル名からそのテーブルのコラム数が欲しいを返す関数
 //もっとスマートに作りたい
