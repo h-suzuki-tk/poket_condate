@@ -530,9 +530,11 @@ class Dictionary(val data: MutableList<String>, val field: String){
     class IntDic(val data: MutableList<Int>, val field: String)
     class FloatDic(val data: MutableList<Float>, val field: String)
 
+    private val dic = Dictionary(data, field)
+
     // 補助その1
     // 辞書型のデータをIntに変換する
-    fun toInt(dic: Dictionary): IntDic{
+    fun toInt(): IntDic{
         val intDic = IntDic(mutableListOf(), dic.field)
 
         dic.data.forEach{
@@ -544,7 +546,7 @@ class Dictionary(val data: MutableList<String>, val field: String){
 
     // 補助その2
     // 辞書型のデータをFloatに変換する
-    fun toFloat(dic: Dictionary): FloatDic{
+    fun toFloat(): FloatDic{
         val floatDic = FloatDic(mutableListOf(), dic.field)
 
         dic.data.forEach{
