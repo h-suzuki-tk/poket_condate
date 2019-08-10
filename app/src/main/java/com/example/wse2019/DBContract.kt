@@ -3,38 +3,37 @@ package com.example.sample
 import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
 
+val INT = 0
+val STR = 1
+val FLOAT = 2
 
-sealed class DBContract {
+open class DBContract {
 
     open class KBaseColumns(val TABLE_NAME : String){
-        //ここでDB機能呼び出さるようにする
+        //ここでDB機能呼び出せるようにする
         fun SEARCH(db: SampleDBOpenHelper, columns: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null,
                    innerJoin: Join? = null, multiJoin: Array<Join>? = null)
                 : List<String>? {
-            val result = db.searchRecord(
+            return db.searchRecord(
                 TABLE_NAME, column = columns, condition = condition, selectionArgs = selectionArgs,
                 innerJoin = innerJoin, multiJoin = multiJoin)
-            return result
         }
 
         fun SEARCH_DIC(db: SampleDBOpenHelper, columns: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null,
-                   innerJoin: Join? = null, multiJoin: Array<Join>? = null)
+                       innerJoin: Join? = null, multiJoin: Array<Join>? = null)
                 : List<Dictionary>? {
-            val result = db.searchRecord_dic(
+            return db.searchRecord_dic(
                 TABLE_NAME, column = columns, condition = condition, selectionArgs = selectionArgs,
                 innerJoin = innerJoin, multiJoin = multiJoin)
-            return result
         }
 
-        fun UPDATE(db: SampleDBOpenHelper, tablename: String, column: Array<String>, convert: Array<String>,
+        fun UPDATE(db: SampleDBOpenHelper, column: Array<String>, convert: Array<String>,
                    condition: String, selectionArgs : Array<String>): Boolean{
-            val result = db.updateRecord(tablename, column, convert, condition, selectionArgs)
-            return result
+            return db.updateRecord(TABLE_NAME, column, convert, condition, selectionArgs)
         }
 
-        fun DELETE(db: SampleDBOpenHelper, tablename : String, condition: String, selectionArgs : Array<String>): Boolean{
-            val result = db.deleteRecord(tablename, condition, selectionArgs)
-            return result
+        fun DELETE(db: SampleDBOpenHelper, condition: String, selectionArgs : Array<String>): Boolean{
+            return db.deleteRecord(TABLE_NAME, condition, selectionArgs)
         }
 
         fun getColumn(): Array<String>{
@@ -53,15 +52,6 @@ sealed class DBContract {
             return fields
         }
 
-    }
-
-
-    data class Column(val column:String, val type:String)
-
-    enum class Type(val type:String){
-        INT("Integer"),
-        REAL("real"),
-        TEXT("text"),
     }
 
     //材料テーブル

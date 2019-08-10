@@ -11,6 +11,7 @@ fun initializer(context: Context) {
 
     DB.dropTables(db)
     DB.onCreate(db)
+    db.close()
 
     default.forEach {
         DB.insertRecord(it)

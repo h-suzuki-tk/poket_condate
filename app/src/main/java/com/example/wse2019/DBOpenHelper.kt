@@ -12,7 +12,7 @@ import android.util.Log
 private const val DB_NAME = "FoodManage"
 private const val DB_VERSION = 1
 
-class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
+class SampleDBOpenHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
 
     override fun onCreate(db: SQLiteDatabase?) {
 
@@ -258,13 +258,11 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
 
     // searchRecordとsearchRecord_dicの同じ処理で長ったらしいため
     // こちらに統一
-    // (カーソルだけ得たとこでできること少ないだろうし多分private外すことは)ないです
-    private fun getCursor(tableName: String, column: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null,
-                          group: String? = null, having: String? = null, order: String? = null, limit:String? = null, innerJoin: Join? = null,
-                          multiJoin: Array<Join>? = null): Cursor?{
+    // (SQL文だけ得たとこでできること少ないだろうし多分private外すことは)ないです
+    private fun getSQL(tableName: String, column: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null,
+                       group: String? = null, having: String? = null, order: String? = null, limit:String? = null, innerJoin: Join? = null,
+                       multiJoin: Array<Join>? = null): String?{
         Log.d("select", "start")
-        //読み込み可能なデータベースを開く
-        val db = readableDatabase
 
         // db.queryによるDB接続はJoinに対応してない(多分。。。)ため、
         // 面倒ですがセレクトはクエリ文を作って実行します。
@@ -320,6 +318,25 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
             sql += " WHERE $condition"
         }
 
+        return sql
+    }
+
+    //テーブル検索
+    // 変数：テーブル名、抽出するコラム、where句、ブレースホルダの値(条件の変数)、
+    //       グルーピング条件、having、 order、 数制限
+    // 返す型：List<String>
+    // テーブル名以降は全て省略可能。その場合の動作はざっくり「SELECT * FROM TABLE_NAME」という全抽出
+    // where句と条件の変数の書き方は、例えば名前が"さんまの塩焼き"であるレコードを探す場合、
+    // condition = "name -> ?"、selectionArgs = arrayOf("'さんまの塩焼き'")となる。詳しくはtest_1st.ktにも。
+    fun searchRecord(tableName: String, column: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null,
+                     group: String? = null, having: String? = null, order: String? = null, limit:String? = null, innerJoin: Join? = null,
+                     multiJoin: Array<Join>? = null): List<String>? {
+        val db = readableDatabase
+
+        val sql =
+            getSQL(tableName, column, condition, selectionArgs,
+                group, having, order, limit, innerJoin, multiJoin) ?: return null
+
         //データベースから検索を行う
         val cursor: Cursor?
         try {
@@ -338,54 +355,19 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
             return null
         }
 
-        db.close()
-        return cursor
-    }
-
-    //テーブル検索
-    // 変数：テーブル名、抽出するコラム、where句、ブレースホルダの値(条件の変数)、
-    //       グルーピング条件、having、 order、 数制限
-    // 返す型：List<String>
-    // テーブル名以降は全て省略可能。その場合の動作はざっくり「SELECT * FROM TABLE_NAME」という全抽出
-    // where句と条件の変数の書き方は、例えば名前が"さんまの塩焼き"であるレコードを探す場合、
-    // condition = "name -> ?"、selectionArgs = arrayOf("'さんまの塩焼き'")となる。詳しくはtest_1st.ktにも。
-    fun searchRecord(tableName: String, column: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null,
-                     group: String? = null, having: String? = null, order: String? = null, limit:String? = null, innerJoin: Join? = null,
-                     multiJoin: Array<Join>? = null): List<String>? {
-        val cursor =
-            getCursor(tableName, column, condition, selectionArgs,
-                group, having, order, limit, innerJoin, multiJoin) ?: return null
-
         val results = mutableListOf<String>()   //返す文字リスト
         //コラム指定が無かった場合はテーブルのコラムの数だけ取得
         cursor.use {
             while (cursor.moveToNext()) {
-                if(column == null) {
-                    //コラム指定がなかった場合は全コラムを格納
-                    for (i in 0 until cursor.columnCount) {
-                        if (cursor.getString(i) != null) {
-                            val result : String = cursor.getString(i)
-                            results.add(result)
-                        } else {
-                            //データがnullだった場合はから文字列を入れておく。
-                            results.add("")
-                        }
-                    }
-                } else {
-                    //コラム指定された場合は、指定されたコラムを確認してresultsに格納
-                    column.forEach {
-                        if (cursor.getString(cursor.getColumnIndex(it)) != null) {
-                            val result: String = cursor.getString(cursor.getColumnIndex(it))
-                            results.add(result)
-                        } else {
-                            //データがnullだった場合はから文字列を入れておく。
-                            results.add("")
-                        }
-                    }
+                for (i in 0 until cursor.columnCount) {
+                    val result: String = cursor.getString(i) ?: ""
+                    results.add(result)
                 }
             }
         }
 
+        db.close()
+        println("searchRecord success\n")
         return results
     }
     //searchRecord終わり
@@ -398,9 +380,9 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
     // ただし、List<String>で返すあちらと異なりList<Dictionary(データリスト、フィールド名)>で返す
     // 特に複数のカラムを抽出して一つ一つ分別したいときはこちらのがいいと思います。　
     fun searchRecord_dic(tableName: String, column: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null,
-                     group: String? = null, having: String? = null, order: String? = null, limit:String? = null, innerJoin: Join? = null,
-                     multiJoin: Array<Join>? = null): List<Dictionary>? {
-
+                         group: String? = null, having: String? = null, order: String? = null, limit:String? = null, innerJoin: Join? = null,
+                         multiJoin: Array<Join>? = null): List<Dictionary>? {
+        val db = readableDatabase
         val dic = mutableListOf<Dictionary>()
         if (column != null) {
             column.forEach {
@@ -412,33 +394,51 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
             }
         }
 
-        val cursor =
-            getCursor(tableName, column, condition, selectionArgs,
+        val sql =
+            getSQL(tableName, column, condition, selectionArgs,
                 group, having, order, limit, innerJoin, multiJoin) ?: return null
+
+        //データベースから検索を行う
+        val cursor: Cursor?
+        try {
+            // db.query機能どこまで使っているか分からないので一応取っありてます。
+            // 前述した通り、内部結合には対応していないため使うか否かでかき分けておきますが、
+            // まぁ望ましくないので徐々に全機能をクエリ文作成のほうに統一していきます。
+            cursor = db.rawQuery(sql, selectionArgs)
+            Log.d("check", sql)
+        } catch (ex: SQLiteException) {
+            //クエリ文が失敗した場合は空の文字列を返す。
+            //エラー文を添えることが出来ればなおよい
+            //エラー時の返す値は他の関数とそろえる
+            //テーブルの間違い、カラムの間違い等も表示できるといいなぁ
+            Log.e(TAG, "SQLite execution failed" + ex.localizedMessage)
+            db.close()
+            return null
+        }
 
         //コラム指定が無かった場合はテーブルのコラムの数だけ取得
         cursor.use {
             while (cursor.moveToNext()) {
                 //コラム指定がなかった場合は全コラムを格納
-                if (innerJoin != null && multiJoin != null) {
+                if (innerJoin == null && multiJoin == null) {
                     dic.forEach {
                         val result: String = cursor.getString(cursor.getColumnIndex(it.field)) ?: ""
                         it.data.add(result)
                     }
                 } else {
-                    var num: Int = 0
+                    var num = 0
                     dic.forEach {
-                        if (cursor.getString(num) != null) {
-                            val result: String = cursor.getString(num) ?: ""
-                            it.data.add(result)
-                            num++
-                        }
+                        val result: String = cursor.getString(num) ?: ""
+                        it.data.add(result)
+                        num++
                     }
                 }
             }
         }
         //List<Dictionary>?で返す
 
+        println("searchRecord success\n")
+        db.close()
         return dic
     }
     //searchRecord_dic終わり
@@ -525,35 +525,82 @@ class Join(val tablename: String, val column1: String, val column2: String, val 
 // 例えば。パスタに絞って品目の名前を抽出した場合、
 // Dictionary(listOf("ペペロンチーノ", "カルボナーラ". "ミートスパ", "和風醤油バター", "ジェノベーゼ"), "name")
 // という感じ、これをsizeがカラム数のリストとして返します。わかりづらいかな。。。？
-class Dictionary(val data: MutableList<String>, val field: String){
+class StrDic(val data: MutableList<String>, val field: String)  // Dictionaryと同じ、見栄え気にするなら使えばいいと思います。
 
-    class IntDic(val data: MutableList<Int>, val field: String)
-    class FloatDic(val data: MutableList<Float>, val field: String)
+// DictionaryのIntバージョン
+class IntDic(val data: MutableList<Int>, val field: String){
 
-    private val dic = Dictionary(data, field)
+}
+
+// DictionaryのFloatバージョン
+class FloatDic(val data: MutableList<Float>, val field: String){
+    var sum = 0f
+    // データの数値の合計をFloat型で返す機能
+    // 変数はそれぞれの倍率をいじれる様に
+    // つまり、品目材料テーブルの数量に対応させるため
+    // 使わなけりゃFloatDic.sum()で構わない
+    fun sum(quant : List<Int>? = null): Float{
+        if(quant == null) {
+            // 単純に合計したいだけなら
+            data.forEach {
+                sum += it
+            }
+        } else {
+            // それぞれの数量が指定された場合はこっち
+            var num = 0
+            data.forEach {
+                sum += it*quant[num]
+                num++
+            }
+        }
+        return sum
+    }
+
+    // データの数値の平均をFloat型で返す機能
+    fun average(): Float{
+        data.forEach {
+            sum += it
+        }
+        return sum/data.size
+    }
+}
+
+open class Dictionary(val data: MutableList<String>, val field: String){
 
     // 補助その1
     // 辞書型のデータをIntに変換する
+    // 変換に失敗した場合はとりあえず0を入れておく。
     fun toInt(): IntDic{
-        val intDic = IntDic(mutableListOf(), dic.field)
-
-        dic.data.forEach{
-            intDic.data.add(it.toInt())
+        val intDic = IntDic(mutableListOf(), field)
+        data.forEach{
+            try {
+                intDic.data.add(it.toInt())
+            } catch(e: Exception) {
+                intDic.data.add(0)
+            }
         }
-
         return intDic
     }
 
     // 補助その2
     // 辞書型のデータをFloatに変換する
+    // 変換に失敗した場合はとりあえず0fを入れておく。
     fun toFloat(): FloatDic{
-        val floatDic = FloatDic(mutableListOf(), dic.field)
-
-        dic.data.forEach{
-            floatDic.data.add(it.toFloat())
+        val floatDic = FloatDic(mutableListOf(), field)
+        data.forEach{
+            try {
+                floatDic.data.add(it.toFloat())
+            } catch(e: Exception) {
+                floatDic.data.add(0f)
+            }
         }
-
         return floatDic
+    }
+
+    // 補助その3(順番前後しました)
+    // ほぼ見栄え、見易さ用
+    fun toStr(): StrDic{
+        return StrDic(data, field)
     }
 }
 
