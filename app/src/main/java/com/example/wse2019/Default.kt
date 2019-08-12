@@ -83,12 +83,12 @@ val default = listOf(
     Table.MyCondate_Food(1, 7, 1),
 
 
-    Table.Record(1, 2019, 7, 13, 2),
-    Table.Record(6, 2019, 7, 13, 3),
-    Table.Record(7, 2019, 7, 14, 1),
-    Table.Record(8, 2019, 7, 14, 1),
-    Table.Record(4, 2019, 7, 14, 2),
-    Table.Record(3, 2019, 7, 14, 3),
+    Table.Record(1, 2019, 7, 13, 2, 1f),
+    Table.Record(6, 2019, 7, 13, 3, 1.5f),
+    Table.Record(7, 2019, 7, 14, 1, 2f),
+    Table.Record(8, 2019, 7, 14, 1, 1f),
+    Table.Record(4, 2019, 7, 14, 2, 0.5f),
+    Table.Record(3, 2019, 7, 14, 3, 1f),
 
 
     Table.UserInfo("かじむら大明神", 195f, 75.7f, 16, 1)

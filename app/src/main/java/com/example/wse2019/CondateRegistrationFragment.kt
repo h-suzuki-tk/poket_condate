@@ -6,10 +6,13 @@ import android.app.DatePickerDialog
 import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
+import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteException
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentTransaction
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -18,15 +21,20 @@ import android.widget.*
 import com.example.sample.DBContract
 import com.example.sample.Join
 import com.example.sample.SampleDBOpenHelper
+import com.example.sample.Table
 import kotlinx.android.synthetic.main.fragment_top.*
 import java.util.*
 import kotlin.NullPointerException
+import kotlin.collections.ArrayList
 
 class CondateRegistrationFragment(): Fragment() {
 
     // フラグ用
     val ON  = 1
     val OFF = 0
+
+    val OK = 1
+    val NG = 0
 
     // 時間帯を定義
     enum class Day(val str: String) {
@@ -42,11 +50,6 @@ class CondateRegistrationFragment(): Fragment() {
         var favorite: Int       = 0,    // OFF
         var category: Int       = 0     // unselected
     )
-    // 品目登録状況を管理
-    data class State(
-        val food: FoodSearchResultAdapter.Food,
-        val number: Float
-    )
 
     val timeRadioButtonID: List<Int> = listOf<Int>(
         R.id.morningRadioButton,
@@ -57,8 +60,8 @@ class CondateRegistrationFragment(): Fragment() {
 
     )
 
-    lateinit private var fsrAdapter : FoodSearchResultAdapter   // 検索結果の操作用アダプター
-    lateinit private var stAdapter  : ArrayAdapter<String>      // 品目登録状況の操作用アダプター
+    lateinit private var fsrAdapter: FoodSearchResultAdapter        // 検索結果の操作用アダプター
+    lateinit private var trsAdapter: TempRegistrationStateAdapter   // 仮品目登録状況の操作用アダプター
 
     private var day: MutableMap<Day, Int>   = mutableMapOf()  // 日時
     private val condition                   = Condition()     // 検索条件
@@ -236,28 +239,26 @@ class CondateRegistrationFragment(): Fragment() {
         // ------------------------------------------------------------
         val myCondate: Button = v.findViewById(R.id.myCondateButton)
         myCondate.setOnClickListener {
-            Toast.makeText(context, "My献立ボタンをおしました", Toast.LENGTH_SHORT).show()
-
-            /***** ここに記述 *****/
-
+            showMyCondateDialog(v)
         }
 
         // ------------------------------------------------------------
-        //  登録状況
+        //  仮登録状況
         // ------------------------------------------------------------
         val state: ListView = v.findViewById(R.id.registrationStateListView)
-        state.adapter = stAdapter
+        state.adapter = trsAdapter
 
         // ------------------------------------------------------------
         //  登録ボタン
         // ------------------------------------------------------------
         val register: Button = v.findViewById(R.id.registerButton)
         register.setOnClickListener {
-            Toast.makeText(context, "登録ボタンをおしました", Toast.LENGTH_SHORT).show(
-            )
-
-            /***** ここに記述 *****/
-
+            when (registerCondate()) {
+                OK      -> {
+                    fragmentManager?.popBackStack() ?: throw NullPointerException()
+                    Toast.makeText(context, "登録しました", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
         return v
@@ -271,9 +272,9 @@ class CondateRegistrationFragment(): Fragment() {
             null -> throw NullPointerException()
             else -> FoodSearchResultAdapter(context)
         }
-        this.stAdapter  = when (context) {
+        this.trsAdapter  = when (context) {
             null -> throw NullPointerException()
-            else -> ArrayAdapter(context, android.R.layout.simple_list_item_1)
+            else -> TempRegistrationStateAdapter(context)
         }
 
     }
@@ -314,12 +315,17 @@ class CondateRegistrationFragment(): Fragment() {
         )
     }
 
-    // --------------------------------------------------
-    //  登録状況の更新
-    // --------------------------------------------------
+    // ==================================================
+    // ==================================================
+    //
+    //  updateState
+    //  - 登録状況の更新
+    //
+    // ==================================================
+    // ==================================================
     private fun updateState(
-        day: MutableMap<Day, Int>?   = null,
-        state: State?                = null
+        day: MutableMap<Day, Int>?                  = null,
+        food: TempRegistrationStateAdapter.Food?    = null
     ) {
         val db = when (context) {
             null -> throw NullPointerException()
@@ -337,6 +343,7 @@ class CondateRegistrationFragment(): Fragment() {
             val result: List<String> = db.searchRecord(
                 tableName   = foodTable.TABLE_NAME,
                 column      = arrayOf(
+                    "${foodTable.TABLE_NAME}.${foodTable.ID}",
                     foodTable.NAME,
                     recordTable.NUMBER
                 ),
@@ -352,27 +359,41 @@ class CondateRegistrationFragment(): Fragment() {
 
             // 格納
             var i = 0
-            this.stAdapter.clear()
+            clearState()
             while (i < result.size) {
-                this.stAdapter.add("${result[i++]}[${result[i++]}人前]")
+                this.trsAdapter.add(TempRegistrationStateAdapter.Food(
+                    id      = result[i++].toInt(),
+                    name    = result[i++],
+                    number  = result[i++].toFloat()))
             }
         }
-        // --------------------------------------------------
 
+        // --------------------------------------------------
         //  品目が追加された場合
         // --------------------------------------------------
-        if (state != null) {
-            this.stAdapter.add("${state.food.name}[${state.number}人前]")
+        if (food != null) {
+            this.trsAdapter.add(TempRegistrationStateAdapter.Food(
+                id      = food.id,
+                name    = food.name,
+                number  = food.number))
         }
         // --------------------------------------------------
 
-        this.stAdapter.notifyDataSetChanged()
+        this.trsAdapter.notifyDataSetChanged()
     }
 
+    private fun clearState() {
+        this.trsAdapter.clear()
+    }
 
-    // --------------------------------------------------
-    //  何人前か表示するダイアログ
-    // --------------------------------------------------
+    // ==================================================
+    // ==================================================
+    //
+    //  showNumberPickerDialog
+    //  - 何人前を登録するか指定するダイアログを表示する
+    //
+    // ==================================================
+    // ==================================================
     private fun showNumberPickerDialog(food: FoodSearchResultAdapter.Food) {
 
         class NumberPickerDialog : DialogFragment() {
@@ -392,7 +413,7 @@ class CondateRegistrationFragment(): Fragment() {
                     .setPositiveButton("OK") { _, _ ->
                         when (val number: Float = formatNumber(intNPicker.value, decNPicker.value)) {
                             0f      -> Toast.makeText(context, "0より大きい値を入力してください", Toast.LENGTH_SHORT).show()
-                            else    -> updateState(state = State(food, number))
+                            else    -> updateState(food = TempRegistrationStateAdapter.Food(food.id, food.name, number))
                     }}
                     .setNegativeButton("キャンセル", null)
                     .setView(v)
@@ -408,6 +429,190 @@ class CondateRegistrationFragment(): Fragment() {
             }
         }
         val dialog = NumberPickerDialog()
+        dialog.show(fragmentManager, "setting_dialog")
+    }
+
+
+    // ==================================================
+    // ==================================================
+    //
+    //  registerCondate
+    //  - 献立を登録する
+    //
+    // ==================================================
+    // ==================================================
+    private fun registerCondate(): Int {
+
+        // ----- 登録内容の確認 -----
+        if (listOf(
+                this.day[Day.YEAR],
+                this.day[Day.MONTH],
+                this.day[Day.DATE],
+                this.day[Day.TIME]).contains(null)) {
+            Toast.makeText(context, "日時を指定してください", Toast.LENGTH_SHORT).show()
+            return NG
+        }
+        if (this.trsAdapter.count == 0) {
+            Toast.makeText(context, "１つ以上の品目を登録してください", Toast.LENGTH_SHORT).show()
+            return NG
+        }
+
+        // ----- データベースに追加 -----
+        val db = when (context) {
+            null -> throw NullPointerException()
+            else -> SampleDBOpenHelper(context!!)
+        }
+
+        for (i in 0..this.trsAdapter.count.minus(1)) {
+            val food = this.trsAdapter.getItem(i)
+            db.insertRecord(
+                Table.Record(
+                    food_id = food.id,
+                    year    = this.day[Day.YEAR]!!,
+                    month   = this.day[Day.MONTH]!!,
+                    date    = this.day[Day.DATE]!!,
+                    time    = this.day[Day.TIME]!!,
+                    number  = food.number
+                )
+            )
+        }
+
+        return OK
+
+    }
+
+
+    // ==================================================
+    // ==================================================
+    //
+    //  showMyCondateDialog
+    //  - マイ献立を選択するダイアログを表示する
+    //
+    // ==================================================
+    // ==================================================
+    private fun showMyCondateDialog(view: View) {
+
+        // My献立情報
+        data class MyCondate(
+            val id: Int,
+            val name: String
+        )
+
+        // --------------------------------------------------
+        //  ダイアログの設定
+        // --------------------------------------------------
+        class MyCondateDialog : DialogFragment() {
+            val myCondate: MutableList<MyCondate> = mutableListOf() // 表示されているMy献立のデータ
+            lateinit var adapter: ArrayAdapter<String>
+
+            // ----- 基本設定 -----
+            override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+                var checking: Int = 0   // 選択アイテムを保持
+                searchMyCondate()
+
+                val builder = AlertDialog.Builder(activity)
+                builder
+                    .setTitle("My献立を選択してください")
+                    .setSingleChoiceItems(adapter, checking) { _, item ->
+                        checking = item
+                    }
+                    .setPositiveButton("OK") { _, _ ->
+                        setMyCondate(position = checking)
+                    }
+                    .setNegativeButton("キャンセル", null)
+
+                return builder.create()
+            }
+
+            override fun onAttach(context: Context?) {
+                super.onAttach(context)
+
+                this.adapter = when (context) {
+                    null -> throw NullPointerException()
+                    else -> ArrayAdapter(context, android.R.layout.simple_list_item_single_choice)
+                }
+            }
+
+            // ----- データベースからMy献立を検索 -----
+            private fun searchMyCondate() {
+                val db = when (context) {
+                    null -> throw NullPointerException()
+                    else -> SampleDBOpenHelper(context!!)
+                }
+                val myCondateTable = DBContract.MyCondate
+
+                // 検索
+                val result = db.searchRecord(
+                    tableName = myCondateTable.TABLE_NAME,
+                    column = arrayOf(
+                        myCondateTable.ID,
+                        myCondateTable.NAME
+                    )
+                ) ?: throw NullPointerException()
+
+                // 格納
+                var i = 0
+                while (i < result.size) {
+                    this.myCondate.add(MyCondate(
+                        id      = result[i++].toInt(),
+                        name    = result[i++])
+                    )
+                }
+                for (j in 0..this.myCondate.size.minus(1)) {
+                    this.adapter.add(this.myCondate[j].name)
+                }
+            }
+
+
+            // ----- My献立を仮登録状況にセットする -----
+            private fun setMyCondate(position: Int) {
+
+                val myCondate = this.myCondate[position]                         // 仮登録するMy献立
+                val foods: MutableList<TempRegistrationStateAdapter.Food> = mutableListOf() // 仮登録するMy献立の内容品目
+
+                // 該当My献立の内容品目を検索
+                val db = when (context) {
+                    null -> throw NullPointerException()
+                    else -> SampleDBOpenHelper(context!!)
+                }
+                val myCondate_foodsTable = DBContract.MyCondate_Foods
+                val foodTable = DBContract.Food
+
+                val result: List<String> = db.searchRecord(
+                    tableName   = foodTable.TABLE_NAME,
+                    column      = arrayOf(
+                        foodTable.ID,
+                        foodTable.NAME,
+                        myCondate_foodsTable.NUMBER),
+                    condition   = "${myCondate_foodsTable.MYCONDATE_ID} = ${myCondate.id}",
+                    innerJoin   = Join(
+                        tablename   = myCondate_foodsTable.TABLE_NAME,
+                        column1     = foodTable.ID,
+                        column2     = myCondate_foodsTable.FOOD_ID
+                    )
+                ) ?: throw SQLiteException("searchRecord was failed.")
+                var i = 0
+                while (i < result.size) {
+                    foods.add(TempRegistrationStateAdapter.Food(
+                        id      = result[i++].toInt(),
+                        name    = result[i++],
+                        number  = result[i++].toFloat())
+                    )
+                }
+
+                // 仮登録状況にセット
+                clearState()
+                foods.forEach {
+                    updateState(food = it)
+                }
+
+            }
+        }
+
+        // --------------------------------------------------
+        //  ダイアログの表示
+        // --------------------------------------------------
+        val dialog = MyCondateDialog()
         dialog.show(fragmentManager, "setting_dialog")
     }
 

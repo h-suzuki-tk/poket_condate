@@ -105,6 +105,7 @@ class SampleDBOpenHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, 
             put(DBContract.Record.MONTH, record.month)
             put(DBContract.Record.DATE, record.date)
             put(DBContract.Record.TIME, record.time)
+            put(DBContract.Record.NUMBER, record.number)
         }
         try {
             //データベースに挿入する
