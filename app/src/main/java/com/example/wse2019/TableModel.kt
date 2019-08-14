@@ -14,7 +14,7 @@ sealed class Table() {
 
     class Food(val name: String, val favorite: Int?, val memo: String?, val category : Int?) : Table()
 
-    class Record(val food_id: Int, val year: Int, val month: Int, val date: Int, val time: Int) : Table()
+    class Record(val food_id: Int, val year: Int, val month: Int, val date: Int, val time: Int, val number: Float) : Table()
 
     class MyCondate(val name: String) : Table()
 

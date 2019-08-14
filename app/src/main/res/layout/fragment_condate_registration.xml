@@ -1,14 +1,147 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <TextView
-            android:text="日付"
-            android:layout_width="wrap_content"
+    <!-- 日付 -->
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize">
+        <TextView
+                android:text="日付"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.3"
+                android:gravity="center"
+                android:background="@color/colorPrimary"
+                android:textColor="@android:color/white"/>
+        <TextView
+                android:id="@+id/dayTextView"
+                android:text="yyyy/mm/dd"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"/>
+    </LinearLayout>
+
+    <!-- 時間帯 -->
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize">
+        <TextView
+                android:text="時間帯"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.3"
+                android:gravity="center"
+                android:background="@color/colorPrimary"
+                android:textColor="@android:color/white"/>
+        <RadioGroup
+                android:id="@+id/timeRadioGroup"
+                android:orientation="horizontal"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+            <RadioButton
+                    android:id="@+id/morningRadioButton"
+                    android:text="朝"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"/>
+            <RadioButton
+                    android:id="@+id/noonRadioButton"
+                    android:text="昼"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"/>
+            <RadioButton
+                    android:id="@+id/eveningRadioButton"
+                    android:text="晩"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"/>
+            <RadioButton
+                    android:id="@+id/snackRadioButton"
+                    android:text="間"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"/>
+        </RadioGroup>
+    </LinearLayout>
+
+    <!-- 検索フィールド -->
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize">
+        <SearchView
+                android:id="@+id/foodSearchView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent" android:layout_weight="1">
+        </SearchView>
+        <Spinner
+                android:id="@+id/categorySpinner"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.7"/>
+        <ImageButton
+                android:id="@+id/favoriteFoodImageButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:background="@null"
+                app:srcCompat="@android:drawable/btn_star_big_off"
+                android:layout_weight="0.2"/>
+    </LinearLayout>
+
+    <!-- 検索結果 -->
+    <ListView
+            android:id="@+id/foodSearchResultListView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+    <!-- 仮登録品目 -->
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="75dp">
+        <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+            <TextView
+                    android:text="登録状況"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.3"
+                    android:gravity="center"/>
+            <Button
+                    android:id="@+id/myCondateButton"
+                    android:text="My献立"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"/>
+        </LinearLayout>
+
+        <!-- 仮 -->
+        <!--
+        自作のAdapterをつくり
+        GridViewなどで表示するのが考えられる
+        -->
+        <ListView
+                android:id="@+id/registrationStateListView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+    </LinearLayout>
+
+    <!-- 登録する！ボタン -->
+    <Button
+            android:id="@+id/registerButton"
+            android:text="登録する !!"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/textView2" android:layout_marginTop="8dp"
-            app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginLeft="8dp" android:layout_marginStart="8dp" android:textSize="30sp"/>
-</android.support.constraint.ConstraintLayout>
+            style="@style/Widget.AppCompat.Button.Colored"/>
+
+
+</LinearLayout>

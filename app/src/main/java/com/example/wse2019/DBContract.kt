@@ -94,7 +94,8 @@ open class DBContract {
             const val MONTH = "month"//月
             const val DATE = "date"  //日にち
             const val TIME = "time"  //時間帯
-            val FIELD = arrayOf(ID, FOOD_ID, YEAR, MONTH, DATE, TIME)
+            const val NUMBER = "number" //何人前
+            val FIELD = arrayOf(ID, FOOD_ID, YEAR, MONTH, DATE, TIME, NUMBER)
         }
     }
 

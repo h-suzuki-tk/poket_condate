@@ -34,7 +34,8 @@ fun createRecordTable () : String {
             DBContract.Record.YEAR + " INTEGER NOT NULL, " +
             DBContract.Record.MONTH + " INTEGER NOT NULL, " +
             DBContract.Record.DATE + " INTEGER NOT NULL, " +
-            DBContract.Record.TIME + " INTEGER NOT NULL " +
+            DBContract.Record.TIME + " INTEGER NOT NULL, " +
+            DBContract.Record.NUMBER + " INTEGER NOT NULL " +
             ")"
 }
 
