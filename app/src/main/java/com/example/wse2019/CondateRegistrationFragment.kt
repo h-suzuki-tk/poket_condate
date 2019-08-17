@@ -13,6 +13,8 @@ import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentTransaction
+import android.support.v7.widget.RecyclerView
+import android.text.Layout
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -492,29 +494,123 @@ class CondateRegistrationFragment(): Fragment() {
     // ==================================================
     private fun showMyCondateDialog(view: View) {
 
-        // My献立情報
+        // My献立情報を管理
         data class MyCondate(
-            val id: Int,
+            val id  : Int,
             val name: String
+        )
+        // 各My献立の行で表示する情報
+        data class ViewHolderItem(
+            var name    : TextView,
+            val contents: TextView
         )
 
         // --------------------------------------------------
         //  ダイアログの設定
         // --------------------------------------------------
+        class MyCondateAdapter(context: Context) : BaseAdapter() {
+
+            private val myCondate: MutableList<MyCondate> = mutableListOf()
+
+            override fun getCount(): Int {
+                return myCondate.size
+            }
+
+            override fun getItem(position: Int): Any {
+                return myCondate[position]
+            }
+
+            override fun getItemId(position: Int): Long {
+                return myCondate[position].id.toLong()
+            }
+
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+
+                val (viewHolder, view) = when (convertView) {
+
+                    null -> {
+                        val view = LayoutInflater.from(context).inflate(R.layout.my_condate_row, parent, false)
+                        val viewHolder = ViewHolderItem(
+                            name        = view.findViewById(R.id.nameTextView),
+                            contents    = view.findViewById(R.id.contentsTextView)
+                        )
+                        view.tag = viewHolder
+                        viewHolder as ViewHolderItem to view
+                    }
+                    else -> convertView.tag as ViewHolderItem to convertView
+
+                }
+
+                viewHolder.name.text = myCondate[position].name
+                viewHolder.contents.text = getMyCondateContents(myCondate[position].id)
+
+                return view
+            }
+
+            fun add(newMyCondate: MyCondate) {
+                myCondate.add(newMyCondate)
+            }
+
+
+            fun getMyCondateContents(myCondateID: Int) : String {
+                var contents = ""
+
+                val db = when (context) {
+                    null -> throw NullPointerException()
+                    else -> SampleDBOpenHelper(context!!)
+                }
+                val myCondate_foodsTable = DBContract.MyCondate_Foods
+                val foodTable = DBContract.Food
+
+                val result: List<String> = db.searchRecord(
+                    tableName   = foodTable.TABLE_NAME,
+                    column      = arrayOf(
+                        foodTable.NAME,
+                        myCondate_foodsTable.NUMBER),
+                    condition   = "${myCondate_foodsTable.MYCONDATE_ID} = ${myCondateID}",
+                    innerJoin   = Join(
+                        tablename   = myCondate_foodsTable.TABLE_NAME,
+                        column1     = foodTable.ID,
+                        column2     = myCondate_foodsTable.FOOD_ID
+                    )
+                ) ?: throw SQLiteException("searchRecord was failed.")
+                if (result.isNotEmpty()) {
+                    var i = 0
+                    contents += "${result[i++]}[${result[i++]}人前]"
+                    while (i < result.size) {
+                        contents += ", ${result[i++]}[${result[i++]}人前]"
+                    }
+                }
+
+                return contents
+            }
+        }
         class MyCondateDialog : DialogFragment() {
             val myCondate: MutableList<MyCondate> = mutableListOf() // 表示されているMy献立のデータ
-            lateinit var adapter: ArrayAdapter<String>
+            lateinit var adapter: MyCondateAdapter
 
             // ----- 基本設定 -----
             override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-                var checking: Int = 0   // 選択アイテムを保持
+                var tmpRadio: RadioButton? = null   // 選択アイテムの表示を保持
+                var checking: Int = -1              // 選択アイテムを保持
                 searchMyCondate()
 
                 val builder = AlertDialog.Builder(activity)
                 builder
                     .setTitle("My献立を選択してください")
-                    .setSingleChoiceItems(adapter, checking) { _, item ->
-                        checking = item
+                    .setSingleChoiceItems(adapter, checking) { dialog, position ->
+
+                        checking = position
+
+                        val d = dialog as AlertDialog
+                        val v = d.listView.getChildAt(position)
+                        val radio = v.findViewById<RadioButton>(R.id.radioButton)
+                        radio.isChecked = true
+                        if (tmpRadio != radio) {
+                            tmpRadio?.isChecked = false
+                            tmpRadio = radio
+                        }
+
                     }
                     .setPositiveButton("OK") { _, _ ->
                         setMyCondate(position = checking)
@@ -529,7 +625,7 @@ class CondateRegistrationFragment(): Fragment() {
 
                 this.adapter = when (context) {
                     null -> throw NullPointerException()
-                    else -> ArrayAdapter(context, android.R.layout.simple_list_item_single_choice)
+                    else -> MyCondateAdapter(context)
                 }
             }
 
@@ -559,7 +655,7 @@ class CondateRegistrationFragment(): Fragment() {
                     )
                 }
                 for (j in 0..this.myCondate.size.minus(1)) {
-                    this.adapter.add(this.myCondate[j].name)
+                    this.adapter.add(myCondate[j])
                 }
             }
 
