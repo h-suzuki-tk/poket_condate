@@ -249,6 +249,28 @@ class CondateRegistrationFragment(): Fragment() {
         // ------------------------------------------------------------
         val state: ListView = v.findViewById(R.id.registrationStateListView)
         state.adapter = trsAdapter
+        state.setOnItemClickListener { parent, view, position, id ->
+            val food: TempRegistrationStateAdapter.Food = trsAdapter.getItem(position)
+
+            when (id.toInt()) {
+
+                // ×ボタンがタップされた場合
+                /*
+                確認のダイアログを表示して、OKされれば削除する
+                 */
+                R.id.removeImageButton -> {
+                    AlertDialog.Builder(context)
+                        .setMessage("${food.name}[${food.number}人前]を仮登録状況から削除します。よろしいですか？")
+                        .setPositiveButton("OK") { _, _ ->
+                            trsAdapter.remove(position)
+                            trsAdapter.notifyDataSetChanged()
+                        }
+                        .setNegativeButton("キャンセル", null)
+                        .show()
+                }
+            }
+
+        }
 
         // ------------------------------------------------------------
         //  登録ボタン
@@ -283,6 +305,7 @@ class CondateRegistrationFragment(): Fragment() {
     override fun onDetach() {
         super.onDetach()
     }
+
 
     private fun getCategories() : List<String> {
         val db = when (context) {
