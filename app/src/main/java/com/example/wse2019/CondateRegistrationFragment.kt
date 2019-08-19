@@ -62,11 +62,13 @@ class CondateRegistrationFragment(): Fragment() {
 
     )
 
-    lateinit private var fsrAdapter: FoodSearchResultAdapter        // 検索結果の操作用アダプター
-    lateinit private var trsAdapter: TempRegistrationStateAdapter   // 仮品目登録状況の操作用アダプター
 
-    private var day: MutableMap<Day, Int>   = mutableMapOf()  // 日時
-    private val condition                   = Condition()     // 検索条件
+    private var selectedDay: MutableMap<Day, Int>   = mutableMapOf()  // 日時
+
+    lateinit private var search         : Search        // 検索管理用クラス
+    lateinit private var state          : State         // 仮登録状況管理用クラス
+
+
 
     // ------------------------------------------------------------
     //  値の取得
@@ -89,9 +91,8 @@ class CondateRegistrationFragment(): Fragment() {
         }
     }
 
-    // ------------------------------------------------------------
-    //  初期化
-    // ------------------------------------------------------------
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -100,14 +101,16 @@ class CondateRegistrationFragment(): Fragment() {
         when {
             args != null -> {
                 Day.values().forEach { day ->
-                    this.day.put(day, args.getInt(day.str))
+                    selectedDay.put(day, args.getInt(day.str))
                 }
             }
         }
         // ----- 初期化 -----
-        searchFoods()
-        updateState(this.day)
+        search.init()
+        state.init()
     }
+
+
 
     // ------------------------------------------------------------
     //  描画
@@ -121,9 +124,9 @@ class CondateRegistrationFragment(): Fragment() {
         // ------------------------------------------------------------
         val day: TextView = v.findViewById(R.id.dayTextView)
         // ----- 初期値 -----
-        day.text = when (this.day.isEmpty()) {
+        day.text = when (selectedDay.isEmpty()) {
             true    -> "選択してください"
-            false   -> "${this.day[Day.YEAR]}/${this.day[Day.MONTH]}/${this.day[Day.DATE]}"
+            false   -> "${selectedDay[Day.YEAR]}/${selectedDay[Day.MONTH]}/${selectedDay[Day.DATE]}"
         }
         day.setOnClickListener {
             // カレンダーダイアログで日付を選択
@@ -132,20 +135,21 @@ class CondateRegistrationFragment(): Fragment() {
                 context ?: throw NullPointerException(),
                 DatePickerDialog.OnDateSetListener { _, year, month, date ->
 
-                    this.day[Day.YEAR]  = year
-                    this.day[Day.MONTH] = month.inc()
-                    this.day[Day.DATE]  = date
+                    selectedDay[Day.YEAR]  = year
+                    selectedDay[Day.MONTH] = month.inc()
+                    selectedDay[Day.DATE]  = date
                     day.text = "%d/%d/%d".format(
-                        this.day[Day.YEAR],
-                        this.day[Day.MONTH],
-                        this.day[Day.DATE]
+                        selectedDay[Day.YEAR],
+                        selectedDay[Day.MONTH],
+                        selectedDay[Day.DATE]
                     )
-                    updateState(day = this.day)
 
+                    state.addAll(state.searchFoods(selectedDay))
+                    state.notifyDataSetChanged()
                 },
-                this.day[Day.YEAR] ?: date.get(Calendar.YEAR),
-                this.day[Day.MONTH]?.dec() ?: date.get(Calendar.MONTH),
-                this.day[Day.DATE] ?: date.get(Calendar.DATE)
+                selectedDay[Day.YEAR] ?: date.get(Calendar.YEAR),
+                selectedDay[Day.MONTH]?.dec() ?: date.get(Calendar.MONTH),
+                selectedDay[Day.DATE] ?: date.get(Calendar.DATE)
             )
             datePickerDialog.show()
         }
@@ -154,13 +158,14 @@ class CondateRegistrationFragment(): Fragment() {
         //  時間帯
         // ------------------------------------------------------------
         val time: RadioGroup = v.findViewById(R.id.timeRadioGroup)
-        time.check(when (this.day.isEmpty()) {
+        time.check(when (selectedDay.isEmpty()) {
             true    -> -1
-            false   -> this.timeRadioButtonID[this.day[Day.TIME]!!]
+            false   -> timeRadioButtonID[selectedDay[Day.TIME]!!]
         })
         time.setOnCheckedChangeListener { _, checkedId ->
-            this.day[Day.TIME] = this.timeRadioButtonID.indexOf(checkedId)
-            updateState(day = this.day)
+            selectedDay[Day.TIME] = timeRadioButtonID.indexOf(checkedId)
+            state.addAll(state.searchFoods(selectedDay))
+            state.notifyDataSetChanged()
         }
 
         // ------------------------------------------------------------
@@ -174,8 +179,8 @@ class CondateRegistrationFragment(): Fragment() {
                 return false
             }
             override fun onQueryTextChange(query: String?): Boolean {
-                updateCondition(name = query)
-                searchFoods()
+                search.updateCondition(name = query)
+                search.updateResult()
                 return false
             }
         })
@@ -191,8 +196,8 @@ class CondateRegistrationFragment(): Fragment() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         category.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, v: View?, position: Int, id: Long) {
-                updateCondition(category = position)
-                searchFoods()
+                search.updateCondition(category = position)
+                search.updateResult()
             }
             override fun onNothingSelected(pstrmy: AdapterView<*>?) {
                 // なにもしない
@@ -203,18 +208,16 @@ class CondateRegistrationFragment(): Fragment() {
         //  お気に入り絞り込みボタン
         // ------------------------------------------------------------
         val favorite: ImageButton = v.findViewById(R.id.favoriteFoodImageButton)
-        favorite.setOnClickListener { when (this.condition.favorite) {
+        favorite.setOnClickListener { when (search.condition.favorite) {
             ON -> {
-                Toast.makeText(context, "お気に入りにによる絞り込みを OFF にします", Toast.LENGTH_SHORT).show()
-                updateCondition(favorite = OFF)
+                search.updateCondition(favorite = OFF)
                 favorite.setImageResource(android.R.drawable.btn_star_big_off)
-                searchFoods()
+                search.updateResult()
             }
             OFF -> {
-                Toast.makeText(context, "お気に入りにによる絞り込みを ON にします", Toast.LENGTH_SHORT).show()
-                updateCondition(favorite = ON)
+                search.updateCondition(favorite = ON)
                 favorite.setImageResource(android.R.drawable.btn_star_big_on)
-                searchFoods()
+                search.updateResult()
             }
         }}
 
@@ -222,13 +225,13 @@ class CondateRegistrationFragment(): Fragment() {
         //  検索結果
         // ------------------------------------------------------------
         val result: ListView    = v.findViewById(R.id.foodSearchResultListView)
-        result.adapter = this.fsrAdapter
+        result.adapter = search.getAdapter()
         result.setOnItemClickListener { parent, view, position, id ->
-            val food: FoodSearchResultAdapter.Food = this.fsrAdapter.getItem(position)
+            val food: FoodSearchResultAdapter.Food = search.getResultItem(position)
             when (id.toInt()) {
                 R.id.favoriteButton -> {
-                    this.fsrAdapter.switchFavorite(position)
-                    searchFoods()
+                    search.switchFavorite(position)
+                    search.updateResult()
                 }
                 R.id.addButton -> {
                     showNumberPickerDialog(food)
@@ -247,10 +250,10 @@ class CondateRegistrationFragment(): Fragment() {
         // ------------------------------------------------------------
         //  仮登録状況
         // ------------------------------------------------------------
-        val state: ListView = v.findViewById(R.id.registrationStateListView)
-        state.adapter = trsAdapter
-        state.setOnItemClickListener { parent, view, position, id ->
-            val food: TempRegistrationStateAdapter.Food = trsAdapter.getItem(position)
+        val stateListView: ListView = v.findViewById(R.id.registrationStateListView)
+        stateListView.adapter = state.getAdapter()
+        stateListView.setOnItemClickListener { parent, view, position, id ->
+            val food: TempRegistrationStateAdapter.Food = state.getItem(position)
 
             when (id.toInt()) {
 
@@ -262,8 +265,8 @@ class CondateRegistrationFragment(): Fragment() {
                     AlertDialog.Builder(context)
                         .setMessage("${food.name}[${food.number}人前]を仮登録状況から削除します。よろしいですか？")
                         .setPositiveButton("OK") { _, _ ->
-                            trsAdapter.remove(position)
-                            trsAdapter.notifyDataSetChanged()
+                            state.remove(position)
+                            state.notifyDataSetChanged()
                         }
                         .setNegativeButton("キャンセル", null)
                         .show()
@@ -291,16 +294,8 @@ class CondateRegistrationFragment(): Fragment() {
     override fun onAttach(context: Context?) {
         super.onAttach(context)
 
-        // ----- アダプターの初期化 ------
-        this.fsrAdapter = when (context) {
-            null -> throw NullPointerException()
-            else -> FoodSearchResultAdapter(context)
-        }
-        this.trsAdapter  = when (context) {
-            null -> throw NullPointerException()
-            else -> TempRegistrationStateAdapter(context)
-        }
-
+        search  = Search()
+        state   = State()
     }
     override fun onDetach() {
         super.onDetach()
@@ -322,94 +317,165 @@ class CondateRegistrationFragment(): Fragment() {
         ) ?: throw NullPointerException("searchRecord was failed")
     }
 
-    private fun updateCondition(
-        name    : String? = null,
-        favorite: Int?    = null,
-        category: Int?    = null
-    ) {
-        if (name        != null) { this.condition.name      = name }
-        if (favorite    != null) { this.condition.favorite  = favorite}
-        if (category    != null) { this.condition.category  = category}
-    }
 
-    private fun searchFoods() {
-        this.fsrAdapter.searchFoods(
-            this.condition.name,
-            this.condition.favorite,
-            this.condition.category
-        )
-    }
 
     // ==================================================
     // ==================================================
     //
-    //  updateState
-    //  - 登録状況の更新
+    //  Search
+    //  - 検索を管理するクラス
     //
     // ==================================================
     // ==================================================
-    private fun updateState(
-        day: MutableMap<Day, Int>?                  = null,
-        food: TempRegistrationStateAdapter.Food?    = null
-    ) {
-        val db = when (context) {
+    private inner class Search {
+        private val adapter: FoodSearchResultAdapter = when (context) {
             null -> throw NullPointerException()
-            else -> SampleDBOpenHelper(context!!)
+            else -> FoodSearchResultAdapter(context!!)
         }
-        var result = mutableListOf<String>()
+        val condition = Condition()
+        val count: Int
+            get() = adapter.count
 
-        //  日付が変更された場合
-        // --------------------------------------------------
-        if (day != null) {
-            val recordTable = DBContract.Record
-            val foodTable = DBContract.Food
+        fun getAdapter() : FoodSearchResultAdapter { return adapter }
+        fun getResultItem(position: Int) : FoodSearchResultAdapter.Food { return adapter.getItem(position) }
+
+        fun init() {
+
+            updateResult()
+
+        }
+
+        fun updateResult() {
+
+            adapter.clear()
+            adapter.searchFoods(
+                condition.name,
+                condition.favorite,
+                condition.category
+            )
+            adapter.notifyDataSetChanged()
+
+        }
+
+        fun updateCondition(
+            name    : String? = null,
+            favorite: Int?    = null,
+            category: Int?    = null
+        ) {
+            Log.d("condition", condition.toString())
+            if (name        != null) { condition.name      = name }
+            if (favorite    != null) { condition.favorite  = favorite}
+            if (category    != null) { condition.category  = category}
+            Log.d("condition", condition.toString())
+        }
+
+        fun switchFavorite(position: Int) {
+            adapter.switchFavorite(position)
+        }
+
+    }
+
+
+
+    // ==================================================
+    // ==================================================
+    //
+    //  State
+    //  - 仮登録状況を管理するクラス
+    //
+    // ==================================================
+    // ==================================================
+    private inner class State {
+        private val adapter: TempRegistrationStateAdapter = when (context) {
+            null -> throw NullPointerException()
+            else -> TempRegistrationStateAdapter(context!!)
+        }
+        val count: Int
+            get() = adapter.count
+
+        fun getAdapter() : TempRegistrationStateAdapter { return adapter }
+        fun getItem(position: Int) : TempRegistrationStateAdapter.Food { return adapter.getItem(position) }
+
+        fun init() {
+
+            if (selectedDay.isNotEmpty()) {
+                val registeredFoods: List<TempRegistrationStateAdapter.Food> = searchFoods(selectedDay)
+                if (registeredFoods.isNotEmpty()) {
+                    addAll(registeredFoods)
+                }
+            }
+
+        }
+
+        fun searchFoods(day: MutableMap<Day, Int>) : List<TempRegistrationStateAdapter.Food> {
+
+            // データベース検索のための宣言・初期化
+            val db = SampleDBOpenHelper(context)
+            val recordT = DBContract.Record // Record table
+            val foodT = DBContract.Food // Food table
 
             // 検索
             val result: List<String> = db.searchRecord(
-                tableName   = foodTable.TABLE_NAME,
-                column      = arrayOf(
-                    "${foodTable.TABLE_NAME}.${foodTable.ID}",
-                    foodTable.NAME,
-                    recordTable.NUMBER
+                tableName = foodT.TABLE_NAME,
+                column = arrayOf(
+                    "${foodT.TABLE_NAME}.${foodT.ID}",
+                    foodT.NAME,
+                    recordT.NUMBER
                 ),
-                condition   =       "${recordTable.TABLE_NAME}.${recordTable.YEAR}  = ${day[Day.YEAR]}" +
-                        " and " +   "${recordTable.TABLE_NAME}.${recordTable.MONTH} = ${day[Day.MONTH]}" +
-                        " and " +   "${recordTable.TABLE_NAME}.${recordTable.DATE}  = ${day[Day.DATE]}" +
-                        " and " +   "${recordTable.TABLE_NAME}.${recordTable.TIME}  = ${day[Day.TIME]}",
-                innerJoin   = Join(
-                    tablename   = recordTable.TABLE_NAME,
-                    column1     = foodTable.ID,
-                    column2     = recordTable.FOOD_ID
-                )) ?: throw NullPointerException("searchRecord was failed.")
+                condition = "${recordT.TABLE_NAME}.${recordT.YEAR}  = ${day[Day.YEAR]}" +
+                        " and " + "${recordT.TABLE_NAME}.${recordT.MONTH} = ${day[Day.MONTH]}" +
+                        " and " + "${recordT.TABLE_NAME}.${recordT.DATE}  = ${day[Day.DATE]}" +
+                        " and " + "${recordT.TABLE_NAME}.${recordT.TIME}  = ${day[Day.TIME]}",
+                innerJoin = Join(
+                    tablename = recordT.TABLE_NAME,
+                    column1 = foodT.ID,
+                    column2 = recordT.FOOD_ID
+                )
+            ) ?: throw NullPointerException("searchRecord was failed.")
 
-            // 格納
+            // 検索結果を格納
+            val foods: MutableList<TempRegistrationStateAdapter.Food> = mutableListOf()
             var i = 0
-            clearState()
             while (i < result.size) {
-                this.trsAdapter.add(TempRegistrationStateAdapter.Food(
-                    id      = result[i++].toInt(),
-                    name    = result[i++],
-                    number  = result[i++].toFloat()))
+                foods.add(
+                    TempRegistrationStateAdapter.Food(
+                        id = result[i++].toInt(),
+                        name = result[i++],
+                        number = result[i++].toFloat()
+                    )
+                )
             }
+
+            return foods
         }
 
-        // --------------------------------------------------
-        //  品目が追加された場合
-        // --------------------------------------------------
-        if (food != null) {
-            this.trsAdapter.add(TempRegistrationStateAdapter.Food(
-                id      = food.id,
-                name    = food.name,
-                number  = food.number))
+        fun add(food: TempRegistrationStateAdapter.Food) {
+            adapter.add(food)
         }
-        // --------------------------------------------------
 
-        this.trsAdapter.notifyDataSetChanged()
+        fun addAll(foods: List<TempRegistrationStateAdapter.Food>) {
+
+            foods.forEach {
+                adapter.add(it)
+            }
+
+        }
+
+        fun notifyDataSetChanged() {
+            adapter.notifyDataSetChanged()
+        }
+
+        fun remove(position: Int) {
+            adapter.remove(position)
+        }
+
+        fun clear() {
+            adapter.clear()
+        }
+
     }
 
-    private fun clearState() {
-        this.trsAdapter.clear()
-    }
+
 
     // ==================================================
     // ==================================================
@@ -438,7 +504,10 @@ class CondateRegistrationFragment(): Fragment() {
                     .setPositiveButton("OK") { _, _ ->
                         when (val number: Float = formatNumber(intNPicker.value, decNPicker.value)) {
                             0f      -> Toast.makeText(context, "0より大きい値を入力してください", Toast.LENGTH_SHORT).show()
-                            else    -> updateState(food = TempRegistrationStateAdapter.Food(food.id, food.name, number))
+                            else    -> {
+                                state.add(TempRegistrationStateAdapter.Food(food.id, food.name, number))
+                                state.notifyDataSetChanged()
+                            }
                     }}
                     .setNegativeButton("キャンセル", null)
                     .setView(v)
@@ -470,14 +539,14 @@ class CondateRegistrationFragment(): Fragment() {
 
         // ----- 登録内容の確認 -----
         if (listOf(
-                this.day[Day.YEAR],
-                this.day[Day.MONTH],
-                this.day[Day.DATE],
-                this.day[Day.TIME]).contains(null)) {
+                selectedDay[Day.YEAR],
+                selectedDay[Day.MONTH],
+                selectedDay[Day.DATE],
+                selectedDay[Day.TIME]).contains(null)) {
             Toast.makeText(context, "日時を指定してください", Toast.LENGTH_SHORT).show()
             return NG
         }
-        if (this.trsAdapter.count == 0) {
+        if (state.count == 0) {
             Toast.makeText(context, "１つ以上の品目を登録してください", Toast.LENGTH_SHORT).show()
             return NG
         }
@@ -488,15 +557,15 @@ class CondateRegistrationFragment(): Fragment() {
             else -> SampleDBOpenHelper(context!!)
         }
 
-        for (i in 0..this.trsAdapter.count.minus(1)) {
-            val food = this.trsAdapter.getItem(i)
+        for (i in 0..state.count.minus(1)) {
+            val food = state.getItem(i)
             db.insertRecord(
                 Table.Record(
                     food_id = food.id,
-                    year    = this.day[Day.YEAR]!!,
-                    month   = this.day[Day.MONTH]!!,
-                    date    = this.day[Day.DATE]!!,
-                    time    = this.day[Day.TIME]!!,
+                    year    = selectedDay[Day.YEAR]!!,
+                    month   = selectedDay[Day.MONTH]!!,
+                    date    = selectedDay[Day.DATE]!!,
+                    time    = selectedDay[Day.TIME]!!,
                     number  = food.number
                 )
             )
@@ -636,20 +705,15 @@ class CondateRegistrationFragment(): Fragment() {
 
                     }
                     .setPositiveButton("OK") { _, _ ->
-                        setMyCondate(position = checking)
+                        if (checking < 0) {
+                            Toast.makeText(context, "選択してください", Toast.LENGTH_SHORT).show()
+                        } else {
+                            setMyCondate(position = checking)
+                        }
                     }
                     .setNegativeButton("キャンセル", null)
 
                 return builder.create()
-            }
-
-            override fun onAttach(context: Context?) {
-                super.onAttach(context)
-
-                this.adapter = when (context) {
-                    null -> throw NullPointerException()
-                    else -> MyCondateAdapter(context)
-                }
             }
 
             // ----- データベースからMy献立を検索 -----
@@ -672,13 +736,21 @@ class CondateRegistrationFragment(): Fragment() {
                 // 格納
                 var i = 0
                 while (i < result.size) {
-                    this.myCondate.add(MyCondate(
+                    myCondate.add(MyCondate(
                         id      = result[i++].toInt(),
                         name    = result[i++])
                     )
                 }
-                for (j in 0..this.myCondate.size.minus(1)) {
-                    this.adapter.add(myCondate[j])
+                for (j in 0..myCondate.size.minus(1)) {
+                    adapter.add(myCondate[j])
+                }
+            }
+
+            override fun onAttach(context: Context?) {
+                super.onAttach(context)
+                adapter = when (context) {
+                    null -> throw NullPointerException()
+                    else -> MyCondateAdapter(context)
                 }
             }
 
@@ -686,7 +758,7 @@ class CondateRegistrationFragment(): Fragment() {
             // ----- My献立を仮登録状況にセットする -----
             private fun setMyCondate(position: Int) {
 
-                val myCondate = this.myCondate[position]                         // 仮登録するMy献立
+                val myCondate = myCondate[position]                         // 仮登録するMy献立
                 val foods: MutableList<TempRegistrationStateAdapter.Food> = mutableListOf() // 仮登録するMy献立の内容品目
 
                 // 該当My献立の内容品目を検索
@@ -720,11 +792,9 @@ class CondateRegistrationFragment(): Fragment() {
                 }
 
                 // 仮登録状況にセット
-                clearState()
-                foods.forEach {
-                    updateState(food = it)
-                }
-
+                state.clear()
+                state.addAll(foods)
+                state.notifyDataSetChanged()
             }
         }
 
