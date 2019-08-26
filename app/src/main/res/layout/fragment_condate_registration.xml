@@ -14,7 +14,7 @@
                 android:text="日付"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="0.3"
+                android:layout_weight="0.1"
                 android:gravity="center"
                 android:background="@color/colorPrimary"
                 android:textColor="@android:color/white"/>
@@ -22,20 +22,14 @@
                 android:id="@+id/dayTextView"
                 android:text="yyyy/mm/dd"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
                 android:gravity="center"/>
-    </LinearLayout>
-
-    <!-- 時間帯 -->
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize">
         <TextView
                 android:text="時間帯"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="0.3"
+                android:layout_weight="0.1"
                 android:gravity="center"
                 android:background="@color/colorPrimary"
                 android:textColor="@android:color/white"/>
@@ -72,15 +66,23 @@
         </RadioGroup>
     </LinearLayout>
 
+    <!-- 時間帯 -->
+
     <!-- 検索フィールド -->
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize">
-        <SearchView
-                android:id="@+id/foodSearchView"
+
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                app:srcCompat="@android:drawable/ic_menu_search"/>
+        <EditText
+                android:id="@+id/searchEditText"
                 android:layout_width="0dp"
-                android:layout_height="match_parent" android:layout_weight="1">
-        </SearchView>
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+        </EditText>
         <Spinner
                 android:id="@+id/categorySpinner"
                 android:layout_width="0dp"
@@ -105,13 +107,13 @@
     <!-- 仮登録品目 -->
     <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="75dp">
+            android:layout_height="100dp">
         <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent">
             <TextView
-                    android:text="仮登録状況"
+                    android:text="仮登録品目"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="0.3"
@@ -124,11 +126,7 @@
                     android:layout_weight="1"/>
         </LinearLayout>
 
-        <!-- 仮 -->
-        <!--
-        自作のAdapterをつくり
-        GridViewなどで表示するのが考えられる
-        -->
+        <!-- 仮登録品目一覧-->
         <ListView
                 android:id="@+id/registrationStateListView"
                 android:layout_width="match_parent"
@@ -136,12 +134,27 @@
     </LinearLayout>
 
     <!-- 登録する！ボタン -->
-    <Button
-            android:id="@+id/registerButton"
-            android:text="登録する !!"
+    <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/Widget.AppCompat.Button.Colored"/>
+            android:layout_height="?attr/actionBarSize"
+            android:orientation="horizontal">
+        <Button
+                android:id="@+id/registerNewFoodButton"
+                android:text="食べたい品目が見つかりませんか?"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:textIsSelectable="false" style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:textSize="10sp"/>
+        <Button
+                android:id="@+id/registerButton"
+                android:text="登録する !!"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                style="@style/Widget.AppCompat.Button.Colored"/>
+    </LinearLayout>
+
 
 
 </LinearLayout>

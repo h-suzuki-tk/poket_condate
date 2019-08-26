@@ -17,6 +17,9 @@
                 android:id="@+id/nav_mycondate"
                 android:title="@string/mycondate"/>
         <item
+                android:id="@+id/nav_food_registration"
+                android:title="@string/food_registration"/>
+        <item
                 android:id="@+id/nav_regisration_inf_edit"
                 android:title="@string/regisration_inf_edit"/>
     </group>

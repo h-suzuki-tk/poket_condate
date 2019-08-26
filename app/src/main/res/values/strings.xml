@@ -6,7 +6,7 @@
     <string name="calendar">カレンダー</string>
     <string name="evaluation">評価</string>
     <string name="mycondate">My献立</string>
-
+    <string name="food_registration">品目登録</string>
     <string name="regisration_inf_edit">登録情報の編集</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
