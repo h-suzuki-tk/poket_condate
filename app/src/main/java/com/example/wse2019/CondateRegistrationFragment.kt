@@ -186,9 +186,10 @@ class CondateRegistrationFragment(): Fragment() {
         val categoryAdapter     = when (context) {
             null -> throw NullPointerException()
             else -> ArrayAdapter<String>(context!!, android.R.layout.simple_list_item_1)}
+        val cm = CategoryManager()
         categoryAdapter.apply {
             add("カテゴリ") // ヒントであると同時に "未選択 (全カテゴリ)" を意味
-            addAll(getCategories())
+            addAll(cm.getCategories(context))
             setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         }
         category.apply {
@@ -561,21 +562,6 @@ class CondateRegistrationFragment(): Fragment() {
             selectedDay.date           ?: today.get(Calendar.DATE)
         ).show()
 
-    }
-
-    private fun getCategories() : List<String> {
-        val db = when (context) {
-            null -> throw NullPointerException()
-            else -> SampleDBOpenHelper(context!!)
-        }
-        val categoryTable = DBContract.Category
-
-        return db.searchRecord(
-            tableName   = categoryTable.TABLE_NAME,
-            column      = arrayOf(
-                categoryTable.NAME
-            )
-        ) ?: throw NullPointerException("searchRecord was failed")
     }
 
     private fun showNumberPickerDialog(food: FoodSearchResultAdapter.Food) {

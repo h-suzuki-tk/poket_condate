@@ -25,17 +25,17 @@
         <EditText
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:inputType="number"
+                android:inputType="numberDecimal"
                 android:ems="10"
                 android:id="@+id/ffr_numberEditText"
                 android:layout_weight="0.3"
-                android:gravity="bottom|right"/>
+                android:gravity="bottom|right|end"/>
         <TextView
                 android:text="人前"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:paddingHorizontal="10dp"/>
+                android:padding="8dp"/>
     </LinearLayout>
 
     <!-- 分類・登録方法 -->
@@ -76,7 +76,6 @@
 
     <!-- 登録方法 -->
     <!--
-    デフォルトでvisible == gone
     ラジオボタンの選択によっていずれかを表示する
     -->
     <LinearLayout
@@ -84,7 +83,15 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_margin="8dp">
+            android:layout_marginHorizontal="8dp">
+        <!-- 未選択 -->
+        <TextView
+            android:id="@+id/ffr_unselectedTextView"
+            android:text="登録方法を選択してください"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:visibility="visible"/>
         <!-- 材料 -->
         <LinearLayout
                 android:id="@+id/ffr_ingredientLayout"
@@ -96,26 +103,26 @@
             <!-- 検索フィールド -->
             <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize">
+                    android:layout_height="wrap_content">
                 <ImageView
                         android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         app:srcCompat="@android:drawable/ic_menu_search"/>
                 <EditText
-                        android:id="@+id/ftn_searchEditText"
+                        android:id="@+id/ffr_searchEditText"
                         android:layout_width="0dp"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"/>
             </LinearLayout>
 
             <ListView
-                    android:id="@+id/fti_listView"
+                    android:id="@+id/ffr_listView"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"/>
 
             <TextView
-                    android:id="@+id/fti_state"
+                    android:id="@+id/ffr_state"
                     android:text="登録状況"
                     android:layout_width="match_parent"
                     android:layout_height="75dp"/>
@@ -141,8 +148,9 @@
                         android:layout_height="wrap_content"
                         android:inputType="numberDecimal"
                         android:ems="10"
-                        android:id="@+id/ftn_sugar"
-                        android:layout_weight="0.5"/>
+                        android:id="@+id/ffr_sugar"
+                        android:layout_weight="0.5"
+                        android:gravity="end"/>
                 <TextView
                         android:text="グラム"
                         android:layout_width="wrap_content"
@@ -161,8 +169,9 @@
                         android:layout_height="wrap_content"
                         android:inputType="numberDecimal"
                         android:ems="10"
-                        android:id="@+id/ftn_fat"
-                        android:layout_weight="0.5"/>
+                        android:id="@+id/ffr_fat"
+                        android:layout_weight="0.5"
+                        android:gravity="end"/>
                 <TextView
                         android:text="グラム"
                         android:layout_width="wrap_content"
@@ -181,8 +190,9 @@
                         android:layout_height="wrap_content"
                         android:inputType="numberDecimal"
                         android:ems="10"
-                        android:id="@+id/ftn_protein"
-                        android:layout_weight="0.5"/>
+                        android:id="@+id/ffr_protein"
+                        android:layout_weight="0.5"
+                        android:gravity="end"/>
                 <TextView
                         android:text="グラム"
                         android:layout_width="wrap_content"
@@ -201,8 +211,9 @@
                         android:layout_height="wrap_content"
                         android:inputType="numberDecimal"
                         android:ems="10"
-                        android:id="@+id/ftn_vitamin"
-                        android:layout_weight="0.5"/>
+                        android:id="@+id/ffr_vitamin"
+                        android:layout_weight="0.5"
+                        android:gravity="end"/>
                 <TextView
                         android:text="グラム"
                         android:layout_width="wrap_content"
@@ -221,8 +232,9 @@
                         android:layout_height="wrap_content"
                         android:inputType="numberDecimal"
                         android:ems="10"
-                        android:id="@+id/ftn_mineral"
-                        android:layout_weight="0.5"/>
+                        android:id="@+id/ffr_mineral"
+                        android:layout_weight="0.5"
+                        android:gravity="end"/>
                 <TextView
                         android:text="グラム"
                         android:layout_width="wrap_content"
@@ -241,8 +253,9 @@
                         android:layout_height="wrap_content"
                         android:inputType="numberDecimal"
                         android:ems="10"
-                        android:id="@+id/ftn_fiber"
-                        android:layout_weight="0.5"/>
+                        android:id="@+id/ffr_fiber"
+                        android:layout_weight="0.5"
+                        android:gravity="end"/>
                 <TextView
                         android:text="グラム"
                         android:layout_width="wrap_content"
@@ -261,8 +274,9 @@
                         android:layout_height="wrap_content"
                         android:inputType="numberDecimal"
                         android:ems="10"
-                        android:id="@+id/ftn_calorie"
-                        android:layout_weight="0.5"/>
+                        android:id="@+id/ffr_calorie"
+                        android:layout_weight="0.5"
+                        android:gravity="end"/>
                 <TextView
                         android:text="キロカロリー"
                         android:layout_width="wrap_content"
