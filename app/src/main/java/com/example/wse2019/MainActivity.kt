@@ -32,8 +32,7 @@ class MainActivity :
         setContentView(R.layout.activity_main)
 
         // データベースの初期化
-        //initDB()  //初期化案1
-        initializer(this)   //初期化案Ⅱ(かじむら大明神作)
+        initializer(this)
 
         // ツールバーをセット
         val toolbar: Toolbar = findViewById(R.id.toolbar)
@@ -113,51 +112,4 @@ class MainActivity :
         ft.commit()
     }
 
-
-    // ----------------------------------------------------------------------
-    //  initDB - データベース初期化
-    // ----------------------------------------------------------------------
-    /*
-    内容: 仮のデータをいれる
-    目的: テストをしたいとき、各自で insert するのは手間であるため共有できるようにする
-    編集: 自由に追加可
-     */
-    private fun initDB() {
-        val db = SampleDBOpenHelper(this).writableDatabase
-        val DB = SampleDBOpenHelper(this)
-
-        DB.dropTables(db)
-        DB.onCreate(db)
-
-        insertIngredient(DB)
-        insertFood(DB)
-        insertRecord(DB)
-    }
-
-    private fun insertIngredient(DB: SampleDBOpenHelper) {
-        DB.insertRecord(
-            Table.Ingredient(
-                "お米", 38.1f, 0.3f, 3.5f, 0f, 0f,
-                0f, 168f, 100f, "グラム",0
-            )
-        ) // 1 (id)
-        DB.insertRecord(
-            Table.Ingredient(
-                "いくら", 0.12f, 9.36f, 19.56f, null, 0f,
-                null, 163f, 60f, "グラム",1
-            )
-        ) // 2
-    }
-
-    private fun insertFood(DB: SampleDBOpenHelper) {
-        DB.insertRecord(
-            Table.Food("いくらご飯", 0, null, 8)
-        ) // 1 (id)
-    }
-
-    private fun insertRecord(DB: SampleDBOpenHelper) {
-        DB.insertRecord(
-            Table.Record(1, 2019, 7, 4, 1)
-        ) // 1 (id)
-    }
 }

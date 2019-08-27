@@ -1,6 +1,11 @@
 package com.example.sample
 
-sealed class Table {
+import android.content.Context
+//import com.example.wse2019.Nutrition
+
+sealed class Table() {
+    val dic = mutableListOf<Dictionary>()
+
     class Ingredient(
         val name: String, val sugar: Float?, val fat: Float?, val protein : Float?,
         val vitamin: Float?, val mineral: Float?, val fiber: Float?, val calorie: Float?,
@@ -9,7 +14,7 @@ sealed class Table {
 
     class Food(val name: String, val favorite: Int?, val memo: String?, val category : Int?) : Table()
 
-    class Record(val food_id: Int, val year: Int, val month: Int, val date: Int, val time: Int) : Table()
+    class Record(val food_id: Int, val year: Int, val month: Int, val date: Int, val time: Int, val number: Float) : Table()
 
     class MyCondate(val name: String) : Table()
 
@@ -20,7 +25,6 @@ sealed class Table {
     class MyCondate_Food(val MyCondate_id: Int, val food_id: Int, val num: Int) : Table()
 
     class UserInfo(val name: String, val height: Float?, val weight: Float?, val age: Int?, val sex: Int?) : Table()
-
 }
 
 fun selectTable(tableName: String): DBContract.KBaseColumns {

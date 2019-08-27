@@ -3,17 +3,37 @@ package com.example.sample
 import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
 
+val INT = 0
+val STR = 1
+val FLOAT = 2
 
-sealed class DBContract {
+open class DBContract {
 
     open class KBaseColumns(val TABLE_NAME : String){
-        //ここでDB機能呼び出さるようにする
-        fun SEARCH(db: SampleDBOpenHelper, columns: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null, innerJoin: Join? = null){
-            db.searchRecord(TABLE_NAME, column = columns, condition = condition, selectionArgs = selectionArgs, innerJoin = innerJoin)
+        //ここでDB機能呼び出せるようにする
+        fun SEARCH(db: SampleDBOpenHelper, columns: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null,
+                   innerJoin: Join? = null, multiJoin: Array<Join>? = null)
+                : List<String>? {
+            return db.searchRecord(
+                TABLE_NAME, column = columns, condition = condition, selectionArgs = selectionArgs,
+                innerJoin = innerJoin, multiJoin = multiJoin)
         }
 
-        fun INSERT(db: SampleDBOpenHelper){
+        fun SEARCH_DIC(db: SampleDBOpenHelper, columns: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null,
+                       innerJoin: Join? = null, multiJoin: Array<Join>? = null)
+                : List<Dictionary>? {
+            return db.searchRecord_dic(
+                TABLE_NAME, column = columns, condition = condition, selectionArgs = selectionArgs,
+                innerJoin = innerJoin, multiJoin = multiJoin)
+        }
 
+        fun UPDATE(db: SampleDBOpenHelper, column: Array<String>, convert: Array<String>,
+                   condition: String, selectionArgs : Array<String>): Boolean{
+            return db.updateRecord(TABLE_NAME, column, convert, condition, selectionArgs)
+        }
+
+        fun DELETE(db: SampleDBOpenHelper, condition: String, selectionArgs : Array<String>): Boolean{
+            return db.deleteRecord(TABLE_NAME, condition, selectionArgs)
         }
 
         fun getColumn(): Array<String>{
@@ -32,18 +52,6 @@ sealed class DBContract {
             return fields
         }
 
-        fun DataSet(db: SampleDBOpenHelper){
-
-        }
-    }
-
-
-    data class Column(val column:String, val type:String)
-
-    enum class Type(val type:String){
-        INT("Integer"),
-        REAL("real"),
-        TEXT("text"),
     }
 
     //材料テーブル
@@ -86,7 +94,8 @@ sealed class DBContract {
             const val MONTH = "month"//月
             const val DATE = "date"  //日にち
             const val TIME = "time"  //時間帯
-            val FIELD = arrayOf(ID, FOOD_ID, YEAR, MONTH, DATE, TIME)
+            const val NUMBER = "number" //何人前
+            val FIELD = arrayOf(ID, FOOD_ID, YEAR, MONTH, DATE, TIME, NUMBER)
         }
     }
 

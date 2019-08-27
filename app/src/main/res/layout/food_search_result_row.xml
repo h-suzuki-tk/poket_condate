@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto" android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/food_search_result_row_height">
+
+
+    <ImageView
+            android:layout_width="@dimen/food_search_result_icon_width"
+            android:layout_height="match_parent"
+            android:id="@+id/foodImageView"/>
+    <TextView
+            android:text="品目名"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" android:id="@+id/foodTextView" android:layout_weight="1"
+            android:gravity="center"/>
+    <ImageButton
+            android:layout_width="0dp"
+            android:layout_height="match_parent" app:srcCompat="@android:drawable/btn_star_big_off"
+            android:id="@+id/favoriteButton" android:layout_weight="0.3" android:background="@null"/>
+    <Button
+            android:text="＋"
+            android:layout_height="match_parent" android:id="@+id/addButton"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="0dp" android:layout_weight="0.3"/>
+</LinearLayout>
