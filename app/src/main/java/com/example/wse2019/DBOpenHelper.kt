@@ -54,6 +54,7 @@ class SampleDBOpenHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME,
             put(DBContract.Ingredient.QUANTITY, "'${ingredient.quantity}'")
             put(DBContract.Ingredient.UNIT, ingredient.unit)
             put(DBContract.Ingredient.ALLERGEN, ingredient.allergen)
+            put(DBContract.Ingredient.CLASS, ingredient.clas)
         }
 
         try {

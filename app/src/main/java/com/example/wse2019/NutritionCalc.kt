@@ -9,7 +9,17 @@ import com.example.sample.SampleDBOpenHelper
 class Nutrition(
     val foodname: String, val sugar: Float, val fat: Float, val protein: Float,
     val vitamin: Float, val mineral: Float, val fiber: Float, val calorie: Float
-)
+) {
+    fun contains(element: Float?): Boolean {
+        return (sugar.equals(element)
+                || fat      .equals(element)
+                || protein  .equals(element)
+                || vitamin  .equals(element)
+                || mineral  .equals(element)
+                || fiber    .equals(element)
+                || calorie  .equals(element))
+    }
+}
 
 // 栄養分の計算や分析を担当するクラスNutritionHelperです。
 class NutritionHelper(mContext: Context?) {

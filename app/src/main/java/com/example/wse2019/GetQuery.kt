@@ -13,7 +13,8 @@ fun createIngredientTable () : String {
             DBContract.Ingredient.CALORIE + " REAL, " +
             DBContract.Ingredient.QUANTITY + " REAL, " +
             DBContract.Ingredient.UNIT + " TEXT, " +
-            DBContract.Ingredient.ALLERGEN + " INTEGER " +
+            DBContract.Ingredient.ALLERGEN + " INTEGER, " +
+            DBContract.Ingredient.CLASS + " INTEGER " +
             ")"
 }
 

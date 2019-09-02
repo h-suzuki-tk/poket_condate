@@ -17,6 +17,7 @@
             android:inputType="numberDecimal"
             android:ems="10"
             android:id="@+id/isrr_number"
+            android:gravity="end"
             android:layout_weight="0.4"/>
     <TextView
             android:id="@+id/isrr_unit"
