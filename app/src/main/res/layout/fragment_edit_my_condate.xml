@@ -3,22 +3,104 @@
                                              xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
                                              android:layout_height="match_parent">
     <LinearLayout
-            android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_width="match_parent"
             android:orientation="vertical">
 
         <TextView
-            android:text="献立編集画面"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" tools:layout_editor_absoluteY="19dp"
-            tools:layout_editor_absoluteX="16dp"/>
-        <TextView
-            android:text="TextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/textView1"
-            tools:layout_editor_absoluteY="76dp"
-            tools:layout_editor_absoluteX="28dp"/>
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/condate_name" />
 
+        <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <TableRow android:layout_width="match_parent" android:layout_height="match_parent">
+                <TextView
+                        android:text="カロリー"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView3"
+                        android:gravity="center_horizontal"/>
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/calorie"
+                        android:gravity="center_horizontal"/>
+            </TableRow>
+            <TableRow android:layout_width="match_parent" android:layout_height="match_parent">
+                <TextView
+                        android:text="糖質"
+                        android:layout_width="116dp"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView12"
+                        android:gravity="center_horizontal"/>
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/sugar"
+                        android:gravity="center_horizontal"/>
+            </TableRow>
+            <TableRow android:layout_width="match_parent" android:layout_height="match_parent">
+                <TextView
+                        android:text="タンパク質"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView15"
+                        android:gravity="center_horizontal"/>
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/protein"
+                        android:gravity="center_horizontal"/>
+            </TableRow>
+            <TableRow android:layout_width="match_parent" android:layout_height="match_parent">
+                <TextView
+                        android:text="脂質"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView17"
+                        android:gravity="center_horizontal"/>
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/fat"
+                        android:gravity="center_horizontal"/>
+            </TableRow>
+            <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                <TextView
+                        android:text="ビタミン"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView19"
+                        android:gravity="center_horizontal"/>
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/vitamin"
+                        android:gravity="center_horizontal"/>
+            </TableRow>
+            <TableRow android:layout_width="match_parent" android:layout_height="match_parent">
+                <TextView
+                        android:text="ミネラル"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView10"
+                        android:gravity="center_horizontal"/>
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/mineral"
+                        android:gravity="center_horizontal"/>
+            </TableRow>
+        </TableLayout>
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/listView1"/>
     </LinearLayout>>
 </android.support.constraint.ConstraintLayout>

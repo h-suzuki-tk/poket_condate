@@ -18,12 +18,6 @@
                 android:text="献立タップで編集画面、長押しで削除"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
-        <SearchView
-                android:id="@+id/searchView1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:queryHint="献立名を入力してください" tools:layout_editor_absoluteY="0dp"
-                tools:layout_editor_absoluteX="0dp"/>
         <ListView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

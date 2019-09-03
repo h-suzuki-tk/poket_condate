@@ -95,8 +95,8 @@ class MyCondateFragment(): Fragment() {
                     //fragmentの張替え
                     val fragmentManager = fragmentManager
                     val transaction = fragmentManager!!.beginTransaction()
-
                     transaction.replace(R.id.frame_contents,fragment)
+                    transaction.addToBackStack(null)
                     transaction.commit()
                 }
             }

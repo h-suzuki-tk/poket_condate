@@ -13,6 +13,13 @@ import com.example.sample.DBContract
 import com.example.sample.SampleDBOpenHelper
 
 
+private const val SEX_MALE="1"
+private const val SEX_FEMALE="0"
+
+private const val INDEX_NUM_MALE=0
+private const val INDEX_NUM_FEMALE=1
+
+
 class EditInfFragment() : Fragment() {
 
 
@@ -44,9 +51,9 @@ class EditInfFragment() : Fragment() {
         nameEditText.setText(userInfo?.get(1).toString())
         ageEditText.setText(userInfo?.get(4).toString())
         //defineして名前つけておくべき
-        if(userInfo?.get(5).toString()=="1"){
+        if(userInfo?.get(5).toString()==SEX_MALE){
             sexRadioGroup.check(R.id.male)
-        }else if(userInfo?.get(5).toString()=="0"){
+        }else if(userInfo?.get(5).toString()== SEX_FEMALE){
             sexRadioGroup.check(R.id.female)
         }else{
             //エラー処理
@@ -73,14 +80,14 @@ class EditInfFragment() : Fragment() {
 
                 //define
                 var sex=-1
-                if(sexIndex==0){
-                    sex=1
-                }else if(sexIndex==1){
-                    sex=0
+            if(sexIndex== INDEX_NUM_MALE){
+                    sex= SEX_MALE.toInt()
+                }else if(sexIndex== INDEX_NUM_FEMALE){
+                    sex= SEX_FEMALE.toInt()
                 }
 
                 //男性または女性の規定値が入っていなかったら、エラー処理
-                if(sex!=0 || sex!=1){
+                if(sex!= INDEX_NUM_FEMALE || sex!= INDEX_NUM_MALE){
                     //エラー処理
                     TODO()
                 }
@@ -110,12 +117,13 @@ class EditInfFragment() : Fragment() {
                         TODO()
                     }
 
-                    Log.d("EditInfsexInt",sex.toString())
+                    Log.d("EditInfSexInt",sex.toString())
 
                     //fragmentの張り替え
                     val fragmentManager1 = fragmentManager
                     val transaction1 = fragmentManager1!!.beginTransaction()
                     transaction1.replace(R.id.frame_contents,FinishEditInfFragment())
+                    transaction1.addToBackStack(null)
                     transaction1.commit()
                 }
 
@@ -134,6 +142,7 @@ class EditInfFragment() : Fragment() {
                 val transaction2 = fragmentManager2!!.beginTransaction()
 
                 transaction2.replace(R.id.frame_contents,RegistrationInfEditFragment())
+                transaction2.addToBackStack(null)
                 transaction2.commit()
             }
         }

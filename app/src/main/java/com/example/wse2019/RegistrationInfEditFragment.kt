@@ -73,8 +73,8 @@ class RegistrationInfEditFragment(): Fragment() {
             if(isValid2){
                 val fragmentManager = fragmentManager
                 val transaction = fragmentManager!!.beginTransaction()
-
                 transaction.replace(R.id.frame_contents,EditInfFragment())
+                transaction.addToBackStack(null)
                 transaction.commit()
             }
         }
