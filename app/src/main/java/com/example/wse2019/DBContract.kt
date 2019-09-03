@@ -69,7 +69,8 @@ open class DBContract {
             const val QUANTITY = "quantity"     //量
             const val UNIT = "unit"             //単位
             const val ALLERGEN = "allergen"     //アレルギー
-            val FIELD = arrayOf(ID, NAME, SUGAR, FAT, PROTEIN, VITAMIN, MINERAL, FIBER, CALORIE, QUANTITY, UNIT, ALLERGEN)
+            const val CLASS = "clas"            //区分 (0: 原料, 1: 完成品)
+            val FIELD = arrayOf(ID, NAME, SUGAR, FAT, PROTEIN, VITAMIN, MINERAL, FIBER, CALORIE, QUANTITY, UNIT, ALLERGEN, CLASS)
         }
     }
 

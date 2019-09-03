@@ -3,6 +3,7 @@ package com.example.wse2019
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteException
+import android.media.Image
 import android.text.Layout
 import android.util.Log
 import android.view.LayoutInflater
@@ -41,21 +42,28 @@ class TempRegistrationStateAdapter(context: Context) : BaseAdapter() {
         val v: View             = this.inflater.inflate(R.layout.temp_registration_state_row, parent, false)
         val parent: ListView    = parent as ListView
 
-        val foodName: TextView = v.findViewById(R.id.foodNameTextView)
+        val foodName: TextView          = v.findViewById(R.id.foodNameTextView)
         foodName.text = String.format("%s[%.1f人前]",
-            this.foods[position].name,
-            this.foods[position].number
+            foods[position].name,
+            foods[position].number
         )
+
+        val removeButton: ImageButton   = v.findViewById(R.id.removeImageButton)
+        removeButton.setOnClickListener { parent.performItemClick(v, position, R.id.removeImageButton.toLong()) }
 
         return v
     }
 
     fun add(food: Food) {
-        this.foods.add(food)
+        foods.add(food)
+    }
+
+    fun remove(position: Int) {
+        foods.removeAt(position)
     }
 
     fun clear() {
-        this.foods.clear()
+        foods.clear()
     }
 
 }

@@ -24,14 +24,14 @@ fun test1(context: Context) {
     DB.insertRecord(
         Table.Ingredient(
             "お米", 38.1f, 0.3f, 3.5f, 0f, 0f,
-            0f, 168f, 100f, "グラム",0
+            0f, 168f, 100f, "グラム",0, 0
         )
     )
 
     DB.insertRecord(
         Table.Ingredient(
             "いくら", 0.12f, 9.36f, 19.56f, null, 0f,
-            null, 163f, 60f, "グラム",1
+            null, 163f, 60f, "グラム",1, 0
         )
     )
 
@@ -131,7 +131,7 @@ fun test1(context: Context) {
     // 先ほどfoodIDも確保済みで不変なので楽
     ingredientList.forEach {
         val ingredientID : Int = Integer.parseInt(it)
-        DB.insertRecord(Table.Food_Ingredient(foodID, ingredientID, 1))
+        DB.insertRecord(Table.Food_Ingredient(foodID, ingredientID, 1.0f))
     }
 
     //ここまでの操作で「いくらご飯」、まぁいくら丼が完成したはずです。

@@ -89,6 +89,10 @@ class MainActivity :
                 fragment=MyCondateFragment()
                 Log.d(TAG,"Nav my condate Selected!")
             }
+            R.id.nav_food_registration -> {
+                fragment=FoodRegistrationFragment()
+                Log.d(TAG,"Nav food registration Selected!")
+            }
             R.id.nav_regisration_inf_edit -> {
                 fragment=RegistrationInfEditFragment()
                 Log.d(TAG,"Nav registration inf edit Selected!")

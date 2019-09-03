@@ -145,7 +145,6 @@ class FoodSearchResultAdapter(context: Context) : BaseAdapter() {
         ) ?: throw NullPointerException("searchRecord was failed.")
 
         // ----- 格納 -----
-        this.foods.clear()
         var i = 0
         while (i < result.size) {
             this.foods.add(Food(
@@ -155,7 +154,10 @@ class FoodSearchResultAdapter(context: Context) : BaseAdapter() {
                 favorite    = result[i++].toInt()
                 ))
         }
-        notifyDataSetChanged()
+    }
+
+    fun clear() {
+        this.foods.clear()
     }
 
 }
