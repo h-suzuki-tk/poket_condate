@@ -2,6 +2,7 @@ package com.example.wse2019
 
 
 import android.annotation.TargetApi
+import android.app.AlertDialog
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
@@ -17,6 +18,7 @@ import com.example.sample.SampleDBOpenHelper
 
 class TopFragment() : Fragment() {
 
+    val foodManager = FoodManager()
     private lateinit var recommendFood: RecommendFood
 
     companion object {
@@ -52,10 +54,9 @@ class TopFragment() : Fragment() {
         val name = view.findViewById<TextView>(R.id.ft_foodNameTextView)
         mostRecommendFood.apply {
             setOnClickListener {
-                replaceFragment(CondateRegistrationFragment())
+                showFoodInformationDialog(recommendFood.first.id, context, container)
             }
         }
-        val foodManager = FoodManager()
         image.apply {
             setImageBitmap(foodManager.getBitmap(context, recommendFood.first.id))
         }
@@ -69,7 +70,8 @@ class TopFragment() : Fragment() {
         otherRecommendFood.apply {
             adapter = recommendFood.getAdapter()
             setOnItemClickListener { view, parent, position, id ->
-                replaceFragment(CondateRegistrationFragment())
+                val food = recommendFood.getItem(position)
+                showFoodInformationDialog(food.id, context, container)
             }
         }
         recommendFood.updateHeight(otherRecommendFood)
@@ -214,6 +216,16 @@ class TopFragment() : Fragment() {
             adapter.notifyDataSetChanged()
         }
 
+    }
+
+    // --------------------------------------------------
+    //  showFoodInformationDialog - 品目の情報を表示する
+    // --------------------------------------------------
+    fun showFoodInformationDialog(foodId: Int, context: Context, container: ViewGroup?) {
+        AlertDialog.Builder(context).apply {
+            setView(foodManager.getFoodInformationView(foodId, context, container))
+            show()
+        }
     }
 
     // --------------------------------------------------
