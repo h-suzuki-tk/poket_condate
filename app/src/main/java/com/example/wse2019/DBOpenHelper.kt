@@ -263,7 +263,7 @@ class SampleDBOpenHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME,
     // (SQL文だけ得たとこでできること少ないだろうし多分private外すことは)ないです
     private fun getSQL(tableName: String, column: Array<String>? = null, condition: String? = null, selectionArgs: Array<String>? = null,
                        group: String? = null, having: String? = null, order: String? = null, limit:String? = null, innerJoin: Join? = null,
-                       multiJoin: Array<Join>? = null): String?{
+                       multiJoin: Array<Join>? = null): String{
         Log.d("select", "start")
 
         // db.queryによるDB接続はJoinに対応してない(多分。。。)ため、
@@ -285,6 +285,10 @@ class SampleDBOpenHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME,
         } else {
             //コラム指定がnullの場合は*、つまり全コラムを抽出します。
             sql += " *"
+        }
+
+        if(group != null) {
+            sql += ", count(*)"
         }
 
         //FROMと検索するテーブル名を追加
@@ -310,8 +314,9 @@ class SampleDBOpenHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME,
             Log.d("join check", sql)
         }
 
-        //内部結合が指定された場合はここでJoin文の作成・追加を行う。
-        if (innerJoin != null) {
+        // 内部結合が指定された場合はここでJoin文の作成・追加を行う。
+        // innerJoinとmultiJoin両方の発動はエラーになるんで防いどきます。
+        if (innerJoin != null && multiJoin == null) {
             sql += " INNER JOIN ${innerJoin.tablename} ON $tableName.${innerJoin.column1} = ${innerJoin.tablename}.${innerJoin.column2}"
         }
 
@@ -320,8 +325,19 @@ class SampleDBOpenHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME,
             sql += " WHERE $condition"
         }
 
+        // グルーピングを行うカラムの指定
+        if(group != null) {
+            sql += " GROUP BY $group"
+        }
+
+        // グルーピングを行った上でそれらを絞る
+        if(having != null) {
+            sql += " HAVING $having"
+        }
+
         return sql
     }
+
 
     //テーブル検索
     // 変数：テーブル名、抽出するコラム、where句、ブレースホルダの値(条件の変数)、
@@ -396,6 +412,10 @@ class SampleDBOpenHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME,
             }
         }
 
+        if(group != null) {
+            dic.add(Dictionary(mutableListOf(), "count"))
+        }
+
         val sql =
             getSQL(tableName, column, condition, selectionArgs,
                 group, having, order, limit, innerJoin, multiJoin) ?: return null
@@ -422,24 +442,19 @@ class SampleDBOpenHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME,
         cursor.use {
             while (cursor.moveToNext()) {
                 //コラム指定がなかった場合は全コラムを格納
-                if (innerJoin == null && multiJoin == null) {
-                    dic.forEach {
-                        val result: String = cursor.getString(cursor.getColumnIndex(it.field)) ?: ""
-                        it.data.add(result)
-                    }
-                } else {
-                    var num = 0
-                    dic.forEach {
-                        val result: String = cursor.getString(num) ?: ""
-                        it.data.add(result)
-                        num++
-                    }
+
+                var num = 0
+                dic.forEach {
+                    val result: String = cursor.getString(num) ?: ""
+                    it.data.add(result)
+                    num++
                 }
+
             }
         }
         //List<Dictionary>?で返す
 
-        println("searchRecord success\n")
+        println("searchRecord_dic success\n")
         db.close()
         return dic
     }
@@ -541,7 +556,7 @@ class FloatDic(val data: MutableList<Float>, val field: String){
     // 変数はそれぞれの倍率をいじれる様に
     // つまり、品目材料テーブルの数量に対応させるため
     // 使わなけりゃFloatDic.sum()で構わない
-    fun sum(quant : List<Int>? = null): Float{
+    fun sum(quant : List<Float>? = null): Float{
         if(quant == null) {
             // 単純に合計したいだけなら
             data.forEach {

@@ -1,14 +1,17 @@
 package com.example.wse2019
 
 import android.content.Context
+import android.util.Log
 import com.example.sample.DBContract
+import com.example.sample.Dictionary
 import com.example.sample.Join
 import com.example.sample.SampleDBOpenHelper
+import kotlin.math.sqrt
 
 // 栄養分析に用いるクラス。品目名とその材料から算出した栄養分の総量を引数にもっています。
 class Nutrition(
     val foodname: String, val sugar: Float, val fat: Float, val protein: Float,
-    val vitamin: Float, val mineral: Float, val fiber: Float, val calorie: Float
+    val vitamin: Float, val mineral: Float, val fiber: Float, val calorie: Float, val foodID: Int? = null
 ) {
     fun contains(element: Float?): Boolean {
         return (sugar.equals(element)
@@ -19,9 +22,22 @@ class Nutrition(
                 || fiber    .equals(element)
                 || calorie  .equals(element))
     }
+
+    fun  normalization(): Nutrition{
+        val sum = sqrt(sugar*sugar + fat*fat + protein*protein + vitamin*vitamin
+                + mineral*mineral + fiber*fiber)
+
+        return Nutrition(foodname, sugar/sum, fat/sum, protein/sum,
+            vitamin/sum, mineral/sum, fiber/sum, calorie)
+    }
 }
 
+// class result(foodIDList)
+
 // 栄養分の計算や分析を担当するクラスNutritionHelperです。
+// 基本的な構造はSQLiteOpenHelperと同じようにするつもりです。
+// contextの扱いは今のところちょっと分かりかねるんで、
+// 不便を感じていてかつもっといい方法があるという場合は教えていただけると幸いです。
 class NutritionHelper(mContext: Context?) {
 
     val context = mContext
@@ -29,12 +45,46 @@ class NutritionHelper(mContext: Context?) {
     val ingredient = DBContract.Ingredient
     val food_ingredient = DBContract.Foods_Ingredients
     val food = DBContract.Food
+    val record = DBContract.Record
 
-    // 単純に品目名を受け取り、品目の栄養分を返す関数
-    fun getNutrition(foodName: String): Nutrition? {
+    // 品目名と、材料をそれぞれ　
+    // SUGAR, FAT, PROTEIN, VITAMIN, MINERAL, FIBER, CALORIE, QUANTITY
+    // の順番のフィールドを持つ辞書リスト渡すことで栄養クラスに変換する
+    // ぶっちゃけ自分用な上引数も適当、例外チェックもガバガバなのでprivateにしときます。
+    // 他でも使いたいとかあればきちんと作り直します。
+    private fun getNutrition(foodname: String, dic: List<Dictionary>, foodID: Int): Nutrition?{
+
+        //渡されたフィールドが正しいかチェック
+        val field = ingredient.FIELD
+        for(i in 0 until 7){
+            if(dic[i].field != "${ingredient.TABLE_NAME}.${field[i+2]}"){
+                println("no")
+                return null
+            }
+        }
+
+        val quantity = dic[7].toFloat().data   //品目材料テーブルの数量
+        // 後は計算した品目ごとの栄養分
+        val sugar = dic[0].toFloat().sum(quantity)
+        val fat = dic[1].toFloat().sum(quantity)
+        val protein = dic[2].toFloat().sum(quantity)
+        val vitamin = dic[3].toFloat().sum(quantity)
+        val mineral = dic[4].toFloat().sum(quantity)
+        val fiber = dic[5].toFloat().sum(quantity)
+        val calorie = dic[6].toFloat().sum(quantity)
+
+        return Nutrition(foodname, sugar, fat, protein, vitamin, mineral, fiber, calorie, foodID)
+    }
+
+    // 品目IDのリストを受け取り、対応した品目名と栄養分を返す関数
+    // もっと別の引数がいいとかあると思います。僕もそう思います。
+    // ただ、手間なので、希望があったときに言ってもらえると助かります。
+    // 自分は自分が欲しい時しか加筆しないです。
+    fun getNutritions(ID: List<Int>): List<Nutrition>? {
         println("Nut check: start")
 
         // 抽出するカラム
+        // ここでは計算に使うものだけ
         val column = arrayOf(
             "${ingredient.TABLE_NAME}.${ingredient.SUGAR}",
             "${ingredient.TABLE_NAME}.${ingredient.FAT}",
@@ -46,32 +96,261 @@ class NutritionHelper(mContext: Context?) {
             "${food_ingredient.TABLE_NAME}.${food_ingredient.NUMBER}"
         )
 
-        // where句
-        val conditionSql: String = "${food.TABLE_NAME}.${food.NAME} = ?"
+        // where句の作成
+        // もっとスマートにいかんかねぇ
+        var conditionSql: String = ""
+        val selectionArgs : Array<String> = Array(ID.size){ID[it].toString()}
+        var head = true
+        ID.forEach{
+            if(head){
+                conditionSql += "${food_ingredient.TABLE_NAME}.${food_ingredient.FOOD_ID} = ?"
+                head = false
+            } else {
+                conditionSql += " OR ${food_ingredient.TABLE_NAME}.${food_ingredient.FOOD_ID} = ?"
+            }
+        }
 
-        // 内部結合の設定
-        val multiJoin = arrayOf(
-            Join(food_ingredient.TABLE_NAME, food.ID, food_ingredient.FOOD_ID),
-            Join(ingredient.TABLE_NAME, food_ingredient.INGREDIENT_ID, ingredient.ID, food_ingredient.TABLE_NAME)
-        )
-
-        // 検索の実行
+        // 栄養分の検索の実行
         val result = DB.searchRecord_dic(
-            food.TABLE_NAME, column, conditionSql, arrayOf(foodName),
-            multiJoin = multiJoin
+            food_ingredient.TABLE_NAME, column, conditionSql, selectionArgs,
+            innerJoin = Join(ingredient.TABLE_NAME, food_ingredient.INGREDIENT_ID, ingredient.ID)
         ) ?: return null
 
-        val quantity = result[7].toInt().data   //品目材料テーブルの数量
-        // 後は計算した品目ごとの栄養分
-        val sugar = result[0].toFloat().sum(quantity)
-        val fat = result[1].toFloat().sum(quantity)
-        val protein = result[2].toFloat().sum(quantity)
-        val vitamin = result[3].toFloat().sum(quantity)
-        val mineral = result[4].toFloat().sum(quantity)
-        val fiber = result[5].toFloat().sum(quantity)
-        val calorie = result[6].toFloat().sum(quantity)
+//        result[0].data.forEach {
+//            println(it)
+//        }
 
-        return Nutrition(foodName, sugar, fat, protein, vitamin, mineral, fiber, calorie)
+        // グループ情報、これはマジで別にしたほうがいいです。ややこしくなります。お気を付けを
+        // 品目名やIDなどそれぞれの識別に使うデータはこっちで抽出している。
+        val ident = DB.searchRecord_dic(food_ingredient.TABLE_NAME,
+            arrayOf("${food_ingredient.TABLE_NAME}.${food_ingredient.FOOD_ID}", "${food.TABLE_NAME}.${food.NAME}"),
+            conditionSql, selectionArgs,
+            group = "${food_ingredient.TABLE_NAME}.${food_ingredient.FOOD_ID}",
+            innerJoin = Join(food.TABLE_NAME, food_ingredient.FOOD_ID, food.ID)
+        ) ?: return null
+
+
+        val nutritions = mutableListOf<Nutrition>()  //最終的に返す栄養クラスのリスト
+        val idList = ident[0].toInt().data    //使いやすいようidの辞書をList<Int>に
+        val nameList = ident[1].toStr().data  //使いやすいようnameの辞書をList<String>に
+        val groupNum = ident[2].toInt().data  //使いやすいようグループカウントの辞書をList<Int>に
+        var post = 0                          //リストの位置、ポジションを保持するため
+        var begin = 0                         //for文のループ開始位置の記憶
+        var end = 0                           //for文のループ終了位置の記憶
+
+        // まだ使ってないけど拡張のしやすさ考えてforでなくidで管理してループ回してます。
+        idList.forEach{
+            // grouNumの持つ、品目が持つ材料の数を参考に、
+            // DIcのリストであるリザルト、そのリザルトにあるそれぞれの辞書の持つデータから
+            // groupNum[post]個抜き取って、それらを使って品目の栄養分を求める。
+            val dicList = mutableListOf<Dictionary>()  //栄養計算用の辞書リスト
+
+            end += groupNum[post]
+            result.forEach {
+                val dic = Dictionary(mutableListOf(), it.field)
+                for(i in begin until end) {
+                    dic.data.add(it.data[i])
+                }
+                dicList.add(dic)   //getNutritioinに渡す辞書リストの作成
+            }
+            begin += groupNum[post]
+
+            // println("post$post : ${nameList[post]}, idList=${idList[post]}, data=${dicList[0].data}")
+
+            val nutrition = getNutrition(nameList[post], dicList, idList[post]) ?: return null   //栄養クラスの作成
+
+            nutritions.add(nutrition)   //栄養クラスのリスト。1品目にひとつある。
+            post++  //一歩進む
+        }
+
+        Log.d("getNutrition", "success")
+        return nutritions
+    }
+    // getNutritions終わり
+
+    // ユーザーの身体情報とこれまでの食事から
+    // 必要な栄養バランスを求める関数。
+    // まだ計算方法分からなくて未実装です。ごめんなさい。
+    private fun necessaryNut(nutritions: List<Nutrition>, period: Int): Nutrition?{
+
+        val user = DB.searchRecord(DBContract.UserInfo.TABLE_NAME) ?: return null
+
+        val age = user[4].toInt()
+        val sex = user[5].toInt()
+        val height = user[2].toFloat()
+        val weight = user[3].toFloat()
+        var cal = 0f
+        var fiber = 20f
+
+        // Harris-Benedict式
+        // 幼年時の計算は別途に必要と思われる
+        if(sex == 0){
+            cal = 66f + (13.7f*weight) + (5.0f*height) - (6.8f*age)
+            fiber = 20f
+        } else if(sex == 1){
+            cal = 655f + (9.6f*weight) + (1.7f*height) - (4.7f*age)
+            fiber = 18f
+        }
+        var protein = weight * 0.8f
+        var fat = cal/36f
+        var sugar = cal * 0.15f
+
+        // とりあえず1日に必要な栄養素量のメモとしてクラス設定
+        // ビタミン、ミネラルはちょっと複雑なので後回し
+
+        var calSum = 0f
+        var sugarSum = 0f
+        var fatSum = 0f
+        var proteinSum = 0f
+        var vitaminSum = 0f
+        var mineralSum = 0f
+        var fiberSum = 0f
+        // 食事記録からこれまで摂取した栄養の合計を求める
+        nutritions.forEach {
+            sugarSum += it.sugar
+            fatSum += it.fat
+            proteinSum += it.protein
+            vitaminSum += it.vitamin
+            mineralSum += it.mineral
+            fiberSum += it.fiber
+            calSum += it.calorie
+        }
+
+        println("ATE : $sugarSum, $fatSum, $proteinSum, $fiberSum, $calSum")
+
+        sugar = sugar*period - sugarSum
+        fat = fat*period - fatSum
+        protein = protein*period-proteinSum
+        fiberSum = fiber*period-fiberSum
+        cal = cal*period-calSum
+
+        if(sugar <= 0) sugar = 0f
+        if(fat <= 0) fat = 0f
+        if(protein <= 0) protein = 0f
+        if(fiber <= 0) fiber = 0f
+        if(cal <= 0) cal = 0f
+
+        println("LACK : $sugar, $fat, $protein, $fiber, $cal")
+
+        return Nutrition("", sugar, fat, protein, 0f, 0f,
+            fiber, cal)
     }
 
+    // 一番足りてない栄養素を計算・選択する。
+    // 拡張予定あり
+    fun selectLack(baseNut: Nutrition): String{
+
+        var distant = 0.2f
+        var lackNut : String = ""
+
+        val base = baseNut.normalization()
+
+        if(distant < base.sugar) {
+            lackNut = ingredient.SUGAR
+            distant = base.sugar
+        }
+        if(distant < base.fat) {
+            lackNut = ingredient.FAT
+            distant = base.fat
+        }
+        if(distant < base.protein) {
+            lackNut = ingredient.PROTEIN
+            distant = base.protein
+        }
+        if(distant < base.vitamin) {
+            lackNut = ingredient.VITAMIN
+            distant = base.vitamin
+        }
+        if(distant < base.mineral) {
+            lackNut = ingredient.MINERAL
+            distant = base.mineral
+        }
+        if(distant < base.fiber) {
+            lackNut = ingredient.FIBER
+            distant = base.fiber
+        }
+
+        return lackNut
+    }
+
+    // ベクトル空間をもとにbaseNutに最も近い栄養を
+    // 正規化した栄養リストの中から一つ選択して返す関数。
+    // そのうち、抽出するクラスの数を設定できるようにするとよい
+    private fun vectorsearch(baseNut: Nutrition): Nutrition?{
+        println("vectorSearch start")
+        val base = baseNut.normalization()
+        var tmpDist = 1f
+
+        val foodList = DB.searchRecord_dic(food.TABLE_NAME, arrayOf(food.ID)) ?: return null
+        val foodIDList = foodList[0].toInt()
+
+        val nutritions = getNutritions(foodIDList.data) ?: return null
+
+        var result = nutritions[0]
+
+
+        nutritions.forEach {
+            val tmp = it.normalization() // 正規化のために一時仕様
+
+            // それぞれの要素の差を求める
+            val sugar = tmp.sugar-base.sugar
+            val fat = tmp.fat-base.fat
+            val protein = tmp.protein-base.protein
+            val vitamin = tmp.vitamin-base.vitamin
+            val mineral = tmp.mineral-base.mineral
+            val fiber = tmp.fiber-base.fiber
+
+            // 求められた差から必要な栄養分とのベクトル空間上の距離を求める。
+            val dist = sqrt(sugar*sugar + fat*fat + protein*protein + vitamin*vitamin
+                    + mineral*mineral + fiber*fiber)
+
+            // 距離が更新できるなら返り値を対応する栄養クラスに更新する
+            println("${result.foodname}:$tmpDist VS ${it.foodname}:$dist")
+            if(dist < tmpDist) {
+                tmpDist = dist
+                result = it
+            }
+
+            println("winner : ${result.foodname}")
+        }
+
+        // 繰り返しの中で最もbaseNutに近い要素を持つ栄養クラスを返す。
+        return result
+    }
+
+    // 引数は考える余地あり
+    // 食事記録のリストと、計測する期間(日数)を渡して
+    // リザルトクラスで返す。
+    fun selectFood(recordIDList: List<Int>, period: Int): Nutrition?{
+
+        // where句の作成
+        var conditionSql: String = ""
+        val selectionArgs : Array<String> = Array(recordIDList.size){recordIDList[it].toString()}
+        var head = true
+        recordIDList.forEach{
+            if(head){
+                conditionSql += "${record.TABLE_NAME}.${record.FOOD_ID} = ?"
+                head = false
+            } else {
+                conditionSql += " OR ${record.TABLE_NAME}.${record.FOOD_ID} = ?"
+            }
+        }
+
+        val foodDicList = DB.searchRecord_dic(record.TABLE_NAME, arrayOf("${food.TABLE_NAME}.${food.ID}"),
+            condition = conditionSql, selectionArgs = selectionArgs,
+            innerJoin = Join(food.TABLE_NAME, record.FOOD_ID, food.ID)
+        ) ?: return null
+
+        val foodIDList = foodDicList[0].toInt().data
+        val foodNutList = getNutritions(foodIDList) ?: return null
+
+        //足りてない栄養を計算
+        val baseNut = necessaryNut(foodNutList, period) ?: return null
+
+        // 足りてない栄養からそれらを補いうる品目を求める
+        val result = vectorsearch(baseNut) ?: return null
+
+        // 最適な品目のIDを返す
+        return result
+    }
 }
