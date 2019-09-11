@@ -32,7 +32,7 @@ class Nutrition(
     }
 }
 
-// class result(foodIDList)
+class Result(val foodIDList: MutableList<Int>)
 
 // 栄養分の計算や分析を担当するクラスNutritionHelperです。
 // 基本的な構造はSQLiteOpenHelperと同じようにするつもりです。
@@ -52,12 +52,12 @@ class NutritionHelper(mContext: Context?) {
     // の順番のフィールドを持つ辞書リスト渡すことで栄養クラスに変換する
     // ぶっちゃけ自分用な上引数も適当、例外チェックもガバガバなのでprivateにしときます。
     // 他でも使いたいとかあればきちんと作り直します。
-    private fun getNutrition(foodname: String, dic: List<Dictionary>, foodID: Int): Nutrition?{
+    private fun getNutrition(foodname: String, dic: List<Dictionary>, foodID: Int): Nutrition? {
 
         //渡されたフィールドが正しいかチェック
         val field = ingredient.FIELD
-        for(i in 0 until 7){
-            if(dic[i].field != "${ingredient.TABLE_NAME}.${field[i+2]}"){
+        for (i in 0 until 7) {
+            if (dic[i].field != "${ingredient.TABLE_NAME}.${field[i + 2]}") {
                 println("no")
                 return null
             }
@@ -99,10 +99,10 @@ class NutritionHelper(mContext: Context?) {
         // where句の作成
         // もっとスマートにいかんかねぇ
         var conditionSql: String = ""
-        val selectionArgs : Array<String> = Array(ID.size){ID[it].toString()}
+        val selectionArgs: Array<String> = Array(ID.size) { ID[it].toString() }
         var head = true
-        ID.forEach{
-            if(head){
+        ID.forEach {
+            if (head) {
                 conditionSql += "${food_ingredient.TABLE_NAME}.${food_ingredient.FOOD_ID} = ?"
                 head = false
             } else {
@@ -122,7 +122,8 @@ class NutritionHelper(mContext: Context?) {
 
         // グループ情報、これはマジで別にしたほうがいいです。ややこしくなります。お気を付けを
         // 品目名やIDなどそれぞれの識別に使うデータはこっちで抽出している。
-        val ident = DB.searchRecord_dic(food_ingredient.TABLE_NAME,
+        val ident = DB.searchRecord_dic(
+            food_ingredient.TABLE_NAME,
             arrayOf("${food_ingredient.TABLE_NAME}.${food_ingredient.FOOD_ID}", "${food.TABLE_NAME}.${food.NAME}"),
             conditionSql, selectionArgs,
             group = "${food_ingredient.TABLE_NAME}.${food_ingredient.FOOD_ID}",
@@ -139,7 +140,7 @@ class NutritionHelper(mContext: Context?) {
         var end = 0                           //for文のループ終了位置の記憶
 
         // まだ使ってないけど拡張のしやすさ考えてforでなくidで管理してループ回してます。
-        idList.forEach{
+        idList.forEach {
             // grouNumの持つ、品目が持つ材料の数を参考に、
             // DIcのリストであるリザルト、そのリザルトにあるそれぞれの辞書の持つデータから
             // groupNum[post]個抜き取って、それらを使って品目の栄養分を求める。
@@ -148,7 +149,7 @@ class NutritionHelper(mContext: Context?) {
             end += groupNum[post]
             result.forEach {
                 val dic = Dictionary(mutableListOf(), it.field)
-                for(i in begin until end) {
+                for (i in begin until end) {
                     dic.data.add(it.data[i])
                 }
                 dicList.add(dic)   //getNutritioinに渡す辞書リストの作成
@@ -171,7 +172,7 @@ class NutritionHelper(mContext: Context?) {
     // ユーザーの身体情報とこれまでの食事から
     // 必要な栄養バランスを求める関数。
     // まだ計算方法分からなくて未実装です。ごめんなさい。
-    private fun necessaryNut(nutritions: List<Nutrition>, period: Int): Nutrition?{
+    private fun necessaryNut(nutritions: List<Nutrition>, period: Int): Nutrition? {
 
         val user = DB.searchRecord(DBContract.UserInfo.TABLE_NAME) ?: return null
 
@@ -184,15 +185,15 @@ class NutritionHelper(mContext: Context?) {
 
         // Harris-Benedict式
         // 幼年時の計算は別途に必要と思われる
-        if(sex == 0){
-            cal = 66f + (13.7f*weight) + (5.0f*height) - (6.8f*age)
+        if (sex == 0) {
+            cal = 66f + (13.7f * weight) + (5.0f * height) - (6.8f * age)
             fiber = 20f
-        } else if(sex == 1){
-            cal = 655f + (9.6f*weight) + (1.7f*height) - (4.7f*age)
+        } else if (sex == 1) {
+            cal = 655f + (9.6f * weight) + (1.7f * height) - (4.7f * age)
             fiber = 18f
         }
         var protein = weight * 0.8f
-        var fat = cal/36f
+        var fat = cal / 36f
         var sugar = cal * 0.15f
 
         // とりあえず1日に必要な栄養素量のメモとしてクラス設定
@@ -218,54 +219,109 @@ class NutritionHelper(mContext: Context?) {
 
         println("ATE : $sugarSum, $fatSum, $proteinSum, $fiberSum, $calSum")
 
-        sugar = sugar*period - sugarSum
-        fat = fat*period - fatSum
-        protein = protein*period-proteinSum
-        fiberSum = fiber*period-fiberSum
-        cal = cal*period-calSum
+        sugar = sugar * period - sugarSum
+        fat = fat * period - fatSum
+        protein = protein * period - proteinSum
+        fiberSum = fiber * period - fiberSum
+        cal = cal * period - calSum
 
-        if(sugar <= 0) sugar = 0f
-        if(fat <= 0) fat = 0f
-        if(protein <= 0) protein = 0f
-        if(fiber <= 0) fiber = 0f
-        if(cal <= 0) cal = 0f
+        if (sugar <= 0) sugar = 0f
+        if (fat <= 0) fat = 0f
+        if (protein <= 0) protein = 0f
+        if (fiber <= 0) fiber = 0f
+        if (cal <= 0) cal = 0f
 
         println("LACK : $sugar, $fat, $protein, $fiber, $cal")
 
-        return Nutrition("", sugar, fat, protein, 0f, 0f,
-            fiber, cal)
+        return Nutrition(
+            "", sugar, fat, protein, 0f, 0f,
+            fiber, cal
+        )
+    }
+
+    private fun scoreCalc(nutritions: List<Nutrition>, period: Int): Float? {
+
+        val user = DB.searchRecord(DBContract.UserInfo.TABLE_NAME) ?: return null
+
+        val age = user[4].toInt()
+        val sex = user[5].toInt()
+        val height = user[2].toFloat()
+        val weight = user[3].toFloat()
+        var cal = 0f
+        var fiber = 20f
+
+        // Harris-Benedict式
+        // 幼年時の計算は別途に必要と思われる
+        if (sex == 0) {
+            cal = 66f + (13.7f * weight) + (5.0f * height) - (6.8f * age)
+            fiber = 20f
+        } else if (sex == 1) {
+            cal = 655f + (9.6f * weight) + (1.7f * height) - (4.7f * age)
+            fiber = 18f
+        }
+        var protein = weight * 0.8f
+        var fat = cal / 36f
+        var sugar = cal * 0.15f
+
+        // とりあえず1日に必要な栄養素量のメモとしてクラス設定
+        // ビタミン、ミネラルはちょっと複雑なので後回し
+
+        var calSum = 0f
+        var sugarSum = 0f
+        var fatSum = 0f
+        var proteinSum = 0f
+        var vitaminSum = 0f
+        var mineralSum = 0f
+        var fiberSum = 0f
+        // 食事記録からこれまで摂取した栄養の合計を求める
+        nutritions.forEach {
+            sugarSum += it.sugar
+            fatSum += it.fat
+            proteinSum += it.protein
+            vitaminSum += it.vitamin
+            mineralSum += it.mineral
+            fiberSum += it.fiber
+            calSum += it.calorie
+        }
+
+        val resultScore = ((sugarSum/(sugar*period)) *
+                (fatSum/(fat*period)) *
+                (proteinSum/(protein*period)) *
+                (fiberSum/(fiber*period))) * 100
+
+        return resultScore
     }
 
     // 一番足りてない栄養素を計算・選択する。
     // 拡張予定あり
-    fun selectLack(baseNut: Nutrition): String{
+    fun selectLack(baseNut: Nutrition): String {
 
         var distant = 0.2f
-        var lackNut : String = ""
+        var lackNut: String = ""
 
         val base = baseNut.normalization()
 
-        if(distant < base.sugar) {
+        if (distant < base.sugar) {
             lackNut = ingredient.SUGAR
             distant = base.sugar
         }
-        if(distant < base.fat) {
+        if (distant < base.fat) {
             lackNut = ingredient.FAT
             distant = base.fat
         }
-        if(distant < base.protein) {
+        if (distant < base.protein) {
             lackNut = ingredient.PROTEIN
             distant = base.protein
         }
-        if(distant < base.vitamin) {
+        if (distant < base.vitamin) {
             lackNut = ingredient.VITAMIN
             distant = base.vitamin
         }
-        if(distant < base.mineral) {
+        if (distant < base.mineral) {
             lackNut = ingredient.MINERAL
             distant = base.mineral
         }
-        if(distant < base.fiber) {
+        if (distant < base.fiber) {
             lackNut = ingredient.FIBER
             distant = base.fiber
         }
@@ -276,8 +332,9 @@ class NutritionHelper(mContext: Context?) {
     // ベクトル空間をもとにbaseNutに最も近い栄養を
     // 正規化した栄養リストの中から一つ選択して返す関数。
     // そのうち、抽出するクラスの数を設定できるようにするとよい
-    private fun vectorsearch(baseNut: Nutrition): Nutrition?{
+    private fun vectorsearch(baseNut: Nutrition): List<Nutrition>? {
         println("vectorSearch start")
+        val nut_dist = mutableListOf<Pair<Nutrition, Float>>()
         val base = baseNut.normalization()
         var tmpDist = 1f
 
@@ -288,55 +345,211 @@ class NutritionHelper(mContext: Context?) {
 
         var result = nutritions[0]
 
-
         nutritions.forEach {
             val tmp = it.normalization() // 正規化のために一時仕様
 
             // それぞれの要素の差を求める
-            val sugar = tmp.sugar-base.sugar
-            val fat = tmp.fat-base.fat
-            val protein = tmp.protein-base.protein
-            val vitamin = tmp.vitamin-base.vitamin
-            val mineral = tmp.mineral-base.mineral
-            val fiber = tmp.fiber-base.fiber
+            val sugar = tmp.sugar - base.sugar
+            val fat = tmp.fat - base.fat
+            val protein = tmp.protein - base.protein
+            val vitamin = tmp.vitamin - base.vitamin
+            val mineral = tmp.mineral - base.mineral
+            val fiber = tmp.fiber - base.fiber
 
             // 求められた差から必要な栄養分とのベクトル空間上の距離を求める。
-            val dist = sqrt(sugar*sugar + fat*fat + protein*protein + vitamin*vitamin
-                    + mineral*mineral + fiber*fiber)
+            val dist = sqrt(
+                sugar * sugar + fat * fat + protein * protein + vitamin * vitamin
+                        + mineral * mineral + fiber * fiber
+            )
 
             // 距離が更新できるなら返り値を対応する栄養クラスに更新する
-            println("${result.foodname}:$tmpDist VS ${it.foodname}:$dist")
-            if(dist < tmpDist) {
+//            println("${result.foodname}:$tmpDist VS ${it.foodname}:$dist")
+            if (dist < tmpDist) {
                 tmpDist = dist
                 result = it
             }
 
-            println("winner : ${result.foodname}")
+            nut_dist.add(Pair(it, dist))
+//            println("winner : ${result.foodname}")
+        }
+
+        nut_dist.sortBy { it.second }
+
+        val nutList = mutableListOf<Nutrition>()
+        nut_dist.forEach {
+            nutList.add(it.first)
         }
 
         // 繰り返しの中で最もbaseNutに近い要素を持つ栄養クラスを返す。
-        return result
+        return nutList
     }
 
-    // 引数は考える余地あり
-    // 食事記録のリストと、計測する期間(日数)を渡して
-    // リザルトクラスで返す。
-    fun selectFood(recordIDList: List<Int>, period: Int): Nutrition?{
+    fun recordScore(year: Int, month: Int, day: Int, span: Int): Float? {
 
-        // where句の作成
-        var conditionSql: String = ""
-        val selectionArgs : Array<String> = Array(recordIDList.size){recordIDList[it].toString()}
-        var head = true
-        recordIDList.forEach{
-            if(head){
-                conditionSql += "${record.TABLE_NAME}.${record.FOOD_ID} = ?"
-                head = false
+        var conditionSql = ""
+        var selectionArgs = arrayOf("")
+        var period = 0
+
+        // 日別の場合
+        if (span == 0) {
+            conditionSql += "${record.TABLE_NAME}.${record.YEAR} = ? AND " +
+                    "${record.TABLE_NAME}.${record.MONTH} = ? AND " +
+                    "${record.TABLE_NAME}.${record.DATE} = ?"
+            selectionArgs = arrayOf(year.toString(), month.toString(), day.toString())
+            period = 1
+        }
+
+        // 週別の場合
+        else if (span == 1) {
+            conditionSql += "${record.TABLE_NAME}.${record.YEAR} = ? " +
+                    "AND ${record.TABLE_NAME}.${record.MONTH} = ? " +
+                    "AND ${record.TABLE_NAME}.${record.DATE} >= ? " +
+                    "AND ${record.TABLE_NAME}.${record.DATE} <= ?"
+            selectionArgs = arrayOf(year.toString(), month.toString())
+            if (day < 8) {
+                selectionArgs = arrayOf(year.toString(), month.toString(), "1", "7")
+                period = 7
+            } else if (day < 15) {
+                selectionArgs = arrayOf(year.toString(), month.toString(), "8", "14")
+                period = 7
+            } else if (day < 22) {
+                selectionArgs = arrayOf(year.toString(), month.toString(), "15", "21")
+                period = 7
+            } else if (day < 29) {
+                selectionArgs = arrayOf(year.toString(), month.toString(), "22", "28")
+                period = 7
             } else {
-                conditionSql += " OR ${record.TABLE_NAME}.${record.FOOD_ID} = ?"
+                selectionArgs = arrayOf(year.toString(), month.toString(), "29", "31")
+                if (month == 2) {
+                    if (year % 4 == 0) {
+                        period = 1
+                    } else {
+                        period = 0
+                    }
+                } else if (month == 4 || month == 6 || month == 9 || month == 11) {
+                    period = 2
+                } else {
+                    period = 3
+                }
             }
         }
 
-        val foodDicList = DB.searchRecord_dic(record.TABLE_NAME, arrayOf("${food.TABLE_NAME}.${food.ID}"),
+        // 月別の場合
+        else if (span == 2) {
+            conditionSql += "${record.TABLE_NAME}.${record.YEAR} = ? " +
+                    "AND ${record.TABLE_NAME}.${record.MONTH} = ?"
+            selectionArgs = arrayOf(year.toString(), month.toString())
+            if (month == 2) {
+                if (year % 4 == 0) {
+                    period = 29
+                } else {
+                    period = 28
+                }
+            } else if (month == 4 || month == 6 || month == 9 || month == 11) {
+                period = 30
+            } else {
+                period = 31
+            }
+        } else {
+            println("invalid span")
+            println("日別:span=0、週別:span=1、月別:span=2")
+            return null
+        }
+
+        val foodDicList = DB.searchRecord_dic(
+            record.TABLE_NAME, arrayOf("${food.TABLE_NAME}.${food.ID}"),
+            condition = conditionSql, selectionArgs = selectionArgs,
+            innerJoin = Join(food.TABLE_NAME, record.FOOD_ID, food.ID)
+        ) ?: return null
+
+        val foodIDList = foodDicList[0].toInt().data
+        val foodNutList = getNutritions(foodIDList) ?: return null
+
+        //足りてない栄養を計算
+        val result = scoreCalc(foodNutList, period) ?: return null
+
+        return result
+    }
+
+    // おすすめ品目選択を行うクラス。
+    // 食事記録のリストと、計測する期間(日数)を渡して
+    // 全品目の類似度順にリザルトクラスで返す。
+    // spanは計測期間を分けるもの
+    // 日別:span=0、週別:span=1、月別:span=2
+    fun selectFood(year: Int, month: Int, day: Int, span: Int): Result? {
+
+        var conditionSql = ""
+        var selectionArgs = arrayOf("")
+        var period = 0
+
+        // 日別の場合
+        if (span == 0) {
+            conditionSql += "${record.TABLE_NAME}.${record.YEAR} = ? AND " +
+                    "${record.TABLE_NAME}.${record.MONTH} = ? AND " +
+                    "${record.TABLE_NAME}.${record.DATE} = ?"
+            selectionArgs = arrayOf(year.toString(), month.toString(), day.toString())
+            period = 1
+        }
+
+        // 週別の場合
+        else if (span == 1) {
+            conditionSql += "${record.TABLE_NAME}.${record.YEAR} = ? " +
+                    "AND ${record.TABLE_NAME}.${record.MONTH} = ? " +
+                    "AND ${record.TABLE_NAME}.${record.DATE} >= ? " +
+                    "AND ${record.TABLE_NAME}.${record.DATE} <= ?"
+            selectionArgs = arrayOf(year.toString(), month.toString())
+            if (day < 8) {
+                selectionArgs = arrayOf(year.toString(), month.toString(), "1", "7")
+                period = 7
+            } else if (day < 15) {
+                selectionArgs = arrayOf(year.toString(), month.toString(), "8", "14")
+                period = 7
+            } else if (day < 22) {
+                selectionArgs = arrayOf(year.toString(), month.toString(), "15", "21")
+                period = 7
+            } else if (day < 29) {
+                selectionArgs = arrayOf(year.toString(), month.toString(), "22", "28")
+                period = 7
+            } else {
+                selectionArgs = arrayOf(year.toString(), month.toString(), "29", "31")
+                if (month == 2) {
+                    if (year % 4 == 0) {
+                        period = 1
+                    } else {
+                        period = 0
+                    }
+                } else if (month == 4 || month == 6 || month == 9 || month == 11) {
+                    period = 2
+                } else {
+                    period = 3
+                }
+            }
+        }
+
+        // 月別の場合
+        else if (span == 2) {
+            conditionSql += "${record.TABLE_NAME}.${record.YEAR} = ? " +
+                    "AND ${record.TABLE_NAME}.${record.MONTH} = ?"
+            selectionArgs = arrayOf(year.toString(), month.toString())
+            if (month == 2) {
+                if (year % 4 == 0) {
+                    period = 29
+                } else {
+                    period = 28
+                }
+            } else if (month == 4 || month == 6 || month == 9 || month == 11) {
+                period = 30
+            } else {
+                period = 31
+            }
+        } else {
+            println("invalid span")
+            println("日別:span=0、週別:span=1、月別:span=2")
+            return null
+        }
+
+        val foodDicList = DB.searchRecord_dic(
+            record.TABLE_NAME, arrayOf("${food.TABLE_NAME}.${food.ID}"),
             condition = conditionSql, selectionArgs = selectionArgs,
             innerJoin = Join(food.TABLE_NAME, record.FOOD_ID, food.ID)
         ) ?: return null
@@ -348,8 +561,13 @@ class NutritionHelper(mContext: Context?) {
         val baseNut = necessaryNut(foodNutList, period) ?: return null
 
         // 足りてない栄養からそれらを補いうる品目を求める
-        val result = vectorsearch(baseNut) ?: return null
+        val nutList = vectorsearch(baseNut) ?: return null
+        val result = Result(mutableListOf())
 
+        nutList.forEach {
+            it.foodID ?: return null
+            result.foodIDList.add(it.foodID)
+        }
         // 最適な品目のIDを返す
         return result
     }

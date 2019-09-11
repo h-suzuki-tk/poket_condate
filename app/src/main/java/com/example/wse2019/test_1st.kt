@@ -225,25 +225,43 @@ fun test1(context: Context) {
         Log.d("calorie", it.toString())
     }
 
-
     // 材料から品目の栄養を計算するくらすNutritionを扱ってみる。
     val Nut = NutritionHelper(context)
 
-    // まず、品目の名前からその品目の栄養素を算出するgetNutririonがあります。
-    // まだ単体の計算なので、繰り返し事態は使用者に設定してもらう形です。
-    val foodName = arrayOf(Food.NAME)
-    val tryNut = DB.searchRecord_dic(Food.TABLE_NAME, foodName) ?: return
-    // まず品目の名前のリストをNutDicに入れます。変数名むちゃくちゃでごめんね
-    val NutDic = tryNut[0]
-    NutDic.data.forEach{
-        Log.d("nuttest", it)
+    // まず、品目の名前からその品目の栄養素を算出するgetNutririonsがあります。
+    // まずはテスト用に品目のIDを抜き出してみます。とりあえず全部。
+    val tryNut = DB.searchRecord_dic(Food.TABLE_NAME, arrayOf(Food.ID)) ?: return
+    // そして使いやすいほうIntのリストに変換
+    val idList = tryNut[0].toInt()
+
+    println(idList.data.size)
+    // まずあるのが品目IDから対応する品目の持つ栄養分を材料から合算して求める。
+    // getNutritionsがあります。さっき抜きとったIDのリストを渡すと、
+    // Nutritionクラスという品目名とそれの持つ栄養素を持つクラスのリストとして返します。
+    val nutritions = Nut.getNutritions(idList.data) ?: return
+
+    // まぁ可視化のためにprintしてみます。
+    // なんどなくどんな感じになるのか分かるんじゃないかなぁ。分かればいいなぁ
+    nutritions.forEach {
+        println("${it.foodname} : ${it.sugar}, ${it.fat}, ${it.protein}, ${it.vitamin}, ${it.mineral}, " +
+                "${it.fiber}, ${it.calorie} \n")
     }
 
-    // NutDic.dataが文字列のリストなので、
-    // それをたどってgetNutritionを実行　
-    NutDic.data.forEach {
-        val thisNut = Nut.getNutrition(it) ?: return
-        println("${thisNut.foodname} : ${thisNut.sugar}, ${thisNut.mineral}, ${thisNut.fiber}, ${thisNut.calorie} \n")
+    val record = DBContract.Record
+    val recordList = DB.searchRecord_dic(record.TABLE_NAME, arrayOf(record.ID)) ?: return
+    val recordIDList = recordList[0].toInt().data
+
+    // 日時と日別(0)か週別(1)か月別(2)を渡すことで、
+    // 品目IDをおすすめ順にソートしたリスト等を持つ
+    // リザルトクラスで返す。
+    val result = Nut.selectFood(2019, 7, 13, 1) ?: return
+    result.foodIDList.forEach {
+        println("ID : $it")
     }
-    // Logcatに「"品目名" : 糖分、ミネラル、繊維、カロリー」という感じで出力されてると思います。
+
+    // 渡す要素をおすすめ品目選択と同じ
+    // その区分でのスコアを100点満点で渡す。
+    val score = Nut.recordScore(2019, 7, 13, 0) ?: return
+
+    println("score: $score")
 }
