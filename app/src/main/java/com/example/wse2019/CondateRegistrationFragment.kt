@@ -449,9 +449,22 @@ class CondateRegistrationFragment(): Fragment() {
         }
         val count: Int
             get() = adapter.count
+        val isEmpty: Boolean
+            get() = adapter.count == 0
 
         fun getAdapter() : TempRegistrationStateAdapter { return adapter }
         fun getItem(position: Int) : TempRegistrationStateAdapter.Food { return adapter.getItem(position) }
+        fun getAllItems() : List<TempRegistrationStateAdapter.Food> {
+
+            val allItems: MutableList<TempRegistrationStateAdapter.Food> = mutableListOf()
+
+            for (i in 0 until adapter.count) {
+                allItems.add(adapter.getItem(i))
+            }
+
+            return allItems
+
+        }
 
         fun init() {
 
@@ -532,6 +545,11 @@ class CondateRegistrationFragment(): Fragment() {
     }
 
 
+
+    // ------------------------------------------------------------
+    //  showDatePickerDialog
+    //  - 日付選択ダイアログを表示
+    // ------------------------------------------------------------
     private fun showDatePickerDialog(day: TextView) {
 
         val today: Calendar = Calendar.getInstance()
@@ -563,7 +581,14 @@ class CondateRegistrationFragment(): Fragment() {
         ).show()
 
     }
+    // ------------------------------------------------------------
 
+
+
+    // ------------------------------------------------------------
+    //  showNumberPickerDialog
+    //  - 選択した品目を何人前登録するかの選択ダイアログを表示
+    // ------------------------------------------------------------
     private fun showNumberPickerDialog(food: FoodSearchResultAdapter.Food) {
 
         class NumberPickerDialog : DialogFragment() {
@@ -604,7 +629,14 @@ class CondateRegistrationFragment(): Fragment() {
         val dialog = NumberPickerDialog()
         dialog.show(fragmentManager, "setting_dialog")
     }
+    // ------------------------------------------------------------
 
+
+
+    // ------------------------------------------------------------
+    //  showMyCondateDialog
+    //  - My献立選択ダイアログを表示
+    // ------------------------------------------------------------
     private fun showMyCondateDialog(view: View) {
 
         // My献立情報を管理
@@ -699,11 +731,13 @@ class CondateRegistrationFragment(): Fragment() {
             }
         }
         class MyCondateDialog : DialogFragment() {
+
             val myCondate: MutableList<MyCondate> = mutableListOf() // 表示されているMy献立のデータ
             lateinit var adapter: MyCondateAdapter
 
             // ----- 基本設定 -----
             override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+
                 var tmpRadio: RadioButton? = null   // 選択アイテムの表示を保持
                 var checking: Int = -1              // 選択アイテムを保持
                 searchMyCondate()
@@ -732,7 +766,48 @@ class CondateRegistrationFragment(): Fragment() {
                             setMyCondate(position = checking)
                         }
                     }
-                    .setNegativeButton("キャンセル", null)
+                    .setNegativeButton("キャン\nセル", null)
+                    .setNeutralButton("現在の仮登録品目を\nMy献立に追加") { _, _ ->
+
+                        if (state.isEmpty) {
+                            Toast.makeText(context, "!! 仮登録品目がありません !!", Toast.LENGTH_LONG).show()
+                        } else {
+                            // My献立名の入力ダイアログを表示
+                            val editText: EditText = EditText(context).apply { hint = "入力してください" }
+                            AlertDialog.Builder(context).apply {
+                                setMessage("新しいMy献立の名前を入力してください")
+                                setView(editText)
+                                setPositiveButton("登録") { _, _ ->
+
+                                    val myCondateName = editText.text.toString()
+
+                                    if (myCondateName.isEmpty() || myCondateName.isBlank()) {
+                                        Toast.makeText(context, "空白以外の文字を入力してください", Toast.LENGTH_LONG).show()
+                                    } else {
+
+                                        val foods: MutableList<Pair<Int, Float>> = mutableListOf()
+                                        for (i in 0 until state.count) {
+                                            val food = state.getItem(i)
+                                            foods.add(Pair(food.id, food.number))
+                                        }
+                                        when (registerMyCondate(myCondateName, foods)) {
+                                            OK -> Toast.makeText(context, "追加しました", Toast.LENGTH_SHORT).show()
+                                            NG -> Toast.makeText(context, "!! 失敗しました !!\n管理者にお問い合わせください", Toast.LENGTH_LONG).show()
+                                            else -> throw AssertionError()
+                                        }
+
+                                    }
+
+
+                                }
+                                setNegativeButton("キャンセル", null)
+                                show()
+                            }
+                        }
+
+
+
+                    }
 
                 return builder.create()
             }
@@ -762,7 +837,7 @@ class CondateRegistrationFragment(): Fragment() {
                         name    = result[i++])
                     )
                 }
-                for (j in 0..myCondate.size.minus(1)) {
+                for (j in 0 until myCondate.size) {
                     adapter.add(myCondate[j])
                 }
             }
@@ -816,6 +891,7 @@ class CondateRegistrationFragment(): Fragment() {
                 state.clear()
                 state.addAll(foods)
             }
+
         }
 
         // --------------------------------------------------
@@ -823,8 +899,55 @@ class CondateRegistrationFragment(): Fragment() {
         // --------------------------------------------------
         val dialog = MyCondateDialog()
         dialog.show(fragmentManager, "setting_dialog")
-    }
 
+    }
+    // ------------------------------------------------------------
+
+
+    // --------------------------------------------------
+    //  registerMyCondate
+    //  - 品目をMy献立に追加する
+    // --------------------------------------------------
+    /*
+     * @params
+     *      name    : String(My献立名)
+     *      foods   : List<Pair<Int(品目ID), Float(何人前)>>
+     */
+    private fun registerMyCondate(name: String, foods: List<Pair<Int, Float>>): Int {
+
+        val db = when (context) {
+            null -> throw NullPointerException()
+            else -> SampleDBOpenHelper(context!!)
+        }
+        val myCondateT = DBContract.MyCondate
+
+        // My献立を追加
+        db.insertRecord(Table.MyCondate(name = name))
+
+        // 追加したMy献立のIDを取得
+        val myCondateId = db.searchRecord(
+            tableName = myCondateT.TABLE_NAME,
+            column = arrayOf(myCondateT.ID)
+        )?.max()?.toInt() ?: throw NullPointerException()
+
+        // 各品目を、追加したMy献立に登録
+        for (i in 0 until foods.size) {
+            val (foodId, number) = foods[i]
+            db.insertRecord(Table.MyCondate_Food(
+                myCondateId, foodId, number
+            ))
+        }
+
+        return OK
+    }
+    // --------------------------------------------------
+
+
+
+    // ------------------------------------------------------------
+    //  registerCondate
+    //  - 仮登録した品目を献立として登録する
+    // ------------------------------------------------------------
     private fun registerCondate(): Int {
 
         // ----- 登録内容の確認 -----
@@ -847,7 +970,7 @@ class CondateRegistrationFragment(): Fragment() {
             else -> SampleDBOpenHelper(context!!)
         }
 
-        for (i in 0..state.count.minus(1)) {
+        for (i in 0 until state.count) {
             val food = state.getItem(i)
             db.insertRecord(
                 Table.Record(
@@ -864,5 +987,6 @@ class CondateRegistrationFragment(): Fragment() {
         return OK
 
     }
+    // ------------------------------------------------------------
 
 }

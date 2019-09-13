@@ -75,12 +75,12 @@ val default = listOf(
     Table.MyCondate("いつもの"),
 
 
-    Table.MyCondate_Food(1, 2, 1),
-    Table.MyCondate_Food(1, 7, 1),
-    Table.MyCondate_Food(2, 3, 1),
-    Table.MyCondate_Food(1, 5, 2),
-    Table.MyCondate_Food(3, 1, 1),
-    Table.MyCondate_Food(1, 7, 1),
+    Table.MyCondate_Food(1, 2, 1.0f),
+    Table.MyCondate_Food(1, 7, 1.0f),
+    Table.MyCondate_Food(2, 3, 1.0f),
+    Table.MyCondate_Food(1, 5, 2.0f),
+    Table.MyCondate_Food(3, 1, 1.0f),
+    Table.MyCondate_Food(1, 7, 1.0f),
 
 
     Table.Record(1, 2019, 7, 13, 1, 1f),
