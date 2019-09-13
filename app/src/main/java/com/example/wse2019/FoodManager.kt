@@ -101,7 +101,7 @@ class FoodManager {
 
         // ----- 栄養値の計算 -----
         val nh = NutritionHelper(context)
-        food.nutrition = nh.getNutrition(food.foodName) ?: throw NullPointerException()
+        food.nutrition = nh.getNutritions(listOf(foodId))?.first() ?: throw NullPointerException()
 
         // ----- 材料情報の検索 -----
         column = arrayOf(

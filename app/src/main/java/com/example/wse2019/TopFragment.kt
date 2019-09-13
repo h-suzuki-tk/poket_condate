@@ -235,7 +235,7 @@ class TopFragment() : Fragment() {
             // 各品目の栄養を調べて格納
             val nh = NutritionHelper(context)
             foods.forEach { food ->
-                food.nutrition = nh.getNutrition(food.name) ?: throw NullPointerException()
+                food.nutrition = nh.getNutritions(listOf(food.id))?.first() ?: throw NullPointerException()
             }
 
             return foods
