@@ -12,14 +12,14 @@ import android.widget.*
 import com.example.sample.DBContract
 import com.example.sample.SampleDBOpenHelper
 
-class FoodSearchResultAdapter(context: Context) : BaseAdapter() {
+class FoodSearchResultAdapter(val context: Context) : BaseAdapter() {
     private val inflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-    private val context = context
+
+    val fm = FoodManager()
 
     // ----- [表示用]品目データクラス -----
     data class Food(
         val id      : Int,
-        val iconID  : Int = R.drawable.ic_menu_gallery,
         val name    : String,
         val category: Int,
         var favorite: Int
@@ -46,11 +46,17 @@ class FoodSearchResultAdapter(context: Context) : BaseAdapter() {
 
         // アイコンのセット
         val icon: ImageView = v.findViewById(R.id.foodImageView)
-        icon.setImageResource(foods[position].iconID)
+        icon.apply {
+            setImageBitmap(fm.getBitmap(context, foods[position].id))
+            setOnClickListener { parent.performItemClick(v, position, 0) }
+        }
 
         // 品目名のセット
         val name: TextView = v.findViewById(R.id.foodTextView)
-        name.text = foods[position].name
+        name.apply {
+            text = foods[position].name
+            setOnClickListener { parent.performItemClick(v, position, 0) }
+        }
 
         // お気に入り済みか否かのセット
         val favorite: ImageButton = v.findViewById(R.id.favoriteButton)
@@ -90,20 +96,6 @@ class FoodSearchResultAdapter(context: Context) : BaseAdapter() {
             values,
             "id = ${foods[position].id}",
             null)
-
-        // うまくいかない
-        /*
-        db.updateRecord(
-            tablename       = foodTable.TABLE_NAME,
-            column          = arrayOf(
-                foodTable.FAVORITE),
-            convert         = arrayOf(
-                "${foods[position].favorite}"),
-            condition       = "${foodTable.ID} -> ?",
-            selectionArgs   = arrayOf(
-                "${foods[position].id}")
-        )
-        */
     }
 
     // ------------------------------------------------------------

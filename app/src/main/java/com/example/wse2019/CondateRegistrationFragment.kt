@@ -111,6 +111,8 @@ class CondateRegistrationFragment(): Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v: View = inflater.inflate(R.layout.fragment_condate_registration, container, false)
 
+        val fm = FoodManager()
+
         // ------------------------------------------------------------
         //  日付
         // ------------------------------------------------------------
@@ -236,6 +238,13 @@ class CondateRegistrationFragment(): Fragment() {
                     }
                     R.id.addButton -> {
                         showNumberPickerDialog(food)
+                    }
+                    else -> {
+                        AlertDialog.Builder(context).apply {
+                            setView(fm.getFoodInformationView(food.id, context, parent))
+                            show()
+                        }
+
                     }
                 }
             }

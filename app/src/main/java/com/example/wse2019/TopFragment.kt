@@ -50,8 +50,10 @@ class TopFragment() : Fragment() {
         //  最もおすすめな品目
         // --------------------------------------------------
         val mostRecommendFood = view.findViewById<LinearLayout>(R.id.ft_recommendFood)
-        val image = view.findViewById<ImageView>(R.id.ft_recommendImageView)
-        val name = view.findViewById<TextView>(R.id.ft_foodNameTextView)
+        val image       = view.findViewById<ImageView>(R.id.ft_recommendImageView)
+        val name        = view.findViewById<TextView>(R.id.ft_foodNameTextView)
+        val favorite    = view.findViewById<ImageView>(R.id.ft_favoriteImageView)
+        val nutrition   = view.findViewById<TextView>(R.id.ft_recommendFoodNutritionTextView)
         mostRecommendFood.apply {
             setOnClickListener {
                 showFoodInformationDialog(recommendFood.first.id, context, container)
@@ -63,6 +65,25 @@ class TopFragment() : Fragment() {
         name.apply {
             text = recommendFood.first.name
         }
+        favorite.apply {
+            visibility = when (recommendFood.first.favorite) {
+                1 -> View.VISIBLE
+                0 -> View.GONE
+                else -> throw AssertionError()
+            }
+        }
+        nutrition.apply {
+            text = "カロリー:\n %.0f kcal\n糖質:\n %.1f g\n脂質:\n %.1f g\nたんぱく質:\n %.1f g\nミネラル:\n %.1f g\nビタミン:\n %.1f g\n食物繊維:\n %.1f g".format(
+                recommendFood.first.nutrition.calorie,
+                recommendFood.first.nutrition.sugar,
+                recommendFood.first.nutrition.fat,
+                recommendFood.first.nutrition.protein,
+                recommendFood.first.nutrition.mineral,
+                recommendFood.first.nutrition.vitamin,
+                recommendFood.first.nutrition.fiber
+            )
+        }
+
         // --------------------------------------------------
         //  そのほかのおすすめ品目
         // --------------------------------------------------
@@ -197,17 +218,25 @@ class TopFragment() : Fragment() {
                 tableName = foodT.TABLE_NAME,
                 column = arrayOf(
                     foodT.ID,
-                    foodT.NAME)
+                    foodT.NAME,
+                    foodT.FAVORITE)
             ) ?: throw NullPointerException("searchRecord was failed")
 
             var i = 0
             while (i < result.size) {
                 foods.add(RecommendFoodAdapter.Food(
-                    result[i++].toInt(),
-                    result[i++]
+                    id      = result[i++].toInt(),
+                    name    = result[i++],
+                    favorite = result[i++].toInt()
                 ))
             }
             // --------------------------------------------------
+
+            // 各品目の栄養を調べて格納
+            val nh = NutritionHelper(context)
+            foods.forEach { food ->
+                food.nutrition = nh.getNutrition(food.name) ?: throw NullPointerException()
+            }
 
             return foods
         }

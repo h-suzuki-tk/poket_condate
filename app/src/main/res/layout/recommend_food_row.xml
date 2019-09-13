@@ -12,12 +12,34 @@
             android:src="@mipmap/ic_launcher"
             android:layout_width="100dp"
             android:layout_height="75dp"/>
-    <TextView
-            android:id="@+id/rfr_foodNameTextView"
-            android:text="FoodName"
+    <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center_vertical"/>
+            android:orientation="vertical">
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+            <TextView
+                    android:id="@+id/rfr_foodNameTextView"
+                    android:text="FoodName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical" android:textSize="18sp" android:textColor="@color/colorPrimary"/>
+            <ImageView
+                    android:id="@+id/rfr_favoriteImageView"
+                    android:src="@android:drawable/btn_star_big_on"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <TextView
+                android:id="@+id/rfr_foodNutritionTextView"
+                android:text="Nutrition"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" android:textSize="10sp"/>
+    </LinearLayout>
+
 
 
 </LinearLayout>
