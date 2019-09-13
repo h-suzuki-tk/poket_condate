@@ -1,6 +1,7 @@
 package com.example.wse2019
 
 
+import android.content.Context
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.design.widget.TabLayout
@@ -14,7 +15,11 @@ import android.support.v7.widget.Toolbar
 import android.support.v7.app.ActionBarDrawerToggle
 import android.view.MenuItem
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
 import android.widget.Button
+import android.widget.TextView
+import com.example.sample.DBContract
 import com.example.sample.SampleDBOpenHelper
 import com.example.sample.Table
 import com.example.sample.initializer
@@ -41,6 +46,12 @@ class MainActivity :
         //ナビゲーションドロワーをセット
         val drawerLayout: DrawerLayout = findViewById(R.id.drawerLayout)
         val nav_view: NavigationView = findViewById(R.id.nav_view)
+        val header: View = nav_view.getHeaderView(0)
+
+        val userName: TextView = header.findViewById(R.id.nhm_userNameTextView)
+        userName.apply {
+            text = "こんにちは！\n${getUserName()} さん"
+        }
         val toggle = ActionBarDrawerToggle(
             this,
             drawerLayout,
@@ -108,6 +119,29 @@ class MainActivity :
         drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
+
+
+
+    // --------------------------------------------------
+    //  getUserName
+    //  - ユーザー名を取得
+    // --------------------------------------------------
+    fun getUserName(): String {
+
+        var userName = ""
+
+        val db = SampleDBOpenHelper(this)
+        val userT = DBContract.UserInfo
+
+        userName = db.searchRecord(
+            tableName = userT.TABLE_NAME,
+            column = arrayOf(userT.NAME)
+        )?.first() ?: throw NullPointerException()
+
+        return userName
+    }
+    // --------------------------------------------------
+
 
     override fun replaceFragment(fragment: Fragment) {
         val ft: FragmentTransaction = supportFragmentManager.beginTransaction()

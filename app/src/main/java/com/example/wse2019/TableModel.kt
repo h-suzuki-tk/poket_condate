@@ -22,7 +22,7 @@ sealed class Table() {
 
     class Food_Ingredient(val food_id: Int, val Ingredient_id: Int, val num: Float) : Table()
 
-    class MyCondate_Food(val MyCondate_id: Int, val food_id: Int, val num: Int) : Table()
+    class MyCondate_Food(val MyCondate_id: Int, val food_id: Int, val num: Float) : Table()
 
     class UserInfo(val name: String, val height: Float?, val weight: Float?, val age: Int?, val sex: Int?) : Table()
 }

@@ -260,7 +260,7 @@ class FoodRegistrationFragment() : Fragment() {
     //
     // ==================================================
     // ==================================================
-    inner class Ingredient() {
+    private inner class Ingredient() {
         private val adapter: IngredientSearchResultAdapter = when (context) {
             null -> throw NullPointerException()
             else -> IngredientSearchResultAdapter(context!!)

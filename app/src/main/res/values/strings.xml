@@ -11,17 +11,19 @@
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">こんにちは！〇〇〇〇〇 さん</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
-    <string name="menu_home">Home</string>
-    <string name="menu_gallery">Gallery</string>
-    <string name="menu_slideshow">Slideshow</string>
-    <string name="menu_tools">Tools</string>
-    <string name="menu_share">Share</string>
-    <string name="menu_send">Send</string>
+    <string name="nutrition_unit">g</string>
+    <string name="calorie_unit">kcal</string>
+    <string name="sugar">糖質</string>
+    <string name="fat">脂質</string>
+    <string name="protein">たんぱく質</string>
+    <string name="vitamin">ビタミン</string>
+    <string name="mineral">ミネラル</string>
+    <string name="fiber">食物繊維</string>
+    <string name="calorie">カロリー</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
