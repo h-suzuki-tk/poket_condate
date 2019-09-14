@@ -378,7 +378,14 @@ class SampleDBOpenHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME,
         cursor.use {
             while (cursor.moveToNext()) {
                 for (i in 0 until cursor.columnCount) {
-                    val result: String = cursor.getString(i) ?: ""
+                    var result: String = cursor.getString(i) ?: ""
+
+                    // 前後の「'」をカット
+                    val regex = Regex(pattern = """'.*'""")
+                    if (regex.matches(input = result)) {
+                        result = result.substring(1, result.length-1)
+                    }
+
                     results.add(result)
                 }
             }
