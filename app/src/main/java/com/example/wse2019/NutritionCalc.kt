@@ -83,6 +83,10 @@ class NutritionHelper(mContext: Context?) {
     fun getNutritions(ID: List<Int>): List<Nutrition>? {
         println("Nut check: start")
 
+        if(ID.isEmpty()){
+            return mutableListOf<Nutrition>()
+        }
+
         // 抽出するカラム
         // ここでは計算に使うものだけ
         val column = arrayOf(
@@ -169,11 +173,7 @@ class NutritionHelper(mContext: Context?) {
     }
     // getNutritions終わり
 
-    // ユーザーの身体情報とこれまでの食事から
-    // 必要な栄養バランスを求める関数。
-    // まだ計算方法分からなくて未実装です。ごめんなさい。
-    private fun necessaryNut(nutritions: List<Nutrition>, period: Int): Nutrition? {
-
+    private fun necessaryNut(period: Int): Nutrition?{
         val user = DB.searchRecord(DBContract.UserInfo.TABLE_NAME) ?: return null
 
         val age = user[4].toInt()
@@ -182,6 +182,8 @@ class NutritionHelper(mContext: Context?) {
         val weight = user[3].toFloat()
         var cal = 0f
         var fiber = 20f
+        var vitamin = 0f
+        var mineral = 0f
 
         // Harris-Benedict式
         // 幼年時の計算は別途に必要と思われる
@@ -196,8 +198,17 @@ class NutritionHelper(mContext: Context?) {
         var fat = cal / 36f
         var sugar = cal * 0.15f
 
-        // とりあえず1日に必要な栄養素量のメモとしてクラス設定
-        // ビタミン、ミネラルはちょっと複雑なので後回し
+        return Nutrition("necessary", sugar*period, fat*period, protein*period,
+            vitamin*period, mineral*period, fiber*period, cal*period)
+    }
+
+    // ユーザーの身体情報とこれまでの食事から
+    // 必要な栄養バランスを求める関数。
+    // まだ計算方法分からなくて未実装です。ごめんなさい。
+    private fun getLackNut(nutritions: List<Nutrition>, period: Int): Nutrition? {
+
+        // ユーザー情報と機関から最適な栄養バランスを求める
+        val necNut = necessaryNut(period) ?: return null
 
         var calSum = 0f
         var sugarSum = 0f
@@ -219,11 +230,11 @@ class NutritionHelper(mContext: Context?) {
 
         println("ATE : $sugarSum, $fatSum, $proteinSum, $fiberSum, $calSum")
 
-        sugar = sugar * period - sugarSum
-        fat = fat * period - fatSum
-        protein = protein * period - proteinSum
-        fiberSum = fiber * period - fiberSum
-        cal = cal * period - calSum
+        var sugar = necNut.sugar - sugarSum
+        var fat = necNut.fat - fatSum
+        var protein = necNut.protein - proteinSum
+        var fiber = necNut.fiber - fiberSum
+        var cal = necNut.calorie - calSum
 
         if (sugar <= 0) sugar = 0f
         if (fat <= 0) fat = 0f
@@ -240,31 +251,8 @@ class NutritionHelper(mContext: Context?) {
     }
 
     private fun scoreCalc(nutritions: List<Nutrition>, period: Int): Float? {
-
-        val user = DB.searchRecord(DBContract.UserInfo.TABLE_NAME) ?: return null
-
-        val age = user[4].toInt()
-        val sex = user[5].toInt()
-        val height = user[2].toFloat()
-        val weight = user[3].toFloat()
-        var cal = 0f
-        var fiber = 20f
-
-        // Harris-Benedict式
-        // 幼年時の計算は別途に必要と思われる
-        if (sex == 0) {
-            cal = 66f + (13.7f * weight) + (5.0f * height) - (6.8f * age)
-            fiber = 20f
-        } else if (sex == 1) {
-            cal = 655f + (9.6f * weight) + (1.7f * height) - (4.7f * age)
-            fiber = 18f
-        }
-        var protein = weight * 0.8f
-        var fat = cal / 36f
-        var sugar = cal * 0.15f
-
-        // とりあえず1日に必要な栄養素量のメモとしてクラス設定
-        // ビタミン、ミネラルはちょっと複雑なので後回し
+        // ユーザー情報と機関から最適な栄養バランスを求める
+        val necNut = necessaryNut(period) ?: return null
 
         var calSum = 0f
         var sugarSum = 0f
@@ -284,10 +272,26 @@ class NutritionHelper(mContext: Context?) {
             calSum += it.calorie
         }
 
-        val resultScore = ((sugarSum/(sugar*period)) *
-                (fatSum/(fat*period)) *
-                (proteinSum/(protein*period)) *
-                (fiberSum/(fiber*period))) * 100
+        // それぞれの栄養分の過不足の割合
+        var sugarPer = sugarSum/necNut.sugar
+        if(sugarPer > 1) sugarPer = 1-(sugarPer-1) // 取りすぎ分を減点
+
+        var fatPer = fatSum/necNut.fat
+        if(fatPer > 1) fatPer = 1-(fatPer-1) // 取りすぎ分を減点
+
+        var proteinPer = proteinSum/necNut.protein
+        if(proteinPer > 1) proteinPer = 1-(proteinPer-1) // 取りすぎ分を減点
+
+        var fiberPer = fiberSum/necNut.fiber
+        if(fiberPer > 1) fiberPer = 1f // 上限以降は考えない
+
+        var calPer = calSum/necNut.calorie
+        if(calPer > 1) calPer = 1-(calPer-1) // 取りすぎ分を減点
+
+        var resultScore = (sugarPer + fatPer + proteinPer + fiberPer + calPer)/5 * 100 + 10
+
+        if(resultScore > 100) resultScore = 100f
+        else if(resultScore < 0) resultScore = 0f
 
         return resultScore
     }
@@ -363,14 +367,14 @@ class NutritionHelper(mContext: Context?) {
             )
 
             // 距離が更新できるなら返り値を対応する栄養クラスに更新する
-//            println("${result.foodname}:$tmpDist VS ${it.foodname}:$dist")
+            println("${result.foodname}:$tmpDist VS ${it.foodname}:$dist")
             if (dist < tmpDist) {
                 tmpDist = dist
                 result = it
             }
 
             nut_dist.add(Pair(it, dist))
-//            println("winner : ${result.foodname}")
+            println("winner : ${result.foodname}")
         }
 
         nut_dist.sortBy { it.second }
@@ -384,8 +388,9 @@ class NutritionHelper(mContext: Context?) {
         return nutList
     }
 
-    fun recordScore(year: Int, month: Int, day: Int, span: Int): Float? {
+    private class calenderSQL(val condition: String, val selectionArgs: Array<String>, val period: Int)
 
+    private fun makeCalenderCondition(year: Int, month: Int, day: Int, span: Int): calenderSQL?{
         var conditionSql = ""
         var selectionArgs = arrayOf("")
         var period = 0
@@ -456,6 +461,16 @@ class NutritionHelper(mContext: Context?) {
             return null
         }
 
+        return calenderSQL(conditionSql, selectionArgs, period)
+    }
+
+    fun recordScore(year: Int, month: Int, day: Int, span: Int): Float? {
+        // 与えられた情報から日付に関する条件句を作成
+        val sqlElement = makeCalenderCondition(year, month, day, span) ?: return null
+        val conditionSql = sqlElement.condition
+        val selectionArgs = sqlElement.selectionArgs
+        val period = sqlElement.period
+
         val foodDicList = DB.searchRecord_dic(
             record.TABLE_NAME, arrayOf("${food.TABLE_NAME}.${food.ID}"),
             condition = conditionSql, selectionArgs = selectionArgs,
@@ -463,6 +478,12 @@ class NutritionHelper(mContext: Context?) {
         ) ?: return null
 
         val foodIDList = foodDicList[0].toInt().data
+
+        // レコードが空の場合は0点
+        if(foodIDList.isEmpty()){
+            return 0f
+        }
+
         val foodNutList = getNutritions(foodIDList) ?: return null
 
         //足りてない栄養を計算
@@ -478,75 +499,11 @@ class NutritionHelper(mContext: Context?) {
     // 日別:span=0、週別:span=1、月別:span=2
     fun selectFood(year: Int, month: Int, day: Int, span: Int): Result? {
 
-        var conditionSql = ""
-        var selectionArgs = arrayOf("")
-        var period = 0
-
-        // 日別の場合
-        if (span == 0) {
-            conditionSql += "${record.TABLE_NAME}.${record.YEAR} = ? AND " +
-                    "${record.TABLE_NAME}.${record.MONTH} = ? AND " +
-                    "${record.TABLE_NAME}.${record.DATE} = ?"
-            selectionArgs = arrayOf(year.toString(), month.toString(), day.toString())
-            period = 1
-        }
-
-        // 週別の場合
-        else if (span == 1) {
-            conditionSql += "${record.TABLE_NAME}.${record.YEAR} = ? " +
-                    "AND ${record.TABLE_NAME}.${record.MONTH} = ? " +
-                    "AND ${record.TABLE_NAME}.${record.DATE} >= ? " +
-                    "AND ${record.TABLE_NAME}.${record.DATE} <= ?"
-            selectionArgs = arrayOf(year.toString(), month.toString())
-            if (day < 8) {
-                selectionArgs = arrayOf(year.toString(), month.toString(), "1", "7")
-                period = 7
-            } else if (day < 15) {
-                selectionArgs = arrayOf(year.toString(), month.toString(), "8", "14")
-                period = 7
-            } else if (day < 22) {
-                selectionArgs = arrayOf(year.toString(), month.toString(), "15", "21")
-                period = 7
-            } else if (day < 29) {
-                selectionArgs = arrayOf(year.toString(), month.toString(), "22", "28")
-                period = 7
-            } else {
-                selectionArgs = arrayOf(year.toString(), month.toString(), "29", "31")
-                if (month == 2) {
-                    if (year % 4 == 0) {
-                        period = 1
-                    } else {
-                        period = 0
-                    }
-                } else if (month == 4 || month == 6 || month == 9 || month == 11) {
-                    period = 2
-                } else {
-                    period = 3
-                }
-            }
-        }
-
-        // 月別の場合
-        else if (span == 2) {
-            conditionSql += "${record.TABLE_NAME}.${record.YEAR} = ? " +
-                    "AND ${record.TABLE_NAME}.${record.MONTH} = ?"
-            selectionArgs = arrayOf(year.toString(), month.toString())
-            if (month == 2) {
-                if (year % 4 == 0) {
-                    period = 29
-                } else {
-                    period = 28
-                }
-            } else if (month == 4 || month == 6 || month == 9 || month == 11) {
-                period = 30
-            } else {
-                period = 31
-            }
-        } else {
-            println("invalid span")
-            println("日別:span=0、週別:span=1、月別:span=2")
-            return null
-        }
+        // 与えられた情報から日付に関する条件句を作成
+        val sqlElement = makeCalenderCondition(year, month, day, span) ?: return null
+        val conditionSql = sqlElement.condition
+        val selectionArgs = sqlElement.selectionArgs
+        val period = sqlElement.period
 
         val foodDicList = DB.searchRecord_dic(
             record.TABLE_NAME, arrayOf("${food.TABLE_NAME}.${food.ID}"),
@@ -558,7 +515,7 @@ class NutritionHelper(mContext: Context?) {
         val foodNutList = getNutritions(foodIDList) ?: return null
 
         //足りてない栄養を計算
-        val baseNut = necessaryNut(foodNutList, period) ?: return null
+        val baseNut = getLackNut(foodNutList, period) ?: return null
 
         // 足りてない栄養からそれらを補いうる品目を求める
         val nutList = vectorsearch(baseNut) ?: return null
