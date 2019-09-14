@@ -19,6 +19,8 @@ import com.example.sample.SampleDBOpenHelper
 class TopFragment() : Fragment() {
 
     val foodManager = FoodManager()
+    val dm = DateManager()
+    val today = dm.calendar.time
     private lateinit var recommendFood: RecommendFood
 
     companion object {
@@ -38,12 +40,21 @@ class TopFragment() : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_top, container, false)
 
+        val dm = DateManager()
+        val nh = NutritionHelper(context)
+
+        val today = dm.calendar.time
+
         // --------------------------------------------------
         //  今週の得点
         // --------------------------------------------------
         val score = view.findViewById<TextView>(R.id.ft_scoreTextView)
         score.apply {
-            //text = /* score */
+            text = "%.0f".format(nh.recordScore(
+                dm.getYear(today)   .toInt(),
+                dm.getMonth(today)  .toInt(),
+                dm.getDate(today)   .toInt(),
+                1) ?: throw NullPointerException())
         }
 
         // --------------------------------------------------
@@ -151,7 +162,7 @@ class TopFragment() : Fragment() {
         val OTHER_RECOMMEND_SHOW_MORE_NUM       = 10    // 「もっと見る！」ボタンが押される毎に増加する品目表示数
 
         fun init() {
-            adapter.allFoods.addAll(search())
+            adapter.allFoods.addAll(search(dm.getYear(today).toInt(), dm.getMonth(today).toInt(), dm.getDate(today).toInt(), 1))
             setOtherRecommendFoodsToShow(OTHER_RECOMMEND_FROM_INDEX, OTHER_RECOMMEND_INITIAL_SHOW_NUM)
         }
 
@@ -205,35 +216,30 @@ class TopFragment() : Fragment() {
             adapter.foodsToShow = adapter.allFoods.subList(fromIndex, toIndex)
         }
 
-        private fun search() : List<RecommendFoodAdapter.Food> {
+        private fun search(year: Int, month: Int, date: Int, span: Int) : List<RecommendFoodAdapter.Food> {
             val foods: MutableList<RecommendFoodAdapter.Food> = mutableListOf()
 
-            // --------------------------------------------------
-            //  仮
-            // --------------------------------------------------
             val db = SampleDBOpenHelper(context)
+            val nh = NutritionHelper(context)
             val foodT = DBContract.Food // Food table
 
-            val result: List<String> = db.searchRecord(
-                tableName = foodT.TABLE_NAME,
-                column = arrayOf(
-                    foodT.ID,
-                    foodT.NAME,
-                    foodT.FAVORITE)
-            ) ?: throw NullPointerException("searchRecord was failed")
+            // ランク付けされたおすすめ品目を取得
+            val recommend = nh.selectFood(year, month, date, span) ?: throw NullPointerException()
 
-            var i = 0
-            while (i < result.size) {
+            // 取得した品目の情報を取得
+            recommend.foodIDList.forEach { foodId ->
+                val result: List<String> = db.searchRecord(
+                    tableName   = foodT.TABLE_NAME,
+                    column      = arrayOf(foodT.NAME, foodT.FAVORITE),
+                    condition   = "${foodT.ID} = ${foodId}"
+                ) ?: throw NullPointerException()
                 foods.add(RecommendFoodAdapter.Food(
-                    id      = result[i++].toInt(),
-                    name    = result[i++],
-                    favorite = result[i++].toInt()
-                ))
+                    id          = foodId,
+                    name        = result[0],
+                    favorite    = result[1].toInt()))
             }
-            // --------------------------------------------------
 
             // 各品目の栄養を調べて格納
-            val nh = NutritionHelper(context)
             foods.forEach { food ->
                 food.nutrition = nh.getNutritions(listOf(food.id))?.first() ?: throw NullPointerException()
             }

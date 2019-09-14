@@ -24,9 +24,9 @@ class RecommendFoodAdapter(val context: Context) : BaseAdapter() {
     //  品目情報
     // --------------------------------------------------
     data class Food(
-        val id: Int,
-        val name: String,
-        val favorite: Int,
+        var id: Int = 0,
+        var name: String = "",
+        var favorite: Int = 0,
         var nutrition: Nutrition = Nutrition("", 0f, 0f, 0f, 0f, 0f, 0f, 0f)
     )
     var allFoods: MutableList<Food> = mutableListOf()
