@@ -170,7 +170,7 @@ class FoodManager {
 
         val memoLayout = view.findViewById<LinearLayout>(R.id.ffi_memoLinearLayout)
         memoLayout.apply {
-            visibility = if ( food.memo == "'null'" || food.memo.isEmpty() || food.memo.isBlank()) {
+            visibility = if ( food.memo == "null" || food.memo.isEmpty() || food.memo.isBlank()) {
                 View.GONE
             } else {
                 View.VISIBLE
