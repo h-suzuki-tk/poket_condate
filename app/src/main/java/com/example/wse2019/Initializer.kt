@@ -17,6 +17,7 @@ fun initializer(context: Context) {
     default.forEach {
         DB.insertRecord(it)
     }
+    csvImportHelper(context,DB,"Ingredients/01-06.csv")
     csvImportHelper(context,DB,"Ingredients/014.csv")
     csvImportHelper(context,DB,"Ingredients/011.csv")
     csvImportHelper(context,DB,"Ingredients/015.csv")
