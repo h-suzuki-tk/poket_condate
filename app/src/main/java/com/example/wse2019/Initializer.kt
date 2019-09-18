@@ -29,5 +29,6 @@ fun initializer(context: Context) {
     csvImportHelper(context,DB,"Ingredients/010.csv")
     csvImportHelper(context,DB,"Ingredients/012.csv")
     csvImportHelper(context,DB,"Ingredients/013.csv")
+    csvImportHelper(context,DB,"Ingredients/01-06.csv")
 
 }
