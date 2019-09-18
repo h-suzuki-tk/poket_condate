@@ -35,7 +35,7 @@ import android.util.Log
                 var data=ArrayList<String>()
 
                 while(i<RowData.size){
-                    if(RowData[i]=="Tr" || RowData[i]=="-"){
+                    if(RowData[i]=="Tr" || RowData[i]=="-" || Regex("""\(.+\)""").matches(RowData[i])){
                         data.add("0")
                     }else{
                         data.add(RowData[i])

@@ -41,7 +41,7 @@ val default = listOf(
     Table.Ingredient("玉ねぎ", 12.75f, 0.18f, 1.77f, null, null,
         2.83f, 65f, 1f, "個", 0, 0),
     Table.Ingredient("ごぼうサラダ", 14.85f, 10.32f, 2.56f, null, null,
-        4.3f, 158f, 100f, "グラム", 0, 0),
+        4.3f, 158f, 100f, "グラム", 0, 1),
     Table.Ingredient("乾燥わかめ", 4.13f, 0.16f, 1.36f, null, null,
         3.27f, 12f, 10f, "グラム", 0, 0),
     /* 21～ */
@@ -49,6 +49,7 @@ val default = listOf(
         1.01f, 39f, 1f, "大さじ", 0, 0),
     Table.Ingredient("絹ごし豆腐", 2f, 3f, 4.9f, null, null,
         0.3f, 56f, 100f, "グラム", 0, 0),
+
 
 
     Table.Food_Ingredient(1, 1, 1.0f),

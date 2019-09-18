@@ -107,7 +107,8 @@ class FoodManager {
         column = arrayOf(
             "${ingT.TABLE_NAME}.${ingT.NAME}",
             "${foods_ingsT.TABLE_NAME}.${foods_ingsT.NUMBER}",
-            "${ingT.TABLE_NAME}.${ingT.UNIT}")
+            "${ingT.TABLE_NAME}.${ingT.UNIT}",
+            "${ingT.TABLE_NAME}.${ingT.CLASS}")
         result = db.searchRecord(
             tableName = foods_ingsT.TABLE_NAME,
             column    = column,
@@ -124,7 +125,8 @@ class FoodManager {
             food.ingredients.add(IngredientAdapter.Ingredient(
                     name    = result[i++],
                     number  = result[i++].toFloat(),
-                    unit    = result[i++]))
+                    unit    = result[i++],
+                    clas    = result[i++].toInt()))
         }
 
         // --------------------------------------------------
@@ -155,7 +157,7 @@ class FoodManager {
         val ingredient = view.findViewById<ListView>(R.id.ffi_ingredientListView)
         val ingAdapter = IngredientAdapter(context)
         ingLayout.apply {
-            visibility = if (food.ingredients.isEmpty() || food.ingredients.size == 1) {
+            visibility = if (food.ingredients.size == 1 && food.ingredients.first().clas == 1) {
                 View.GONE
             } else {
                 View.VISIBLE
@@ -189,7 +191,8 @@ class FoodManager {
         data class Ingredient(
             val name    : String,
             val number  : Float,
-            val unit    : String
+            val unit    : String,
+            val clas    : Int
         )
         var ingredients: MutableList<Ingredient> = mutableListOf()
 

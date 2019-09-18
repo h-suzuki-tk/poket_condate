@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentTransaction
 import android.text.Editable
 import android.text.Html
+import android.text.InputType
 import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
@@ -21,6 +22,7 @@ import com.example.sample.SampleDBOpenHelper
 import com.example.sample.Table
 import com.example.sample.createFoodIngredientsTable
 import org.w3c.dom.Text
+import java.io.File
 import java.lang.ClassCastException
 import kotlin.Float.Companion.NaN
 
@@ -132,16 +134,45 @@ class FoodRegistrationFragment() : Fragment() {
                 when (id.toInt()) {
                     // "＋" ボタンを押した場合
                     R.id.isrr_addButton -> {
-                        if (state.add(TempIngredientStateAdapter.Ingredient(
-                                ingredient.id,
-                                ingredient.name,
-                                ingredient.number,
-                                ingredient.unit
-                            )) == OK
-                        ) {
-                            Toast.makeText(context, "${ingredient.name}を ${ingredient.number}${ingredient.unit} 追加しました。", Toast.LENGTH_SHORT).show()
-                            state.applyChanges()
+
+                        // ビューの設定
+                        val v: View = inflater.inflate(R.layout.add_ingredient_dialog, null, false)
+                        val aid_number: EditText = v.findViewById(R.id.aid_number)
+                        val aid_unit: TextView = v.findViewById(R.id.aid_unit)
+                        aid_number.apply {
+                            hint = "入力してください"
                         }
+                        aid_unit.apply {
+                            text = ingredient.unit
+                        }
+
+                        AlertDialog.Builder(context).apply {
+                            setMessage("量を入力してください")
+                            setView(v)
+                            setPositiveButton("追加") { _, _ ->
+
+                                if (aid_number.text.isEmpty()) {
+                                    Toast.makeText(context, "!! 入力してください !!", Toast.LENGTH_LONG).show()
+                                } else {
+                                    val num: Float = aid_number.text.toString().toFloat()
+                                    if (state.add(TempIngredientStateAdapter.Ingredient(
+                                            ingredient.id,
+                                            ingredient.name,
+                                            num,
+                                            ingredient.unit
+                                        )) == OK
+                                    ) {
+                                        Toast.makeText(context, "${ingredient.name}を ${num}${ingredient.unit} 追加しました。", Toast.LENGTH_SHORT).show()
+                                        state.applyChanges()
+                                    }
+                                }
+
+                            }
+                            setNegativeButton("キャンセル", null)
+                            show()
+                        }
+
+
                     }
                 }
             }
@@ -211,7 +242,7 @@ class FoodRegistrationFragment() : Fragment() {
                         favorite = position
                     }
                     setPositiveButton("登録") { _, _ ->
-                        if (registerNewFood(
+                        if (test_registerNewFood(
                             name        = name.text.toString(),
                             number      = if(number.text.isEmpty()) { NaN } else { number.text.toString().toFloat() },
                             category    = category.selectedItemPosition,
@@ -565,6 +596,167 @@ class FoodRegistrationFragment() : Fragment() {
 
             }
             else -> throw AssertionError()
+        }
+
+        return OK
+    }
+    // --------------------------------------------------
+
+    // --------------------------------------------------
+    //  test_registerNewFood - (テスト用)品目を登録する
+    // --------------------------------------------------
+    /*
+     * @description
+     *      ※テスト用
+     *      　registerNewFood同様、データベースに品目を登録することに加え
+     *      Insert文を表示する
+     */
+    fun test_registerNewFood(
+        name        : String,
+        number      : Float,
+        category    : Int,
+        memo        : String,
+        favorite    : Int,
+        method      : Int,
+        ingredients : List<TempIngredientStateAdapter.Ingredient>,
+        nutrition   : Nutrition
+    ) : Int {
+
+        val strList: MutableList<String> = mutableListOf()
+
+        // --------------------------------------------------
+        //  未入力項目等がないかチェック
+        // --------------------------------------------------
+        var msg = ""
+        if (name.isBlank() || name.isEmpty()) { msg += "品目名を入力してください。" }
+        if (number.isNaN() || number == 0.0f) { msg += "何人前かを入力してください。" }
+        if (category == 0) { msg += "カテゴリを選択してください。" }
+        if (method == -1) { msg += "登録方法を選択してください。" }
+        when (method) {
+            // 材料選択の場合
+            R.id.ffr_ingredientRadioButton  -> {
+                if (ingredients.isEmpty()) { msg += "少なくとも1つの材料を追加してください。" }
+            }
+            // 栄養選択の場合
+            R.id.ffr_nutritionRadioButton   -> {
+                if (nutrition.contains(NaN)) { msg += "栄養素を全て記入してください。" }
+            }
+            else -> AssertionError()
+        }
+        if (msg.isNotEmpty()) {
+            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+            return NG
+        }
+
+        // --------------------------------------------------
+        //  登録
+        // --------------------------------------------------
+        val db = when (context) {
+            null -> throw NullPointerException()
+            else -> SampleDBOpenHelper(context!!)
+        }
+        val foodT               = DBContract.Food
+        val ingredientsT        = DBContract.Ingredient
+
+        // 品目テーブルにデータを追加
+        db.insertRecord(
+            Table.Food(
+                name        = name,
+                favorite    = favorite,
+                memo        = if(memo.isEmpty() || memo.isBlank()) { null } else { memo },
+                category    = category
+            )
+        )
+        val m = if (memo.isEmpty() || memo.isBlank()) {
+            "null"
+        } else {
+            "\"$memo\""
+        }
+        strList.add("Table.Food(\"${name}\", ${favorite}, ${m}, ${category})")
+
+        // 追加した品目のIDを取得
+        val foodId: Int = db.searchRecord(
+            tableName = foodT.TABLE_NAME,
+            column = arrayOf(foodT.ID)
+        )?.last()?.toInt() ?: throw NullPointerException()
+
+        when (method) {
+            // --------------------------------------------------
+            //  材料選択の場合
+            // --------------------------------------------------
+            R.id.ffr_ingredientRadioButton  -> {
+
+                // 各材料について、品目材料テーブルにデータを追加
+                ingredients.forEach { ingredient ->
+                    db.insertRecord(
+                        Table.Food_Ingredient(
+                            food_id         = foodId,
+                            Ingredient_id   = ingredient.id,
+                            num             = ingredient.number
+                        )
+                    )
+                    strList.add("Table.Food_Ingredient(${foodId}, ${ingredient.id}, ${ingredient.number}f)")
+                }
+
+            }
+            // --------------------------------------------------
+            //  栄養選択の場合
+            // --------------------------------------------------
+            R.id.ffr_nutritionRadioButton   -> {
+
+                // 材料テーブルにデータを追加
+                db.insertRecord(
+                    Table.Ingredient(
+                        name        = name,
+                        unit        = "個",
+                        quantity    = 1f, // そのうち実装
+                        sugar       = nutrition.sugar   / number,
+                        fat         = nutrition.fat     / number,
+                        protein     = nutrition.protein / number,
+                        vitamin     = nutrition.vitamin / number,
+                        mineral     = nutrition.mineral / number,
+                        fiber       = nutrition.fiber   / number,
+                        calorie     = nutrition.calorie / number,
+                        allergen    = 0, // そのうち実装
+                        clas        = 1    // 1: 区分 "完成品"
+                    )
+                )
+                strList.add("Table.Ingredient(\"${name}\", " +
+                            "${nutrition.sugar/number}f, " +
+                            "${nutrition.fat/number}f, " +
+                            "${nutrition.protein/number}f, " +
+                            "${nutrition.vitamin/number}f, " +
+                            "${nutrition.mineral/number}f, " +
+                            "${nutrition.fiber/number}f, " +
+                            "${nutrition.calorie/number}f, " +
+                            "1f, \"個\", 0, 1)")
+
+                // 追加した材料のIDを取得
+                val ingredientId = db.searchRecord(
+                    tableName = ingredientsT.TABLE_NAME,
+                    column = arrayOf(ingredientsT.ID)
+                )?.last()?.toInt() ?: throw NullPointerException()
+
+                // 品目材料テーブルにデータを追加
+                db.insertRecord(
+                    Table.Food_Ingredient(
+                        food_id         = foodId,
+                        Ingredient_id   = ingredientId,
+                        num             = 1.0f
+                    )
+                )
+                strList.add("Table.Food_Ingredient(${foodId}, ${ingredientId}, 1f)")
+
+            }
+            else -> throw AssertionError()
+        }
+
+        val array = strList.toTypedArray()
+        AlertDialog.Builder(context).apply {
+            setItems(array, null)
+            setPositiveButton("閉じる", null)
+            setCancelable(false)
+            show()
         }
 
         return OK
