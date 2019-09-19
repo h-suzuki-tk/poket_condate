@@ -49,8 +49,19 @@ val default = listOf(
         1.01f, 39f, 1f, "大さじ", 0, 0),
     Table.Ingredient("絹ごし豆腐", 2f, 3f, 4.9f, null, null,
         0.3f, 56f, 100f, "グラム", 0, 0),
-
-
+    Table.Ingredient("ビッグマック", 41.8f, 28.3f, 26.0f, null, null,
+        2.6f, 56f, 217f, "個", 0, 1),
+    Table.Ingredient("ホットケーキミックス",80.4f,2.7f,7.2f,null,null,
+        0.0f,375f,100f,"グラム",1,0),
+    Table.Ingredient("ホットケーキシロップ",30.2f,0f,0f,null,null,
+        0.0f,121f,41f,"グラム",1,0),
+    /*26~*/
+    Table.Ingredient("サラダ油",0.0f,14f,0.0f,null,null,
+        0.0f,126f,14f,"グラム",1,0),
+    Table.Ingredient("醤油",4.93f,0.57f,8.14f,null,null,
+        0.8f,53.0f,100f,"グラム",1,0),
+    Table.Ingredient("丸亀釜揚げうどん",70.7f,1.5f,10.4f,null,null,
+        0.3f,338f,270f,"杯",1,1),
 
     Table.Food_Ingredient(1, 1, 1.0f),
     Table.Food_Ingredient(1, 2, 1.0f),
@@ -77,6 +88,16 @@ val default = listOf(
     Table.Food_Ingredient(11, 20, 1.0f),
     Table.Food_Ingredient(11, 21, 1.0f),
     Table.Food_Ingredient(11, 22, 0.5f),
+    Table.Food_Ingredient(12,1,2.0f),
+    Table.Food_Ingredient(12,15,1.0f),
+    Table.Food_Ingredient(13,23,1.0f),
+    Table.Food_Ingredient(14,15,1f),
+    Table.Food_Ingredient(14,24,1.5f),
+    Table.Food_Ingredient(14,25,0.5f),
+    Table.Food_Ingredient(15,27,0.15f),
+    Table.Food_Ingredient(15,26,1.0f),
+    Table.Food_Ingredient(15,13,1.0f),
+    Table.Food_Ingredient(16,28,1.0f),
 
     Table.Food("いくらご飯", 1, null, 8),
     Table.Food("ぶり大根", 0, "シンプルな調理", 4),
@@ -91,6 +112,13 @@ val default = listOf(
     Table.Food("ごぼうサラダ(小鉢)", 1, "作り置き", 4),
     /* 11～ */
     Table.Food("味噌汁", 1, "1杯", 1),
+    Table.Food("卵かけご飯",0,null,1),
+    Table.Food("ビッグマック",0,null,2),
+    Table.Food("ホットケーキ",0,null,2),
+    Table.Food("もやし炒め",0,null,1),
+    /* 16~ */
+    Table.Food("丸亀釜揚げうどん",0,null,1),
+
 
     Table.Category("和食", 0),
     Table.Category("洋食", 0),

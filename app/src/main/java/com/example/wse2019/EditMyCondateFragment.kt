@@ -11,10 +11,7 @@ import android.widget.*
 import com.example.sample.DBContract
 import com.example.sample.Join
 import com.example.sample.SampleDBOpenHelper
-import com.example.sample.Table
-import org.w3c.dom.Text
 
-private const val ADD="+"
 
 
 class EditMyCondateFragment(): Fragment(){
@@ -48,16 +45,18 @@ class EditMyCondateFragment(): Fragment(){
         val textMineral=v.findViewById<TextView>(R.id.mineral)
         textCondateName.setText(itemTextView)
 
+        val nuCal=NutritionHelper(context)
 
-        //合計値を計算し、値をセットする
-        textCalorie.setText("")
-        textProtein.setText("")
-        textFat.setText("")
-        textMineral.setText("")
-        textSugar.setText("")
-        textVitamin.setText("")
+        var sumCalorie=0f
+        var sumProtein=0f
+        var sumFat=0f
+        var sumVitamin=0f
+        var sumFiber=0f
+        var sumMineral=0f
+        var sumSugar=0f
 
-        var map= mutableMapOf<String,String>()
+
+        val map= mutableMapOf<String,String>()
 
         val res=DB.searchRecord(DBContract.MyCondate.TABLE_NAME,
             arrayOf(DBContract.MyCondate.ID),
@@ -69,6 +68,68 @@ class EditMyCondateFragment(): Fragment(){
         //献立idの取得
         val myCondateId=res[0]
 
+
+        //品目idを取得
+        val multiJoin = arrayOf(
+            //献立品目テーブルを結合
+            Join(DBContract.MyCondate_Foods.TABLE_NAME,
+                DBContract.Food.ID,
+                DBContract.MyCondate_Foods.FOOD_ID),
+            //
+            Join(DBContract.MyCondate.TABLE_NAME,
+                DBContract.MyCondate_Foods.MYCONDATE_ID,
+                DBContract.MyCondate.ID,
+                DBContract.MyCondate_Foods.TABLE_NAME)
+        )
+
+        val columns = arrayOf(
+            "${DBContract.Food.TABLE_NAME}.${DBContract.Food.ID}"
+        )
+
+        val result=DB.searchRecord(DBContract.Food.TABLE_NAME,
+            columns,
+            "${DBContract.MyCondate.TABLE_NAME}.${DBContract.MyCondate.NAME} = ?",
+            arrayOf(itemTextView),
+            multiJoin = multiJoin)?:TODO()
+
+        val ids= mutableListOf<Int>()
+
+        var i=0
+
+        while(i<result.size)
+        {
+            ids.add(result[i].toInt())
+            i++
+        }
+
+        val nuList=nuCal.getNutritions(ids)?:TODO()
+
+        i=0
+
+        while(i<nuList.size){
+            sumCalorie+=nuList[i].calorie
+            sumSugar+=nuList[i].sugar
+            sumProtein+=nuList[i].protein
+            sumFat+=nuList[i].fat
+            sumMineral+=nuList[i].mineral
+            sumFiber+=nuList[i].fiber
+            sumVitamin+=nuList[i].vitamin
+            i++
+        }
+
+
+        //合計値を計算し、値をセットする
+        textCalorie.setText("${sumCalorie}")
+        textProtein.setText("${sumProtein}")
+        textFat.setText("${sumFat}")
+        textMineral.setText("${sumMineral}")
+        textSugar.setText("${sumSugar}")
+        textVitamin.setText("${sumVitamin}")
+
+
+
+
+
         //リストビューで表示
         var items=loadList(DB,map)
 
@@ -77,43 +138,6 @@ class EditMyCondateFragment(): Fragment(){
 
 
 
-
-
-
-
-        // 項目をタップしたときの処理
-        myListView.setOnItemClickListener {parent,view, position, id ->
-
-            var isValid=true
-
-            val foodName=adapter.getItem(position)
-
-            //画面遷移処理
-            if(isValid){
-                if(foodName==ADD){
-                    //項目追加のための画面遷移処理
-
-
-                }else{
-                    //テキスト名をfragmentにセット
-                    val bundle= Bundle()
-
-                    bundle.putString("FOOD_ID",map[foodName])
-                    val fragment =FoodInfFragment()
-                    fragment.setArguments(bundle)
-
-                    //fragmentの張替え
-                    val fragmentManager = fragmentManager
-                    val transaction = fragmentManager!!.beginTransaction()
-                    transaction.replace(R.id.frame_contents,fragment)
-                    transaction.addToBackStack(null)
-                    transaction.commit()
-                }
-            }
-
-            adapter.notifyDataSetChanged()
-
-        }
 
         // 項目を長押ししたときの処理
         myListView.setOnItemLongClickListener { parent, view, position, id ->
@@ -124,10 +148,6 @@ class EditMyCondateFragment(): Fragment(){
                 TODO()
             }
 
-            //"+"であれば、何もしない
-            if(foodName==ADD){
-                return@setOnItemLongClickListener true
-            }
 
             AlertDialog.Builder(requireContext()).apply {
                 setTitle("${foodName}を削除しますか?")
@@ -202,8 +222,6 @@ class EditMyCondateFragment(): Fragment(){
             map[result[i+1]]=result[i]
             i=i+2
         }
-        //最後の項目に+を表示
-        items.add(ADD)
 
         return items
 
