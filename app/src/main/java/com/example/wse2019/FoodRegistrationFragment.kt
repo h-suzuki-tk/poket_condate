@@ -692,10 +692,10 @@ class FoodRegistrationFragment() : Fragment() {
                         Table.Food_Ingredient(
                             food_id         = foodId,
                             Ingredient_id   = ingredient.id,
-                            num             = ingredient.number
+                            num             = ingredient.number/number
                         )
                     )
-                    strList.add("Table.Food_Ingredient(${foodId}, ${ingredient.id}, ${ingredient.number}f)")
+                    strList.add("Table.Food_Ingredient(${foodId}, ${ingredient.id}, ${ingredient.number/number}f)")
                 }
 
             }

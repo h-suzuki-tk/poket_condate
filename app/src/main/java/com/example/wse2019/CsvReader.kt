@@ -45,8 +45,8 @@ import android.util.Log
 
                 db.insertRecord(
                     Table.Ingredient(
-                        data[0].toString(), data[1].toFloat()-data[6].toFloat(), data[2].toFloat(), data[3].toFloat(), null, 0f,
-                        data[6].toFloat(), data[7].toFloat(), data[8].toFloat(), data[9].toString(),1, data[11].toInt()
+                        data[0].toString(), (data[1].toFloat()-data[6].toFloat())/100f, data[2].toFloat()/100f, data[3].toFloat()/100f, null, 0f,
+                        data[6].toFloat()/100f, data[7].toFloat()/100f, data[8].toFloat(), data[9].toString(),1, data[11].toInt()
                     )
                 )
 
