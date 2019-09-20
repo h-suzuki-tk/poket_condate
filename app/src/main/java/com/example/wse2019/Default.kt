@@ -49,19 +49,6 @@ val default = listOf(
         1.01f, 39f, 1f, "大さじ", 0, 0),
     Table.Ingredient("絹ごし豆腐", 2f, 3f, 4.9f, null, null,
         0.3f, 56f, 100f, "グラム", 0, 0),
-    Table.Ingredient("ビッグマック", 41.8f, 28.3f, 26.0f, null, null,
-        2.6f, 56f, 217f, "個", 0, 1),
-    Table.Ingredient("ホットケーキミックス",80.4f,2.7f,7.2f,null,null,
-        0.0f,375f,100f,"グラム",1,0),
-    Table.Ingredient("ホットケーキシロップ",30.2f,0f,0f,null,null,
-        0.0f,121f,41f,"グラム",1,0),
-    /*26~*/
-    Table.Ingredient("サラダ油",0.0f,14f,0.0f,null,null,
-        0.0f,126f,14f,"グラム",1,0),
-    Table.Ingredient("醤油",4.93f,0.57f,8.14f,null,null,
-        0.8f,53.0f,100f,"グラム",1,0),
-    Table.Ingredient("丸亀釜揚げうどん",70.7f,1.5f,10.4f,null,null,
-        0.3f,338f,270f,"杯",1,1),
 
     Table.Food_Ingredient(1, 1, 1.0f),
     Table.Food_Ingredient(1, 2, 1.0f),
@@ -90,14 +77,49 @@ val default = listOf(
     Table.Food_Ingredient(11, 22, 0.5f),
     Table.Food_Ingredient(12,1,2.0f),
     Table.Food_Ingredient(12,15,1.0f),
-    Table.Food_Ingredient(13,23,1.0f),
+    Table.Food_Ingredient(13,2108,1.0f),
     Table.Food_Ingredient(14,15,1f),
-    Table.Food_Ingredient(14,24,1.5f),
-    Table.Food_Ingredient(14,25,0.5f),
-    Table.Food_Ingredient(15,27,0.15f),
-    Table.Food_Ingredient(15,26,1.0f),
+    Table.Food_Ingredient(14,2109,1.5f),
+    Table.Food_Ingredient(14,2110,0.5f),
+    Table.Food_Ingredient(15,2112,0.15f),
+    Table.Food_Ingredient(15,2111,1.0f),
     Table.Food_Ingredient(15,13,1.0f),
-    Table.Food_Ingredient(16,28,1.0f),
+    Table.Food_Ingredient(16,2113,1.0f),
+    Table.Food_Ingredient(17, 1613, 70f),
+    Table.Food_Ingredient(17, 397, 25f),
+    Table.Food_Ingredient(17, 453, 25f),
+    Table.Food_Ingredient(17, 200, 10f),
+    Table.Food_Ingredient(17, 668, 25f),
+    Table.Food_Ingredient(18, 293, 100f),
+    Table.Food_Ingredient(18, 1192, 10f),
+    Table.Food_Ingredient(18, 200, 5f),
+    Table.Food_Ingredient(18, 1205, 5f),
+    Table.Food_Ingredient(18, 230, 10f),
+    Table.Food_Ingredient(19, 143, 70f),
+    Table.Food_Ingredient(19, 908, 10f),
+    Table.Food_Ingredient(19, 1225, 7.5f),
+    Table.Food_Ingredient(19, 1258, 22.5f),
+    Table.Food_Ingredient(19, 1192, 2.5f),
+    Table.Food_Ingredient(19, 1199, 0.5f),
+    Table.Food_Ingredient(19, 1289, 0.5f),
+    Table.Food_Ingredient(20, 840, 150f),
+    Table.Food_Ingredient(20, 349, 5f),
+    Table.Food_Ingredient(20, 200, 2.5f),
+    Table.Food_Ingredient(20, 1126, 7.5f),
+    Table.Food_Ingredient(20, 1192, 15f),
+    Table.Food_Ingredient(20, 1150, 15f),
+    Table.Food_Ingredient(21, 701, 75f),
+    Table.Food_Ingredient(21, 465, 45f),
+    Table.Food_Ingredient(21, 142, 50f),
+    Table.Food_Ingredient(21, 624, 75f),
+    Table.Food_Ingredient(21, 1521, 30f),
+    Table.Food_Ingredient(21, 432, 50f),
+    Table.Food_Ingredient(21, 345, 25f),
+    Table.Food_Ingredient(21, 683, 3.75f),
+    Table.Food_Ingredient(21, 2034, 1f),
+    Table.Food_Ingredient(21, 1192, 25f),
+    Table.Food_Ingredient(21, 1150, 25f),
+    Table.Food_Ingredient(21, 200, 10f),
 
     Table.Food("いくらご飯", 1, null, 8),
     Table.Food("ぶり大根", 0, "シンプルな調理", 4),
@@ -118,7 +140,12 @@ val default = listOf(
     Table.Food("もやし炒め",0,null,1),
     /* 16~ */
     Table.Food("丸亀釜揚げうどん",0,null,1),
-
+    Table.Food("あじの南蛮漬け", 0, "【1】玉ねぎは薄切りにする。にんじんは千切りにする。保存容器に酢、砂糖、醤油、塩、和風だしの素を入れよく混ぜて、玉ねぎ、にんじんを入れて混ぜ、なじませておく。\n【2】玉ねぎは薄切りにする。にんじんは千切りにする。保存容器に酢、砂糖、醤油、塩、和風だしの素を入れよく混ぜて、玉ねぎ、にんじんを入れて混ぜ、なじませておく。\n【3】小骨を取ったアジを食べやすい大きさに切り、片栗粉をまぶす。\n【4】フライパンに油を入れて熱し、アジを入れて上下に返しながら中火で揚げ焼きにする。\n【5】1に3を入れて、10分以上漬け込む。", 1),
+    Table.Food("かぼちゃの甘辛焼き", 1, null, 2),
+    Table.Food("サツマイモとベーコンのオイマヨ炒め", 0, null, 2),
+    Table.Food("しょうが焼き", 1, "【1】肉を軽く焼く。\n【2】しょうが、砂糖、酒、しょうゆ、みりんを入れ、たれがほとんどなくなれば完成。", 1),
+    /* 21~ */
+    Table.Food("すき焼き", 1, null, 1),
 
     Table.Category("和食", 0),
     Table.Category("洋食", 0),
@@ -152,4 +179,25 @@ val default = listOf(
 
 
     Table.UserInfo("かじむら大明神", 195f, 75.7f, 16, 1)
+)
+
+val default_after = listOf(
+
+    /* 2108~ */
+    Table.Ingredient("ビッグマック", 41.8f, 28.3f, 26.0f, null, null,
+        2.6f, 56f, 217f, "個", 0, 1),
+    Table.Ingredient("ホットケーキミックス",80.4f,2.7f,7.2f,null,null,
+        0.0f,375f,100f,"グラム",1,0),
+    Table.Ingredient("ホットケーキシロップ",30.2f,0f,0f,null,null,
+        0.0f,121f,41f,"グラム",1,0),
+    /* 2111~ */
+    Table.Ingredient("サラダ油",0.0f,14f,0.0f,null,null,
+        0.0f,126f,14f,"グラム",1,0),
+    Table.Ingredient("醤油",4.93f,0.57f,8.14f,null,null,
+        0.8f,53.0f,100f,"グラム",1,0),
+    Table.Ingredient("丸亀釜揚げうどん",70.7f,1.5f,10.4f,null,null,
+        0.3f,338f,270f,"杯",1,1)
+
+
+
 )
