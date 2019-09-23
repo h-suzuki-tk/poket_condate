@@ -14,11 +14,15 @@ import java.lang.ClassCastException
 import java.text.SimpleDateFormat
 import java.util.*
 
+private const val SCROLL_OFFSET = 3
 
 class CalendarFragment() : Fragment() {
-    var listener: OnCellSelectedListener? = null
+    lateinit var listener: OnCellSelectedListener
     private val dm: DateManager = DateManager()
-    private val calendar_selection_offset: Int = 3
+
+    // スクロール位置
+    var sp = -1 // Scroll position
+    var sy = -1 // Scroll Y coordinate
 
     companion object {
         fun newInstance(): CalendarFragment {
@@ -33,6 +37,13 @@ class CalendarFragment() : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // スクロール位置を初期化
+        /*
+         * 今日の日付が上からSCROLL_OFFSET行にくるよう設定
+         */
+        sp = dm.getDate(dm.calendar.time).toInt() - SCROLL_OFFSET
+        sy = 0
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -40,39 +51,40 @@ class CalendarFragment() : Fragment() {
 
         // ListView の処理
         val listView: ListView          = v.findViewById(R.id.calendarListView)
-        var adapter: CalendarAdapter    = when (context) {
+        val cAdapter: CalendarAdapter   = when (context) {
                 null -> throw NullPointerException()
-                else -> CalendarAdapter(context!!)
-            }
-        listView.adapter = adapter
-        listView.setSelection(dm.getDate(dm.calendar.time).toInt() - calendar_selection_offset)
-        listView.setOnItemClickListener { _, _, position, time ->
-            val day: Date = adapter.getItem(position)
-            when (this.listener) {
-                null -> throw NullPointerException()
-                else -> {
-                    this.listener!!.replaceFragment(CondateRegistrationFragment.newInstance(
-                        dm.getYear(day) .toInt(),
-                        dm.getMonth(day).toInt(),
-                        dm.getDate(day) .toInt(),
-                        time            .toInt()))
-                }
+                else -> CalendarAdapter(context!!) }
+        listView.apply {
+            adapter = cAdapter
+            setSelectionFromTop(sp, sy)
+            setOnItemClickListener { adapterView, view, position, time ->
+                val day: Date = cAdapter.getItem(position)
+
+                // スクロール位置の保存
+                sp = listView.firstVisiblePosition
+                sy = listView.getChildAt(0).top
+
+                listener.replaceFragment(CondateRegistrationFragment.newInstance(
+                    dm.getYear(day) .toInt(),
+                    dm.getMonth(day).toInt(),
+                    dm.getDate(day) .toInt(),
+                    time            .toInt()))
             }
         }
 
         // 当月の表示
         val currentYearMonth: TextView = v.findViewById(R.id.currentYearMonth)
-        currentYearMonth.text = adapter.getCurrentYearMonth()
+        currentYearMonth.text = cAdapter.getCurrentYearMonth()
         // 先月ボタン・来月ボタンの処理
         val prevButton: Button = v.findViewById(R.id.prevMonth)
         val nextButton: Button = v.findViewById(R.id.nextMonth)
         prevButton.setOnClickListener {
-            adapter.prevMonth()
-            currentYearMonth.text = adapter.getCurrentYearMonth()
+            cAdapter.prevMonth()
+            currentYearMonth.text = cAdapter.getCurrentYearMonth()
         }
         nextButton.setOnClickListener {
-            adapter.nextMonth()
-            currentYearMonth.text = adapter.getCurrentYearMonth()
+            cAdapter.nextMonth()
+            currentYearMonth.text = cAdapter.getCurrentYearMonth()
         }
 
         return v
