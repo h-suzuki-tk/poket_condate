@@ -153,3 +153,13 @@ open class DBContract {
         }
     }
 }
+
+class Time {
+    companion object {
+        const val MORNING   = 0
+        const val NOON      = 1
+        const val EVENING   = 2
+        const val SNACK     = 3
+        val OBJECT = listOf(MORNING, NOON, EVENING, SNACK)
+    }
+}

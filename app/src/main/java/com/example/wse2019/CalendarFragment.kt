@@ -2,6 +2,7 @@ package com.example.wse2019
 
 
 import android.content.Context
+import android.icu.util.Calendar
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
@@ -18,9 +19,11 @@ private const val SCROLL_OFFSET = 3
 
 class CalendarFragment() : Fragment() {
     lateinit var listener: OnCellSelectedListener
+    lateinit var cAdapter: CalendarAdapter
     private val dm: DateManager = DateManager()
 
-    // スクロール位置
+    // 表示位置
+    lateinit var calendar: java.util.Calendar
     var sp = -1 // Scroll position
     var sy = -1 // Scroll Y coordinate
 
@@ -42,6 +45,7 @@ class CalendarFragment() : Fragment() {
         /*
          * 今日の日付が上からSCROLL_OFFSET行にくるよう設定
          */
+        calendar = cAdapter.dm.calendar
         sp = dm.getDate(dm.calendar.time).toInt() - SCROLL_OFFSET
         sy = 0
     }
@@ -50,17 +54,17 @@ class CalendarFragment() : Fragment() {
         val v: View = inflater.inflate(R.layout.fragment_calendar, container, false)
 
         // ListView の処理
-        val listView: ListView          = v.findViewById(R.id.calendarListView)
-        val cAdapter: CalendarAdapter   = when (context) {
-                null -> throw NullPointerException()
-                else -> CalendarAdapter(context!!) }
+        val listView: ListView = v.findViewById(R.id.calendarListView)
         listView.apply {
-            adapter = cAdapter
+            adapter = cAdapter.apply {
+                dm.calendar = calendar
+            }
             setSelectionFromTop(sp, sy)
             setOnItemClickListener { adapterView, view, position, time ->
                 val day: Date = cAdapter.getItem(position)
 
-                // スクロール位置の保存
+                // 表示位置の保存
+                calendar = dm.calendar
                 sp = listView.firstVisiblePosition
                 sy = listView.getChildAt(0).top
 
@@ -93,6 +97,9 @@ class CalendarFragment() : Fragment() {
     override fun onAttach(context: Context?) {
         super.onAttach(context)
 
+        cAdapter = when (context) {
+            null -> throw NullPointerException()
+            else -> CalendarAdapter(context) }
         when (context) {
             is OnCellSelectedListener -> this.listener = context
             else -> throw ClassCastException("${context.toString()} must implement OnCellSelectedListener")

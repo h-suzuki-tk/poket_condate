@@ -7,7 +7,7 @@ import kotlin.collections.ArrayList
 
 class DateManager() {
 
-    val calendar: Calendar = Calendar.getInstance()
+    var calendar: Calendar = Calendar.getInstance()
 
     // 当月の要素を取得
     fun getDays(): ArrayList<Date> {
