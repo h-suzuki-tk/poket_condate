@@ -1,19 +1,25 @@
 package com.example.wse2019
 
 
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.app.AlertDialog
 import android.content.Context
+import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.example.sample.DBContract
 import com.example.sample.SampleDBOpenHelper
+import com.github.mikephil.charting.charts.PieChart
+import com.github.mikephil.charting.data.PieData
+import com.github.mikephil.charting.data.PieDataSet
+import com.github.mikephil.charting.data.PieEntry
 
 
 class TopFragment() : Fragment() {
@@ -48,13 +54,16 @@ class TopFragment() : Fragment() {
         // --------------------------------------------------
         //  今週の得点
         // --------------------------------------------------
-        val score = view.findViewById<TextView>(R.id.ft_scoreTextView)
-        score.apply {
-            text = "%.0f".format(nh.recordScore(
-                dm.getYear(today)   .toInt(),
-                dm.getMonth(today)  .toInt(),
-                dm.getDate(today)   .toInt(),
-                1) ?: throw NullPointerException())
+        val score: Float = nh.recordScore(
+            dm.getYear(today)   .toInt(),
+            dm.getMonth(today)  .toInt(),
+            dm.getDate(today)   .toInt(),
+            1) ?: throw NullPointerException()
+
+        val scoreChart: PieChart = view.findViewById(R.id.ft_scorePieChart)
+        when (context) {
+            null -> throw NullPointerException()
+            else -> createScorePieChart(context!!, scoreChart, score)
         }
 
         // --------------------------------------------------
@@ -262,6 +271,51 @@ class TopFragment() : Fragment() {
             show()
         }
     }
+
+
+
+    // --------------------------------------------------
+    //  createScorePieChart - スコア円グラフをつくる
+    // --------------------------------------------------
+    @SuppressLint("ResourceType")
+    private fun createScorePieChart(context: Context, pieChart: PieChart, score: Float) {
+        pieChart.apply {
+            holeRadius = 75f
+            transparentCircleRadius = holeRadius+10f
+            isRotationEnabled = false
+            description = null
+            legend.isEnabled = false
+            centerText = "%.0f".format(score)
+            setCenterTextSize(50f)
+            setCenterTextColor(Color.parseColor(getString(R.color.colorAccent)))
+            setCenterTextTypeface(Typeface.DEFAULT_BOLD)
+            data = createScorePieData(score)
+            invalidate()
+            animateXY(3000, 3000)
+        }
+    }
+    @SuppressLint("ResourceType")
+    private fun createScorePieData(score: Float): PieData {
+        val values: MutableList<PieEntry>   = mutableListOf()
+        val colors: MutableList<Int>        = mutableListOf()
+
+        values += PieEntry(score)
+        values += PieEntry(100f-score)
+
+        colors += Color.parseColor(getString(R.color.colorAccent))
+        colors += Color.argb(0, 255, 255, 255)
+
+        val dataSet = PieDataSet(values, null)
+        dataSet.apply {
+            sliceSpace = 5f
+            setDrawValues(false)
+            setColors(colors)
+        }
+
+        return PieData(dataSet)
+    }
+
+
 
     // --------------------------------------------------
     //  replaceFragment - フラグメントを切り替える
