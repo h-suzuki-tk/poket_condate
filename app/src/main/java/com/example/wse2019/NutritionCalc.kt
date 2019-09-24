@@ -367,14 +367,14 @@ class NutritionHelper(mContext: Context?) {
             )
 
             // 距離が更新できるなら返り値を対応する栄養クラスに更新する
-            println("${result.foodname}:$tmpDist VS ${it.foodname}:$dist")
+//            println("${result.foodname}:$tmpDist VS ${it.foodname}:$dist")
             if (dist < tmpDist) {
                 tmpDist = dist
                 result = it
             }
 
             nut_dist.add(Pair(it, dist))
-            println("winner : ${result.foodname}")
+//            println("winner : ${result.foodname}")
         }
 
         nut_dist.sortBy { it.second }

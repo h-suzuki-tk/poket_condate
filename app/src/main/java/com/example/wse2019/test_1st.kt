@@ -24,14 +24,14 @@ fun test1(context: Context) {
     DB.insertRecord(
         Table.Ingredient(
             "お米", 38.1f, 0.3f, 3.5f, 0f, 0f,
-            0f, 168f, 100f, "グラム",0, 0
+            0f, 168f, 100f, "グラム", 0, 0
         )
     )
 
     DB.insertRecord(
         Table.Ingredient(
             "いくら", 0.12f, 9.36f, 19.56f, null, 0f,
-            null, 163f, 60f, "グラム",1, 0
+            null, 163f, 60f, "グラム", 1, 0
         )
     )
 
@@ -70,8 +70,12 @@ fun test1(context: Context) {
     // result5のようなことはさすがにしないだろうが
     val result3 = DB.searchRecord("ingredients")
     val result4 = DB.searchRecord("ingredients", null)
-    val result5 = DB.searchRecord("ingredients", arrayOf("id", "name", "sugar", "fat", "protein", "vitamin",
-        "mineral", "fiber", "calorie", "quantity", "unit", "allergen"))
+    val result5 = DB.searchRecord(
+        "ingredients", arrayOf(
+            "id", "name", "sugar", "fat", "protein", "vitamin",
+            "mineral", "fiber", "calorie", "quantity", "unit", "allergen"
+        )
+    )
 
     result3?.forEach {
         Log.d("id", it)
@@ -103,18 +107,22 @@ fun test1(context: Context) {
     // さっきまでのに加えてwhere句(条件)を設定した検索
     // 第三変数conditionには「?」を用いた条件文を入れ、第四変数selectionArgsには「?」に入れる値もしくは変数を渡す。
     // 下の例では、つまり「name = 'いくらご飯'」という条件を設定している。
-    val newFood = DB.searchRecord(DBContract.Food.TABLE_NAME, arrayOf(DBContract.Food.ID),
-        "name = ?", arrayOf("'いくらご飯'")) ?: return
+    val newFood = DB.searchRecord(
+        DBContract.Food.TABLE_NAME, arrayOf(DBContract.Food.ID),
+        "name = ?", arrayOf("'いくらご飯'")
+    ) ?: return
 
     //Listから文字列を抽出する一例。
     //このフードIDは後でリレーションに使います。
-    val foodID : Int = Integer.parseInt(newFood.get(0))
+    val foodID: Int = Integer.parseInt(newFood.get(0))
 
     // もちろん条件も複数の指定は可能である。
     // 例えば、下で設定された条件は「name = 'お米' or name = 'いくら'」、
     // つまり材料名が'お米'あるいわ'いくら'であるレコードのIDを返す形になる。
-    val ingredientList = DB.searchRecord(DBContract.Ingredient.TABLE_NAME, arrayOf(DBContract.Ingredient.ID),
-        "name = ? or name = ?", arrayOf("'お米'", "'いくら'")) ?: return
+    val ingredientList = DB.searchRecord(
+        DBContract.Ingredient.TABLE_NAME, arrayOf(DBContract.Ingredient.ID),
+        "name = ? or name = ?", arrayOf("'お米'", "'いくら'")
+    ) ?: return
 
     Log.d("test5", "success!")
 
@@ -130,19 +138,23 @@ fun test1(context: Context) {
     // forEach文を使ってFood_Ingredientテーブルに入れちゃいましょう
     // 先ほどfoodIDも確保済みで不変なので楽
     ingredientList.forEach {
-        val ingredientID : Int = Integer.parseInt(it)
+        val ingredientID: Int = Integer.parseInt(it)
         DB.insertRecord(Table.Food_Ingredient(foodID, ingredientID, 1.0f))
     }
 
     //ここまでの操作で「いくらご飯」、まぁいくら丼が完成したはずです。
     //確認のため検索
-    val last = DB.searchRecord(DBContract.Foods_Ingredients.TABLE_NAME, arrayOf(DBContract.Foods_Ingredients.INGREDIENT_ID),
-        "${DBContract.Foods_Ingredients.FOOD_ID} = ?", arrayOf("$foodID")) ?: return
+    val last = DB.searchRecord(
+        DBContract.Foods_Ingredients.TABLE_NAME, arrayOf(DBContract.Foods_Ingredients.INGREDIENT_ID),
+        "${DBContract.Foods_Ingredients.FOOD_ID} = ?", arrayOf("$foodID")
+    ) ?: return
 
     last.forEach {
-        val last_id : Int = Integer.parseInt(it)
-        val IngredientName = DB.searchRecord(DBContract.Ingredient.TABLE_NAME, arrayOf(DBContract.Ingredient.NAME),
-            "${DBContract.Ingredient.ID} = ?", arrayOf("$last_id"))
+        val last_id: Int = Integer.parseInt(it)
+        val IngredientName = DB.searchRecord(
+            DBContract.Ingredient.TABLE_NAME, arrayOf(DBContract.Ingredient.NAME),
+            "${DBContract.Ingredient.ID} = ?", arrayOf("$last_id")
+        )
 
         Log.d("last", IngredientName?.get(0))
     }
@@ -203,7 +215,8 @@ fun test1(context: Context) {
     // 例えば。パスタに絞って品目(Food)テーブルの名前を抽出した場合、
     // Dictionary(listOf("ペペロンチーノ", "カルボナーラ". "ミートスパ", "和風醤油バター", "ジェノベーゼ"), "name")
     // という感じです。　
-    val Dic = DB.searchRecord_dic(Ingredient.TABLE_NAME, arrayOf(Ingredient.ID, Ingredient.NAME, Ingredient.CALORIE)) ?: return
+    val Dic = DB.searchRecord_dic(Ingredient.TABLE_NAME, arrayOf(Ingredient.ID, Ingredient.NAME, Ingredient.CALORIE))
+        ?: return
 
     // この辞書クラスでは.(ドット)と続いて「toInt()」「toFloat()」「toStr()」を付けることで
     // それぞれの型に対応した型のデータクラスに変換することが出来ます。
@@ -215,13 +228,13 @@ fun test1(context: Context) {
     val calorie = Dic[2].toFloat()  //calorie:クラスFloatDic(List<Float>, string)
     //とすれば、それぞれ型の異なる別のクラスに置き換えられます。toStr()の意味？見栄え見栄え
 
-    ident.data.forEach{
+    ident.data.forEach {
         Log.d("ident", it.toString())
     }
     names.data.forEach {
         Log.d("names", it)
     }
-    calorie.data.forEach{
+    calorie.data.forEach {
         Log.d("calorie", it.toString())
     }
 
@@ -243,8 +256,10 @@ fun test1(context: Context) {
     // まぁ可視化のためにprintしてみます。
     // なんどなくどんな感じになるのか分かるんじゃないかなぁ。分かればいいなぁ
     nutritions.forEach {
-        println("${it.foodname} : ${it.sugar}, ${it.fat}, ${it.protein}, ${it.vitamin}, ${it.mineral}, " +
-                "${it.fiber}, ${it.calorie} \n")
+        println(
+            "${it.foodname} : ${it.sugar}, ${it.fat}, ${it.protein}, ${it.vitamin}, ${it.mineral}, " +
+                    "${it.fiber}, ${it.calorie} \n"
+        )
     }
 
     val record = DBContract.Record
@@ -254,14 +269,21 @@ fun test1(context: Context) {
     // 日時と日別(0)か週別(1)か月別(2)を渡すことで、
     // 品目IDをおすすめ順にソートしたリスト等を持つ
     // リザルトクラスで返す。
-    val result = Nut.selectFood(2019, 7, 13, 1) ?: return
+    val result = Nut.selectFood(2019, 6, 13, 1) ?: return
     result.foodIDList.forEach {
         println("ID : $it")
     }
 
     // 渡す要素をおすすめ品目選択と同じ
     // その区分でのスコアを100点満点で渡す。
-    val score = Nut.recordScore(2019, 7, 13, 0) ?: return
+    val score = Nut.recordScore(2019, 6, 13, 0)
+    if(score == null){
+        println("no data")
+    } else {
+        println("score: $score")
+    }
 
-    println("score: $score")
+    val result11 = DB.searchRecord(record.TABLE_NAME, null, "month = ?", arrayOf("12"))
+
 }
+
