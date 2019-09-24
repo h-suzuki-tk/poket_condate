@@ -302,7 +302,7 @@ class TopFragment() : Fragment() {
         values += PieEntry(score)
         values += PieEntry(100f-score)
 
-        colors += Color.parseColor(getString(R.color.colorAccent))
+        colors += Color.YELLOW
         colors += Color.argb(0, 255, 255, 255)
 
         val dataSet = PieDataSet(values, null)
