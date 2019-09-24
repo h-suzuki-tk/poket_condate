@@ -20,13 +20,13 @@
                 android:gravity="center"
                 android:paddingTop="8dp"
                 android:orientation="vertical"
-                android:background="#ffd700">
+                android:background="@color/colorAccent">
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="今週の得点は…"
-                    android:textSize="18sp" android:textColor="@color/colorAccent"/>
+                    android:textSize="18sp" android:textColor="@android:color/white"/>
             <com.github.mikephil.charting.charts.PieChart
                     android:id="@+id/ft_scorePieChart"
                     android:layout_width="match_parent"
