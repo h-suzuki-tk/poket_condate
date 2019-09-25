@@ -44,7 +44,7 @@ fun setupLineChart(mChart: LineChart,span: Int){
 
             dt = DateTime.now()
             dt.addDays(i-3)//日の計算
-            label=dt.year.toString()+"年"+(dt.month+1).toString()+"月"+dt.day.toString()+"日"
+            label=(dt.month+1).toString()+"月"+dt.day.toString()+"日"
             Log.d("date", dt.toString())
             labels.add(label.format())
             i++
@@ -61,15 +61,15 @@ fun setupLineChart(mChart: LineChart,span: Int){
             Log.d("date",dt.toString())
             //第何周かどうかで場合分け
             if(dt.day>0 && dt.day<=7){
-                label=dt.year.toString()+"年"+(dt.month+1).toString()+"月"+"第一週"
+                label=(dt.month+1).toString()+"月"+"第一週"
             }else if(dt.day>7 && dt.day<=14){
-                label=dt.year.toString()+"年"+(dt.month+1).toString()+"月"+"第二週"
+                label=(dt.month+1).toString()+"月"+"第二週"
             }else if(dt.day>14 && dt.day<=21){
-                label=dt.year.toString()+"年"+(dt.month+1).toString()+"月"+"第三週"
+                label=(dt.month+1).toString()+"月"+"第三週"
             }else if(dt.day>21 && dt.day<=28){
-                label=dt.year.toString()+"年"+(dt.month+1).toString()+"月"+"第四週"
+                label=(dt.month+1).toString()+"月"+"第四週"
             }else if(dt.day>28 && dt.day<=31){
-                label=dt.year.toString()+"年"+(dt.month+1).toString()+"月"+"第五週"
+                label=(dt.month+1).toString()+"月"+"第五週"
             }else{
                 TODO()
             }
@@ -126,28 +126,29 @@ fun setupLineChart(mChart: LineChart,span: Int){
 fun lineDataWithCount(dt:DateTime,context:Context,span:Int): LineData {
 
     val values = mutableListOf<Entry>()
-    val Nut = NutritionHelper(context)
+    val nut = NutritionHelper(context)
     val period=7
+    val db=SampleDBOpenHelper(context)
 
 
     for (i in 0 until period) {
         //現在は仮の乱数データを入れているが、関数が完成次第こちらに処理を入れる予定
+
         var value=0f
 
+
         if(span==0){
-            value = Nut.recordScore(dt.year, dt.month+1, dt.day+i, span)?: continue
+            value=nut.recordScore(dt.year,dt.month+1,dt.day+(i-3),span)?: TODO()
         }else if(span==1){
-            value = Nut.recordScore(dt.year, dt.month+1, dt.day+i*7, span)?: continue
-
+            value=nut.recordScore(dt.year,dt.month+1,dt.day+(i-3)*7,span)?: TODO()
         }else if(span==2){
-            value = Nut.recordScore(dt.year, dt.month+1+i, dt.day, span)?: continue
+            value=nut.recordScore(dt.year,dt.month+1+(i-3),dt.day,span)?: TODO()
+        }else{
+            TODO()
         }
 
 
-        if(value==null){
-            value=0f
-        }
-
+        Log.d("value:",value.toString())
         values.add(Entry(i.toFloat(), value))
     }
     // create a dataset and give it a type
@@ -157,7 +158,7 @@ fun lineDataWithCount(dt:DateTime,context:Context,span:Int): LineData {
         highLightColor = Color.YELLOW
         setDrawCircles(false)
         setDrawCircleHole(false)
-        setDrawValues(false)
+        setDrawValues(true)
         lineWidth = 2f
     }
     val data = LineData(yVals)
@@ -250,7 +251,8 @@ fun setGraphData(rChart: RadarChart, set:List<RadarDataSet>) {
     var mTypeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
     data.setValueTypeface(mTypeface)
     data.setValueTextSize(8f)
-    data.setDrawValues(false)
+    data.setDrawValues(true)
+    data.setValueTextSize(5f)
     data.setValueTextColor(Color.BLACK)
 
     rChart.setData(data)
@@ -412,11 +414,11 @@ fun calPartScore(year:Int,month:Int,day:Int,span:Int,db: SampleDBOpenHelper,cont
     var calPer = calSum/necNut.calorie
     if(calPer > 1) calPer = 1-(calPer-1) // 取りすぎ分を減点
 
-    var scoreSugar=sugarPer*100+10
-    var scoreFat=fatPer*100+10
-    var scoreProtein=proteinPer*100+10
-    var scoreFiber=100*fiberPer+10
-    var scoreCal=100*calPer+10
+    var scoreSugar=sugarPer*100
+    var scoreFat=fatPer*100
+    var scoreProtein=proteinPer*100
+    var scoreFiber=100*fiberPer
+    var scoreCal=100*calPer
 
     if(scoreSugar>100f){
         scoreSugar=100f
@@ -445,7 +447,7 @@ fun calPartScore(year:Int,month:Int,day:Int,span:Int,db: SampleDBOpenHelper,cont
     }
 
 
-    val resultScore = arrayOf(calPer,sugarPer ,proteinPer,fatPer,fiberPer)
+    val resultScore = arrayOf(scoreCal,scoreSugar ,scoreProtein,scoreFat,scoreFiber)
 
 
 

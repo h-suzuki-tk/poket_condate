@@ -52,6 +52,9 @@ class EvaluationMonthFragment() : Fragment() {
 
         var i=0
 
+
+
+
         while(i<period) {
 
             dt=DateTime.now()
@@ -80,7 +83,12 @@ class EvaluationMonthFragment() : Fragment() {
             //　アイテムが選択された時
             override fun onItemSelected(parent: AdapterView<*>?,
                                         view: View?, position: Int, id: Long) {
-                dt=DateTime.now().addMonths((-3))
+
+                dt=DateTime.now()
+                setupLineChart(mChart,span)
+                mChart.data=lineDataWithCount(dt,requireContext(),span)
+
+                dt.addMonths((-3))
                 dt.addMonths(position)
                 text=dt.year.toString()+"年"+(dt.month+1).toString()+"月の詳細データ"
 
@@ -88,6 +96,8 @@ class EvaluationMonthFragment() : Fragment() {
                 textView2.setText(text)
                 score.setText(nut.recordScore(dt.year,dt.month+1,dt.day,span).toString())
                 Log.d("position",position.toString())
+
+
             }
 
             //　アイテムが選択されなかった
@@ -98,8 +108,6 @@ class EvaluationMonthFragment() : Fragment() {
 
 
 
-        setupLineChart(mChart,span)
-        mChart.data=lineDataWithCount(dt,requireContext(),span)
 
         return v
     }

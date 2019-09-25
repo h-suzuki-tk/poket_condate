@@ -11,12 +11,13 @@ import android.widget.*
 import com.example.sample.DBContract
 import com.example.sample.Join
 import com.example.sample.SampleDBOpenHelper
-
+import android.util.Log
 
 
 class EditMyCondateFragment(): Fragment(){
 
     private var itemTextView=""
+    private val ADD="+"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,15 +35,16 @@ class EditMyCondateFragment(): Fragment(){
 
 
         val DB = SampleDBOpenHelper(requireContext())
+        val fm = FoodManager()
+
         //リストビューを探す
         val myListView=v.findViewById<ListView>(R.id.listView1)
         val textCondateName=v.findViewById<TextView>(R.id.condate_name)
         val textCalorie=v.findViewById<TextView>(R.id.calorie)
         val textProtein=v.findViewById<TextView>(R.id.protein)
-        val textVitamin=v.findViewById<TextView>(R.id.vitamin)
+        val textFiber=v.findViewById<TextView>(R.id.fiber)
         val textFat=v.findViewById<TextView>(R.id.fat)
         val textSugar=v.findViewById<TextView>(R.id.sugar)
-        val textMineral=v.findViewById<TextView>(R.id.mineral)
         textCondateName.setText(itemTextView)
 
         val nuCal=NutritionHelper(context)
@@ -52,7 +54,6 @@ class EditMyCondateFragment(): Fragment(){
         var sumFat=0f
         var sumVitamin=0f
         var sumFiber=0f
-        var sumMineral=0f
         var sumSugar=0f
 
 
@@ -111,9 +112,7 @@ class EditMyCondateFragment(): Fragment(){
             sumSugar+=nuList[i].sugar
             sumProtein+=nuList[i].protein
             sumFat+=nuList[i].fat
-            sumMineral+=nuList[i].mineral
             sumFiber+=nuList[i].fiber
-            sumVitamin+=nuList[i].vitamin
             i++
         }
 
@@ -122,9 +121,9 @@ class EditMyCondateFragment(): Fragment(){
         textCalorie.setText("${sumCalorie}")
         textProtein.setText("${sumProtein}")
         textFat.setText("${sumFat}")
-        textMineral.setText("${sumMineral}")
+
         textSugar.setText("${sumSugar}")
-        textVitamin.setText("${sumVitamin}")
+        textFiber.setText("${sumFiber}")
 
 
 
@@ -137,7 +136,31 @@ class EditMyCondateFragment(): Fragment(){
         myListView.adapter=adapter
 
 
+        myListView.setOnItemClickListener { parent, view, position, id ->
 
+            val foodName=adapter.getItem(position)
+
+            if(foodName!=ADD) {
+                android.app.AlertDialog.Builder(context).apply {
+                    setView(fm.getFoodInformationView(map[foodName]!!.toInt(), context, parent))
+                    show()
+                }
+            }else{
+                val bundle= Bundle()
+
+                bundle.putString("MYCONDATE_NAME",itemTextView)
+                Log.d("condatename:",itemTextView)
+                val fragment =CondateEditFragment()
+                fragment.setArguments(bundle)
+
+                //fragmentの張替え
+                val fragmentManager = fragmentManager
+                val transaction = fragmentManager!!.beginTransaction()
+                transaction.replace(R.id.frame_contents,fragment)
+                transaction.addToBackStack(null)
+                transaction.commit()
+            }
+        }
 
         // 項目を長押ししたときの処理
         myListView.setOnItemLongClickListener { parent, view, position, id ->
@@ -148,30 +171,39 @@ class EditMyCondateFragment(): Fragment(){
                 TODO()
             }
 
+            if(foodName==ADD){
+                //何もしない
+            }else{
+                AlertDialog.Builder(requireContext()).apply {
+                    setTitle("${foodName}を削除しますか?")
+                    setPositiveButton("OK", DialogInterface.OnClickListener { _, _ ->
+                        // OKをタップしたときの処理、項目の削除
 
-            AlertDialog.Builder(requireContext()).apply {
-                setTitle("${foodName}を削除しますか?")
-                setPositiveButton("OK", DialogInterface.OnClickListener { _, _ ->
-                    // OKをタップしたときの処理、項目の削除
+                        DB.deleteRecord(DBContract.MyCondate_Foods.TABLE_NAME,
+                            "${DBContract.MyCondate_Foods.FOOD_ID} = ? and ${DBContract.MyCondate_Foods.MYCONDATE_ID} = ?",
+                            arrayOf(map[foodName]!!,myCondateId))
 
-                    DB.deleteRecord(DBContract.MyCondate_Foods.TABLE_NAME,
-                        "${DBContract.MyCondate_Foods.FOOD_ID} = ? and ${DBContract.MyCondate_Foods.MYCONDATE_ID} = ?",
-                        arrayOf(map[foodName]!!,myCondateId))
+                        adapter.clear()
+                        items=loadList(DB,map)
+                        adapter.addAll(items)
 
-                    adapter.clear()
-                    items=loadList(DB,map)
-                    adapter.addAll(items)
+                        Toast.makeText(context, "${foodName}を${itemTextView}から削除しました。", Toast.LENGTH_LONG).show()
+                    })
+                    setNegativeButton("Cancel", null)
+                    show()
+                }
 
-                    Toast.makeText(context, "${foodName}を${itemTextView}から削除しました。", Toast.LENGTH_LONG).show()
-                })
-                setNegativeButton("Cancel", null)
-                show()
+                adapter.notifyDataSetChanged()
+
             }
 
-            adapter.notifyDataSetChanged()
+
 
             return@setOnItemLongClickListener true
         }
+
+
+
 
         DB.close()
 
@@ -222,6 +254,8 @@ class EditMyCondateFragment(): Fragment(){
             map[result[i+1]]=result[i]
             i=i+2
         }
+
+        items.add(ADD)
 
         return items
 

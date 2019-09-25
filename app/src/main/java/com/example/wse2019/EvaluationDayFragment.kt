@@ -73,7 +73,11 @@ class EvaluationDayFragment() : Fragment() {
             //　アイテムが選択された時
             override fun onItemSelected(parent: AdapterView<*>?,
                                         view: View?, position: Int, id: Long) {
-                dt=DateTime.now().addDays((-3))
+                dt=DateTime.now()
+                setupLineChart(mChart,span)
+                mChart.data=lineDataWithCount(dt,requireContext(),span)
+
+                dt.addDays((-3))
                 dt.addDays(position)
                 text=dt.year.toString()+"年"+(dt.month+1).toString()+"月"+dt.day.toString()+"日の詳細データ"
 
@@ -81,6 +85,7 @@ class EvaluationDayFragment() : Fragment() {
                 textView2.setText(text)
                 score.setText(nut.recordScore(dt.year,dt.month+1,dt.day,span).toString())
                 Log.d("position",position.toString())
+
             }
 
             //　アイテムが選択されなかった
@@ -91,8 +96,7 @@ class EvaluationDayFragment() : Fragment() {
 
 
 
-        setupLineChart(mChart,span)
-        mChart.data=lineDataWithCount(dt,requireContext(),span)
+
 
         return v
     }

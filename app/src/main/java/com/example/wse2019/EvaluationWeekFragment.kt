@@ -108,7 +108,12 @@ class EvaluationWeekFragment() : Fragment(),OnChartValueSelectedListener {
             //　アイテムが選択された時
             override fun onItemSelected(parent: AdapterView<*>?,
                                         view: View?, position: Int, id: Long) {
-                dt=DateTime.now().addDays(7*(-3))
+
+                dt=DateTime.now()
+                setupLineChart(mChart,span)
+                mChart.data=lineDataWithCount(dt,requireContext(),span)
+
+                dt.addDays(7*(-3))
                 dt.addDays(7*position)
                 if(dt.day>0 && dt.day<=7){
                     text=dt.year.toString()+"年"+(dt.month+1).toString()+"月"+"第一週の詳細データ"
@@ -128,6 +133,9 @@ class EvaluationWeekFragment() : Fragment(),OnChartValueSelectedListener {
                 textView2.setText(text)
                 score.setText(nut.recordScore(dt.year,dt.month+1,dt.day,span).toString())
                 Log.d("position",position.toString())
+
+
+
             }
 
             //　アイテムが選択されなかった
@@ -138,8 +146,6 @@ class EvaluationWeekFragment() : Fragment(),OnChartValueSelectedListener {
 
 
 
-        setupLineChart(mChart,span)
-        mChart.data=lineDataWithCount(dt,requireContext(),span)
 
 
 

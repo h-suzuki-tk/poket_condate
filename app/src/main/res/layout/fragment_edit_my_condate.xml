@@ -73,7 +73,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
                 <TextView
-                        android:text="ビタミン"
+                        android:text="食物繊維"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/textView19"
@@ -81,26 +81,15 @@
                 <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/vitamin"
+                        android:id="@+id/fiber"
                         android:gravity="center_horizontal"/>
             </TableRow>
-            <TableRow android:layout_width="match_parent" android:layout_height="match_parent">
-                <TextView
-                        android:text="ミネラル"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/textView10"
-                        android:gravity="center_horizontal"/>
-                <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/mineral"
-                        android:gravity="center_horizontal"/>
-            </TableRow>
+
         </TableLayout>
         <ListView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/listView1"/>
+            android:id="@+id/listView1">
+        </ListView>
     </LinearLayout>>
 </android.support.constraint.ConstraintLayout>
