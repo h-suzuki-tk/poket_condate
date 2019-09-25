@@ -8,32 +8,42 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import com.example.wse2019.csvImportHelper
 
 private const val DB_NAME = "FoodManage"
 private const val DB_VERSION = 1
 
 class SampleDBOpenHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
+    val context = context
 
-    override fun onCreate(db: SQLiteDatabase?) {
+    override fun onCreate(db: SQLiteDatabase) {
 
         //テーブルの作成
         Log.d("program check", "create table start")
-        db?.execSQL(createIngredientTable())
-        db?.execSQL(createFoodTable())
-        db?.execSQL(createRecordTable())
-        db?.execSQL(createMyCondateTable())
-        db?.execSQL(createCategoryTable())
-        db?.execSQL(createFoodIngredientsTable())
-        db?.execSQL(createMyCondateFoodTable())
-        db?.execSQL(createUserInfoTable())
+        try {
+            db.execSQL(createIngredientTable())
+            db.execSQL(createFoodTable())
+            db.execSQL(createRecordTable())
+            db.execSQL(createMyCondateTable())
+            db.execSQL(createCategoryTable())
+            db.execSQL(createFoodIngredientsTable())
+            db.execSQL(createMyCondateFoodTable())
+            db.execSQL(createUserInfoTable())
+            val mContext = context ?: return
+
+            defaultData(mContext)
+        } catch  (ex: SQLiteException) {
+            Log.e(TAG, "SQLite execution failed" + ex.localizedMessage)
+            db.close()
+            return
+        }
 
         Log.d("program check", "create table done")
     }
 
-    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         //バージョン更新時のSQL発行
         onCreate(db)
-
         Log.d("program check", "upgrade done")
     }
 
@@ -311,7 +321,7 @@ class SampleDBOpenHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME,
             }
 
             sql += " FROM $joinSql"
-            Log.d("join check", sql)
+//            Log.d("join check", sql)
         }
 
         // 内部結合が指定された場合はここでJoin文の作成・追加を行う。
@@ -362,7 +372,7 @@ class SampleDBOpenHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME,
             // 前述した通り、内部結合には対応していないため使うか否かでかき分けておきますが、
             // まぁ望ましくないので徐々に全機能をクエリ文作成のほうに統一していきます。
             cursor = db.rawQuery(sql, selectionArgs)
-            Log.d("check", sql)
+//            Log.d("check", sql)
         } catch (ex: SQLiteException) {
             //クエリ文が失敗した場合は空の文字列を返す。
             //エラー文を添えることが出来ればなおよい
@@ -434,7 +444,7 @@ class SampleDBOpenHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME,
             // 前述した通り、内部結合には対応していないため使うか否かでかき分けておきますが、
             // まぁ望ましくないので徐々に全機能をクエリ文作成のほうに統一していきます。
             cursor = db.rawQuery(sql, selectionArgs)
-            Log.d("check", sql)
+//            Log.d("check", sql)
         } catch (ex: SQLiteException) {
             //クエリ文が失敗した場合は空の文字列を返す。
             //エラー文を添えることが出来ればなおよい
@@ -535,6 +545,8 @@ class SampleDBOpenHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME,
         db.execSQL("DROP TABLE IF EXISTS " + DBContract.Foods_Ingredients.TABLE_NAME)
         db.execSQL("DROP TABLE IF EXISTS " + DBContract.MyCondate_Foods.TABLE_NAME)
         db.execSQL("DROP TABLE IF EXISTS " + DBContract.UserInfo.TABLE_NAME)
+        db.execSQL("DROP DATABASE IF EXISTS " + DB_NAME)
+        println("drop success")
     }
 }
 
