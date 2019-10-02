@@ -17,6 +17,7 @@ import kotlin.collections.ArrayList
 
 
 class CalendarAdapter(val context: Context) : BaseAdapter() {
+    val dm: DateManager = DateManager()
 
     // 各行で表示する情報
     private data class ViewHolderItem(
@@ -31,9 +32,17 @@ class CalendarAdapter(val context: Context) : BaseAdapter() {
         val area_snack      : FrameLayout
     )
 
-    val dm: DateManager = DateManager()
+    // 表示する日付
+    /*
+     * ArrayList(Date)
+     */
     var days: ArrayList<Date> = dm.getDays()
-    var condate = getMonthlyCondate(dm.getYear(dm.calendar.time).toInt(), dm.getMonth(dm.calendar.time).toInt())
+
+    // 表示する各日時の献立内容
+    /*
+     * MutableMap(Pair(Date<Int>, Time<Int>) to FoodNameList<MutableList<String>>)
+     */
+    var condate: MutableMap<Pair<Int, Int>, MutableList<String>> = mutableMapOf()
 
     override fun getCount(): Int {
         return days.size
@@ -120,18 +129,30 @@ class CalendarAdapter(val context: Context) : BaseAdapter() {
     }
 
 
+
+    // ------------------------------------------------------------
+    //  updateCondateContents
+    //  - 献立内容を最新のものに更新
+    // ------------------------------------------------------------
+    fun updateCondateContents() {
+        condate = getMonthlyCondate(dm.getYear(dm.calendar.time).toInt(), dm.getMonth(dm.calendar.time).toInt())
+        notifyDataSetChanged()
+    }
+
+
+
     // --------------------------------------------------
     //  getMonthlyCondate
-    //  - 該当月に登録されている献立を取得する
+    //  - 該当月に登録されている献立を取得
     // --------------------------------------------------
     /*
      * @params
      *      Year    : year<Int>
      *      Month   : month<Int>
      * @return
-     *      Map(Pair(Date<Int>, Time<Int>) to FoodNameList<List<String>>)
+     *      MutableMap(Pair(Date<Int>, Time<Int>) to FoodNameList<List<String>>)
      */
-    private fun getMonthlyCondate(year: Int, month: Int): Map<Pair<Int, Int>, List<String>> {
+    private fun getMonthlyCondate(year: Int, month: Int): MutableMap<Pair<Int, Int>, MutableList<String>> {
         val condate: MutableMap<Pair<Int, Int>, MutableList<String>> = mutableMapOf()
 
         // 検索の準備
@@ -181,10 +202,24 @@ class CalendarAdapter(val context: Context) : BaseAdapter() {
         return condate
     }
 
+
+    // ------------------------------------------------------------
+    //  getCurrentYearMonth
+    //  - 現在表示している年月を取得
+    // ------------------------------------------------------------
+    /*
+     * @return <String>yyyy/M (ex. 2019/9)
+     */
     fun getCurrentYearMonth(): String {
         return SimpleDateFormat("yyyy/M", Locale.US).format(dm.calendar.time)
     }
 
+
+
+    // ------------------------------------------------------------
+    //  nextMonth
+    //  - カレンダーのデータを翌月のものに更新
+    // ------------------------------------------------------------
     fun nextMonth() {
         dm.nextMonth()
         days = dm.getDays()
@@ -192,6 +227,12 @@ class CalendarAdapter(val context: Context) : BaseAdapter() {
         this.notifyDataSetChanged()
     }
 
+
+
+    // ------------------------------------------------------------
+    //  prevMonth
+    //  - カレンダーのデータを先月のものに更新
+    // ------------------------------------------------------------
     fun prevMonth() {
         dm.prevMonth()
         days = dm.getDays()

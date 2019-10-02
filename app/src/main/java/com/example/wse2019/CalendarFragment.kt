@@ -53,6 +53,9 @@ class CalendarFragment() : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v: View = inflater.inflate(R.layout.fragment_calendar, container, false)
 
+        // 献立内容を最新に更新
+        updateCondateContents()
+
         // ListView の処理
         val listView: ListView = v.findViewById(R.id.calendarListView)
         listView.apply {
@@ -108,6 +111,15 @@ class CalendarFragment() : Fragment() {
 
     override fun onDetach() {
         super.onDetach()
+    }
+
+
+    // ------------------------------------------------------------
+    //  updateCondateContents
+    //  - 献立内容を最新に更新
+    // ------------------------------------------------------------
+    private fun updateCondateContents() {
+        cAdapter.updateCondateContents()
     }
 
 }

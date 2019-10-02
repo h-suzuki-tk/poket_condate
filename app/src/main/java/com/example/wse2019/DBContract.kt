@@ -163,3 +163,11 @@ class Time {
         val OBJECT = listOf(MORNING, NOON, EVENING, SNACK)
     }
 }
+
+class IngredientClass {
+    companion object {
+        const val MATERIAL      = 0
+        const val FINISHED_FOOD = 1
+        val OBJECT = listOf(MATERIAL, FINISHED_FOOD)
+    }
+}

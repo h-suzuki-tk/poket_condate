@@ -48,14 +48,16 @@ class FoodSearchResultAdapter(val context: Context) : BaseAdapter() {
         val icon: ImageView = v.findViewById(R.id.foodImageView)
         icon.apply {
             setImageBitmap(fm.getBitmap(context, foods[position].id))
-            setOnClickListener { parent.performItemClick(v, position, 0) }
+            setOnClickListener      { parent.performItemClick(v, position, 0) }
+            setOnLongClickListener  { parent.performLongClick() }
         }
 
         // 品目名のセット
         val name: TextView = v.findViewById(R.id.foodTextView)
         name.apply {
             text = foods[position].name
-            setOnClickListener { parent.performItemClick(v, position, 0) }
+            setOnClickListener      { parent.performItemClick(v, position, 0) }
+            setOnLongClickListener  { parent.performLongClick() }
         }
 
         // お気に入り済みか否かのセット

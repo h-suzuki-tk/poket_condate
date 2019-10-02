@@ -13,6 +13,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentTransaction
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -248,6 +249,29 @@ class CondateRegistrationFragment(): Fragment() {
                     }
                 }
             }
+            setOnItemLongClickListener { parent, view, position, id ->
+                val food = search.getResultItem(position)
+
+                // 品目削除確認ダイアログを表示
+                AlertDialog.Builder(context).apply {
+                    setMessage("品目「%s」を削除しますか？".format(food.name))
+                    setNegativeButton("キャンセル", null)
+                    setPositiveButton("削除") { _, _ ->
+
+                        val msg = when (fm.delete(context, food.id)) {
+                            OK -> "削除しました"
+                            NG -> "!! 失敗しました !!\n管理者にお問い合わせください"
+                            else -> throw AssertionError()
+                        }
+                        search.updateResult()
+                        Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+
+                    }
+                    show()
+                }
+                true
+
+            }
         }
 
         // ------------------------------------------------------------
@@ -437,6 +461,10 @@ class CondateRegistrationFragment(): Fragment() {
 
         fun switchFavorite(position: Int) {
             adapter.switchFavorite(position)
+        }
+
+        fun applyChanges() {
+            adapter.notifyDataSetChanged()
         }
 
     }
@@ -937,7 +965,7 @@ class CondateRegistrationFragment(): Fragment() {
         val myCondateId = db.searchRecord(
             tableName = myCondateT.TABLE_NAME,
             column = arrayOf(myCondateT.ID)
-        )?.max()?.toInt() ?: throw NullPointerException()
+        )?.last()?.toInt() ?: throw NullPointerException()
 
         // 各品目を、追加したMy献立に登録
         for (i in 0 until foods.size) {

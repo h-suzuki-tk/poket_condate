@@ -242,7 +242,7 @@ class FoodRegistrationFragment() : Fragment() {
                         favorite = position
                     }
                     setPositiveButton("登録") { _, _ ->
-                        if (test_registerNewFood(
+                        if (registerNewFood(
                             name        = name.text.toString(),
                             number      = if(number.text.isEmpty()) { NaN } else { number.text.toString().toFloat() },
                             category    = category.selectedItemPosition,
@@ -525,18 +525,18 @@ class FoodRegistrationFragment() : Fragment() {
         // 品目テーブルにデータを追加
         db.insertRecord(
             Table.Food(
-                name = name,
-                memo = if(memo.isEmpty() || memo.isBlank()) { null } else { memo },
-                favorite = favorite,
-                category = category
+                name        = name,
+                favorite    = favorite,
+                memo        = if(memo.isEmpty() || memo.isBlank()) { null } else { memo },
+                category    = category
             )
         )
 
         // 追加した品目のIDを取得
-        val foodId = db.searchRecord(
+        val foodId: Int = db.searchRecord(
             tableName = foodT.TABLE_NAME,
             column = arrayOf(foodT.ID)
-        )?.max()?.toInt() ?: throw NullPointerException()
+        )?.last()?.toInt() ?: throw NullPointerException()
 
         when (method) {
             // --------------------------------------------------
@@ -550,7 +550,7 @@ class FoodRegistrationFragment() : Fragment() {
                         Table.Food_Ingredient(
                             food_id         = foodId,
                             Ingredient_id   = ingredient.id,
-                            num             = ingredient.number
+                            num             = ingredient.number/number
                         )
                     )
                 }
@@ -566,7 +566,7 @@ class FoodRegistrationFragment() : Fragment() {
                     Table.Ingredient(
                         name        = name,
                         unit        = "個",
-                        quantity    = null, // そのうち実装
+                        quantity    = 1f, // そのうち実装
                         sugar       = nutrition.sugar   / number,
                         fat         = nutrition.fat     / number,
                         protein     = nutrition.protein / number,
@@ -574,7 +574,7 @@ class FoodRegistrationFragment() : Fragment() {
                         mineral     = nutrition.mineral / number,
                         fiber       = nutrition.fiber   / number,
                         calorie     = nutrition.calorie / number,
-                        allergen    = null, // そのうち実装
+                        allergen    = 0, // そのうち実装
                         clas        = 1    // 1: 区分 "完成品"
                     )
                 )
@@ -583,7 +583,7 @@ class FoodRegistrationFragment() : Fragment() {
                 val ingredientId = db.searchRecord(
                     tableName = ingredientsT.TABLE_NAME,
                     column = arrayOf(ingredientsT.ID)
-                )?.max()?.toInt() ?: throw NullPointerException()
+                )?.last()?.toInt() ?: throw NullPointerException()
 
                 // 品目材料テーブルにデータを追加
                 db.insertRecord(

@@ -8,14 +8,12 @@ import android.view.ViewGroup
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
-import com.example.sample.DBContract
-import com.example.sample.Dictionary
-import com.example.sample.Join
-import com.example.sample.SampleDBOpenHelper
+import com.example.sample.*
 import org.w3c.dom.Text
 
 const val FOOD_IMAGE_DIRECTORY = "foods"
 const val NO_IMAGE_FILENAME = "0.png"
+
 
 class FoodManager {
     private val imageManager = ImageManager()
@@ -245,6 +243,72 @@ class FoodManager {
         }
     }
     // --------------------------------------------------
+
+
+    // ------------------------------------------------------------
+    //  delete
+    //  - 品目をデータベースから削除する
+    // ------------------------------------------------------------
+    /*
+     * @params
+     *      foodId: Int
+     */
+    fun delete(context: Context, foodId: Int): Int {
+        var result: Int = NG
+
+        val db = SampleDBOpenHelper(context)
+        val foodT               = DBContract.Food
+        val ingredientT         = DBContract.Ingredient
+        val food_ingredientsT   = DBContract.Foods_Ingredients
+
+        // 材料のIDと区分を取得
+        val ingredients = db.searchRecord(
+            tableName   = ingredientT.TABLE_NAME,
+            column      = arrayOf(ingredientT.ID, ingredientT.CLASS)
+        ) ?: throw NullPointerException()
+        if (ingredients.isEmpty()) { throw AssertionError() }
+
+        // 材料が完成品1つのみであった場合、その材料を削除
+        /*
+         * ingredients.size == 2 : 材料が1つのみであれば、ingredientsにはその材料のID, CLASSの2つしか入っていないため
+         */
+        val (id, clas) = Pair(ingredients[0].toInt(), ingredients[1].toInt())
+        if (ingredients.size == 2 && clas == IngredientClass.FINISHED_FOOD) {
+            result = when (db.deleteRecord(
+                tablename       = ingredientT.TABLE_NAME,
+                condition       = "${ingredientT.ID} = ?",
+                selectionArgs   = arrayOf(id.toString())
+            )) {
+                true    -> OK
+                false   -> NG
+            }
+            if (result == NG) { return result }
+        }
+
+        // 品目材料の削除
+        result = when (db.deleteRecord(
+            tablename       = food_ingredientsT.TABLE_NAME,
+            condition       = "${food_ingredientsT.FOOD_ID} = ?",
+            selectionArgs   = arrayOf(foodId.toString())
+        )) {
+            true  -> OK
+            false -> NG
+        }
+        if (result == NG) { return result }
+
+        // 品目の削除
+        result = when (db.deleteRecord(
+            tablename = foodT.TABLE_NAME,
+            condition = "${foodT.ID} = ?",
+            selectionArgs = arrayOf(foodId.toString())
+        )) {
+            true    -> OK
+            false   -> NG
+        }
+
+        return result
+    }
+    // ------------------------------------------------------------
 
 
 }

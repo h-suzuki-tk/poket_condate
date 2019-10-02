@@ -438,7 +438,7 @@ class CondateEditFragment(): Fragment() {
             condition = "${myCondateT.NAME}= ?",
             selectionArgs = arrayOf(name)
 
-        )?.max()?.toInt() ?: throw NullPointerException()
+        )?.last()?.toInt() ?: throw NullPointerException()
 
         // 各品目を、追加したMy献立に登録
         for (i in 0 until foods.size) {
