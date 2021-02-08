@@ -16,30 +16,7 @@ private const val DB_VERSION = 1
 class SampleDBOpenHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
     val context = context
 
-    override fun onCreate(db: SQLiteDatabase) {
-
-        //テーブルの作成
-        Log.d("program check", "create table start")
-        try {
-            db.execSQL(createIngredientTable())
-            db.execSQL(createFoodTable())
-            db.execSQL(createRecordTable())
-            db.execSQL(createMyCondateTable())
-            db.execSQL(createCategoryTable())
-            db.execSQL(createFoodIngredientsTable())
-            db.execSQL(createMyCondateFoodTable())
-            db.execSQL(createUserInfoTable())
-            val mContext = context ?: return
-
-            defaultData(mContext)
-        } catch  (ex: SQLiteException) {
-            Log.e(TAG, "SQLite execution failed" + ex.localizedMessage)
-            db.close()
-            return
-        }
-
-        Log.d("program check", "create table done")
-    }
+    override fun onCreate(db: SQLiteDatabase) { }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         //バージョン更新時のSQL発行

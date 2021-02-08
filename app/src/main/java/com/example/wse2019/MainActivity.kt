@@ -36,6 +36,7 @@ class MainActivity :
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+
         // データベースの初期化
         initializer(this)
 

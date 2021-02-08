@@ -27,7 +27,7 @@ import android.util.Log
                 }
 
                 //カンマ区切りで１つづつ配列に入れる
-                Log.d("line:",line)
+                //Log.d("line:",line)
                 var RowData = line.split(",")
 
                 var i=0
