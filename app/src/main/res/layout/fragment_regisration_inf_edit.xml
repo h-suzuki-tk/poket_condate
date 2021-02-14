@@ -6,10 +6,13 @@
     <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_margin="10dp">
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:layout_gravity="center_horizontal"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:text="@string/regisration_inf_edit"/>
         <TableLayout
@@ -87,6 +90,8 @@
         <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="10dp"
                 android:id="@+id/button"
                 android:text="編集画面へ移動する"/>
     </LinearLayout>

@@ -114,8 +114,38 @@ class CondateRegistrationFragment(): Fragment() {
                 )
             }
         }
+    }
 
-        // ----- アダプターの初期化 -----
+
+    // ==================================================
+    //
+    //  描画と制御
+    //
+    // ==================================================
+    @TargetApi(Build.VERSION_CODES.N)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        super.onCreateView(inflater, container, savedInstanceState)
+
+        // レイアウトの初期化
+        return inflater.inflate(R.layout.fragment_condate_registration, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // 各ビューの初期化
+        dayText               = view.findViewById(R.id.dayTextView)
+        timeRadioGroup        = view.findViewById(R.id.timeRadioGroup)
+        searchEditText        = view.findViewById(R.id.searchEditText)
+        categorySpinner       = view.findViewById(R.id.categorySpinner)
+        favoriteButton        = view.findViewById(R.id.favoriteFoodImageButton)
+        resultList            = view.findViewById(R.id.foodSearchResultListView)
+        myCondateButton       = view.findViewById(R.id.myCondateButton)
+        condateEditList       = view.findViewById(R.id.registrationStateListView)
+        registerFoodButton    = view.findViewById(R.id.registerNewFoodButton)
+        registerCondateButton = view.findViewById(R.id.registerButton)
+
+        // アダプターの初期化
         categoryAdapter = ArrayAdapter<String>(
             requireContext(),
             android.R.layout.simple_list_item_1).apply {
@@ -130,35 +160,8 @@ class CondateRegistrationFragment(): Fragment() {
         condateEditAdapter = CondateEditAdapter(requireContext()).apply {
             if (!day.containsEmpty()) { reset(day) }
         }
-    }
 
-
-    // ==================================================
-    //
-    //  描画と制御
-    //
-    // ==================================================
-    @TargetApi(Build.VERSION_CODES.N)
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_condate_registration, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        // 初期化
-        dayText               = view.findViewById(R.id.dayTextView)
-        timeRadioGroup        = view.findViewById(R.id.timeRadioGroup)
-        searchEditText        = view.findViewById(R.id.searchEditText)
-        categorySpinner       = view.findViewById(R.id.categorySpinner)
-        favoriteButton        = view.findViewById(R.id.favoriteFoodImageButton)
-        resultList            = view.findViewById(R.id.foodSearchResultListView)
-        myCondateButton       = view.findViewById(R.id.myCondateButton)
-        condateEditList       = view.findViewById(R.id.registrationStateListView)
-        registerFoodButton    = view.findViewById(R.id.registerNewFoodButton)
-        registerCondateButton = view.findViewById(R.id.registerButton)
-
-        // 設定
+        // 各ビューの設定
         dayText.apply {
             text = when (day.containsEmpty()) {
                 true    -> "選択してください"

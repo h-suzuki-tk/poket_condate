@@ -19,6 +19,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import com.example.sample.DBContract
 import com.example.sample.SampleDBOpenHelper
 import com.example.sample.Table
@@ -32,28 +33,55 @@ class MainActivity :
     CalendarFragment.OnCellSelectedListener,
     TabFragment.OnRegisterNewCondateSelectedListener {
 
+    companion object {
+        const val TAG = "MainActivity"
+    }
+
+    private lateinit var toolbar        : Toolbar
+    private lateinit var drawerLayout   : DrawerLayout
+    private lateinit var navigationView : NavigationView
+    private lateinit var header         : View
+    private lateinit var userNameText   : TextView
+    private lateinit var toggle         : ActionBarDrawerToggle
+
+    private lateinit var userName : String
+
+    // 初期化
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // ユーザー情報の取得
+        userName = getUserName()
 
         // データベースの初期化
-        initializer(this)
+        if (userName.isBlank()) {
+            Toast.makeText(
+                this,
+                "データベースの初期化を開始します。\nしばらくお待ちください...",
+                Toast.LENGTH_LONG
+            ).show()
+            initializer(this)
+            userName = getUserName()
+            Toast.makeText(
+                this,
+                "...データベースの初期化が完了しました。\nようこそ！ ${userName} さん",
+                Toast.LENGTH_LONG
+            ).show()
+        }
 
         // ツールバーをセット
-        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
         //ナビゲーションドロワーをセット
-        val drawerLayout: DrawerLayout = findViewById(R.id.drawerLayout)
-        val nav_view: NavigationView = findViewById(R.id.nav_view)
-        val header: View = nav_view.getHeaderView(0)
+        drawerLayout   = findViewById(R.id.drawerLayout)
+        navigationView = findViewById(R.id.nav_view)
+        header         = navigationView.getHeaderView(0)
+        userNameText   = header.findViewById(R.id.nhm_userNameTextView)
 
-        val userName: TextView = header.findViewById(R.id.nhm_userNameTextView)
-        userName.apply {
-            text = "こんにちは！\n${getUserName()} さん"
-        }
-        val toggle = ActionBarDrawerToggle(
+        userNameText.apply { text = "こんにちは！\n${userName} さん" }
+        toggle = ActionBarDrawerToggle(
             this,
             drawerLayout,
             toolbar,
@@ -62,15 +90,13 @@ class MainActivity :
         )
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
-        nav_view.setNavigationItemSelectedListener(this)
+        navigationView.setNavigationItemSelectedListener(this)
 
         //最初に表示する画面の設定
         val ft = supportFragmentManager.beginTransaction()
         ft.replace(R.id.frame_contents, TabFragment())
         ft.commit()
     }
-
-    var TAG = "MainActivity"
 
     // ナビゲーションメニューの各項目を選択した際の動作
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -137,7 +163,7 @@ class MainActivity :
         userName = db.searchRecord(
             tableName = userT.TABLE_NAME,
             column = arrayOf(userT.NAME)
-        )?.first() ?: throw NullPointerException()
+        )?.first() ?: ""
 
         return userName
     }

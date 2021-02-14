@@ -87,7 +87,7 @@ class EditInfFragment() : Fragment() {
                 }
 
                 //男性または女性の規定値が入っていなかったら、エラー処理
-                if(sex!= INDEX_NUM_FEMALE || sex!= INDEX_NUM_MALE){
+                if(sex!= INDEX_NUM_FEMALE && sex!= INDEX_NUM_MALE){
                     //エラー処理
                     TODO()
                 }
@@ -133,6 +133,7 @@ class EditInfFragment() : Fragment() {
             }
 
         }
+
         //キャンセルが押されたときの処理
         btn2.setOnClickListener{
             var isValid2=true
@@ -146,11 +147,6 @@ class EditInfFragment() : Fragment() {
                 transaction2.commit()
             }
         }
-
-
-
-
-
 
         return v
     }
