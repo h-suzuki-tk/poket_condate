@@ -511,6 +511,25 @@ class SampleDBOpenHelper(context: Context?) : SQLiteOpenHelper(context, DB_NAME,
         return true
     }
 
+    fun deleteRecord(tablename : String, condition: String) : Boolean{
+        //書き込み可能なデータベースを開く
+        val db = writableDatabase
+
+        try {
+            db.delete(tablename, condition, null)
+        } catch (ex: SQLiteException) {
+            //クエリ文が失敗した場合は空のFALSEを返す。
+            //エラー文を添えることが出来ればなおよい
+            Log.e(TAG, "SQLite execution failed" + ex.localizedMessage)
+            db.close()
+            return false
+        }
+
+        //削除に成功したのでTRUEを返す
+        db.close()
+        return true
+    }
+
     //テーブル全削除機能
     //主にテストや初期化、更新用
     fun dropTables(db: SQLiteDatabase) {

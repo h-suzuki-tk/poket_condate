@@ -24,9 +24,17 @@ class FoodSearchResultAdapter(val context: Context) : BaseAdapter() {
         val category: Int,
         var favorite: Int
     )
+    var foods = mutableListOf<Food>()
 
-    val favorite_resourceID= listOf<Int>(android.R.drawable.btn_star_big_off, android.R.drawable.btn_star_big_on)
-    var foods = mutableListOf<Food>()   // [表示用]品目プロパティ
+    // 検索条件を定義
+    data class Condition(
+        var name    : String    = "",
+        var favorite: Int       = 0,    // OFF
+        var category: Int       = 0     // unselected
+    )
+    val condition = Condition()
+
+    val favorite_resourceID = listOf<Int>(android.R.drawable.btn_star_big_off, android.R.drawable.btn_star_big_on)
 
     override fun getCount(): Int {
         return foods.size
@@ -150,8 +158,36 @@ class FoodSearchResultAdapter(val context: Context) : BaseAdapter() {
         }
     }
 
+    // --------------------------------------------------
+    //  updateResult - 再検索 -
+    // --------------------------------------------------
+    fun updateResult() {
+
+        clear()
+        searchFoods(
+            condition.name,
+            condition.favorite,
+            condition.category
+        )
+        notifyDataSetChanged()
+
+    }
+
+    // --------------------------------------------------
+    // updateCondition - 検索条件を更新 -
+    // --------------------------------------------------
+    fun updateCondition(
+        name    : String? = null,
+        favorite: Int?    = null,
+        category: Int?    = null
+    ) {
+        if (name        != null) { condition.name      = name }
+        if (favorite    != null) { condition.favorite  = favorite}
+        if (category    != null) { condition.category  = category}
+    }
+
     fun clear() {
-        this.foods.clear()
+        foods.clear()
     }
 
 }

@@ -33,40 +33,44 @@ class CondateEditFragment(): Fragment() {
     val OK = 1
     val NG = 0
 
-    // 検索条件を定義
-    data class Condition(
-        var name    : String    = "",
-        var favorite: Int       = 0,    // OFF
-        var category: Int       = 0     // unselected
-    )
-
     // 使用する画像ID
-
     private val favoriteButton = listOf(
         android.R.drawable.btn_star_big_off,
         android.R.drawable.btn_star_big_on
     )
 
-    lateinit private var search         : Search        // 検索管理用クラス
-    lateinit private var state          : State         // 仮登録状況管理用クラス
+    // アダプター
+    private lateinit var condateEditAdapter : CondateEditAdapter
+    private lateinit var categoryAdapter    : ArrayAdapter<String>
+    private lateinit var searchAdapter      : FoodSearchResultAdapter
 
-    private var condateName=""
+    private var condateName : String
 
-
-
+    init {
+        condateName = ""
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // ----- 初期化 -----
-        search.init()
-        state.init()
-
-        val bundle=arguments
+        val bundle = arguments
         if(bundle!=null){
-            condateName=bundle.getString("MYCONDATE_NAME")
+            condateName = bundle.getString("MYCONDATE_NAME")
         }
+
+        categoryAdapter = ArrayAdapter<String>(
+            requireContext(),
+            android.R.layout.simple_list_item_1).apply {
+
+            add("カテゴリ")
+            addAll(CategoryManager().getCategories(requireContext()))
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+        searchAdapter = FoodSearchResultAdapter(requireContext()).apply {
+            updateResult()
+        }
+        condateEditAdapter = CondateEditAdapter(requireContext())
     }
 
 
@@ -92,8 +96,8 @@ class CondateEditFragment(): Fragment() {
             allowEnterTransitionOverlap = false
             addTextChangedListener(object : TextWatcher {
                 override fun afterTextChanged(text: Editable?) {
-                    search.updateCondition(name = text.toString())
-                    search.updateResult()
+                    searchAdapter.updateCondition(name = text.toString())
+                    searchAdapter.updateResult()
                 }
 
                 override fun beforeTextChanged(text: CharSequence?, start: Int, count: Int, after: Int) { /* なにもしない */ }
@@ -105,21 +109,12 @@ class CondateEditFragment(): Fragment() {
         //  カテゴリ選択
         // ------------------------------------------------------------
         val category: Spinner   = v.findViewById(R.id.categorySpinner)
-        val categoryAdapter     = when (context) {
-            null -> throw NullPointerException()
-            else -> ArrayAdapter<String>(context!!, android.R.layout.simple_list_item_1)}
-        val cm = CategoryManager()
-        categoryAdapter.apply {
-            add("カテゴリ") // ヒントであると同時に "未選択 (全カテゴリ)" を意味
-            addAll(cm.getCategories(context))
-            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        }
         category.apply {
             adapter = categoryAdapter
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, v: View?, position: Int, id: Long) {
-                    search.updateCondition(category = position)
-                    search.updateResult()
+                    searchAdapter.updateCondition(category = position)
+                    searchAdapter.updateResult()
                 }
                 override fun onNothingSelected(pstrmy: AdapterView<*>?) {
                     // なにもしない
@@ -134,12 +129,12 @@ class CondateEditFragment(): Fragment() {
         val favorite: ImageButton = v.findViewById(R.id.favoriteFoodImageButton)
         favorite.apply {
             setOnClickListener {
-                when (search.condition.favorite) {
-                    ON  -> search.updateCondition(favorite = OFF)
-                    OFF -> search.updateCondition(favorite = ON)
+                when (searchAdapter.condition.favorite) {
+                    ON  -> searchAdapter.updateCondition(favorite = OFF)
+                    OFF -> searchAdapter.updateCondition(favorite = ON)
                 }
-                favorite.setImageResource(favoriteButton[search.condition.favorite])
-                search.updateResult()
+                favorite.setImageResource(favoriteButton[searchAdapter.condition.favorite])
+                searchAdapter.updateResult()
             }
         }
 
@@ -148,13 +143,13 @@ class CondateEditFragment(): Fragment() {
         // ------------------------------------------------------------
         val result: ListView    = v.findViewById(R.id.foodSearchResultListView)
         result.apply {
-            adapter = search.getAdapter()
+            adapter = searchAdapter
             setOnItemClickListener { parent, view, position, id ->
-                val food: FoodSearchResultAdapter.Food = search.getResultItem(position)
+                val food: FoodSearchResultAdapter.Food = searchAdapter.getItem(position)
                 when (id.toInt()) {
                     R.id.favoriteButton -> {
-                        search.switchFavorite(position)
-                        search.updateResult()
+                        searchAdapter.switchFavorite(position)
+                        searchAdapter.updateResult()
                     }
                     R.id.addButton -> {
                         showNumberPickerDialog(food)
@@ -173,13 +168,13 @@ class CondateEditFragment(): Fragment() {
 
 
         // ------------------------------------------------------------
-        //  仮登録状況
+        //  登録状況
         // ------------------------------------------------------------
         val stateListView: ListView = v.findViewById(R.id.registrationStateListView)
         stateListView.apply {
-            adapter = state.getAdapter()
+            adapter = condateEditAdapter
             setOnItemClickListener { parent, view, position, id ->
-                val food: TempRegistrationStateAdapter.Food = state.getItem(position)
+                val food: CondateEditAdapter.Food = condateEditAdapter.getItem(position)
 
                 when (id.toInt()) {
 
@@ -191,7 +186,8 @@ class CondateEditFragment(): Fragment() {
                         AlertDialog.Builder(context).apply {
                             setMessage("${food.name}[${food.number}人前]を仮登録状況から削除します。よろしいですか？")
                             setPositiveButton("OK") { _, _ ->
-                                state.remove(position)
+                                condateEditAdapter.remove(position)
+                                condateEditAdapter.notifyDataSetChanged()
                             }
                             setNegativeButton("キャンセル", null)
                             show()
@@ -223,8 +219,8 @@ class CondateEditFragment(): Fragment() {
         register.apply {
             setOnClickListener {
                 val foods: MutableList<Pair<Int, Float>> = mutableListOf()
-                for (i in 0 until state.count) {
-                    val food = state.getItem(i)
+                for (i in 0 until condateEditAdapter.count) {
+                    val food = condateEditAdapter.getItem(i)
                     foods.add(Pair(food.id, food.number))
                 }
 
@@ -242,125 +238,10 @@ class CondateEditFragment(): Fragment() {
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-
-        search  = Search()
-        state   = State()
     }
     override fun onDetach() {
         super.onDetach()
     }
-
-
-
-
-    // ==================================================
-    // ==================================================
-    //
-    //  Search
-    //  - 検索を管理するクラス
-    //
-    // ==================================================
-    // ==================================================
-    private inner class Search {
-        private val adapter: FoodSearchResultAdapter = when (context) {
-            null -> throw NullPointerException()
-            else -> FoodSearchResultAdapter(context!!)
-        }
-        val condition = Condition()
-        val count: Int
-            get() = adapter.count
-
-        fun getAdapter() : FoodSearchResultAdapter { return adapter }
-        fun getResultItem(position: Int) : FoodSearchResultAdapter.Food { return adapter.getItem(position) }
-
-        fun init() {
-
-            updateResult()
-
-        }
-
-        fun updateResult() {
-
-            adapter.clear()
-            adapter.searchFoods(
-                condition.name,
-                condition.favorite,
-                condition.category
-            )
-            adapter.notifyDataSetChanged()
-
-        }
-
-        fun updateCondition(
-            name    : String? = null,
-            favorite: Int?    = null,
-            category: Int?    = null
-        ) {
-            if (name        != null) { condition.name      = name }
-            if (favorite    != null) { condition.favorite  = favorite}
-            if (category    != null) { condition.category  = category}
-        }
-
-        fun switchFavorite(position: Int) {
-            adapter.switchFavorite(position)
-        }
-
-    }
-
-
-
-    // ==================================================
-    // ==================================================
-    //
-    //  State
-    //  - 仮登録状況を管理するクラス
-    //
-    // ==================================================
-    // ==================================================
-    private inner class State {
-        private val adapter: TempRegistrationStateAdapter = when (context) {
-            null -> throw NullPointerException()
-            else -> TempRegistrationStateAdapter(context!!)
-        }
-        val count: Int
-            get() = adapter.count
-        val isEmpty: Boolean
-            get() = adapter.count == 0
-
-        fun getAdapter() : TempRegistrationStateAdapter { return adapter }
-        fun getItem(position: Int) : TempRegistrationStateAdapter.Food { return adapter.getItem(position) }
-
-        fun init() {
-
-        }
-
-
-        fun add(food: TempRegistrationStateAdapter.Food) {
-            adapter.add(food)
-            adapter.notifyDataSetChanged()
-        }
-
-        fun addAll(foods: List<TempRegistrationStateAdapter.Food>) {
-
-            foods.forEach {
-                adapter.add(it)
-            }
-            adapter.notifyDataSetChanged()
-
-        }
-
-        fun remove(position: Int) {
-            adapter.remove(position)
-            adapter.notifyDataSetChanged()
-        }
-
-        fun clear() {
-            adapter.clear()
-        }
-
-    }
-
-
 
 
 
@@ -389,7 +270,8 @@ class CondateEditFragment(): Fragment() {
                         when (val number: Float = formatNumber(intNPicker.value, decNPicker.value)) {
                             0f      -> Toast.makeText(context, "0より大きい値を入力してください", Toast.LENGTH_SHORT).show()
                             else    -> {
-                                state.add(TempRegistrationStateAdapter.Food(food.id, food.name, number))
+                                condateEditAdapter.add(CondateEditAdapter.Food(food.id, food.name, number))
+                                condateEditAdapter.notifyDataSetChanged()
                             }
                         }}
                     .setNegativeButton("キャンセル", null)
