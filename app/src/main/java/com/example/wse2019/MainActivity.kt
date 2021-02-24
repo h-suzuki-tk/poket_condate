@@ -93,8 +93,10 @@ class MainActivity :
         navigationView.setNavigationItemSelectedListener(this)
 
         //最初に表示する画面の設定
-        val ft = supportFragmentManager.beginTransaction()
-        ft.replace(R.id.frame_contents, TabFragment())
+        val ft = supportFragmentManager.beginTransaction().apply {
+            replace(R.id.frame_contents, TabFragment())
+            addToBackStack(null)
+        }
         ft.commit()
     }
 
@@ -137,8 +139,10 @@ class MainActivity :
             }
         }
         if (fragment != null) {
-            val ft = supportFragmentManager.beginTransaction()
-            ft.replace(R.id.frame_contents, fragment)
+            val ft = supportFragmentManager.beginTransaction().apply {
+                replace(R.id.frame_contents, fragment)
+                addToBackStack(null)
+            }
             ft.commit()
         }
 
@@ -171,9 +175,10 @@ class MainActivity :
 
 
     override fun replaceFragment(fragment: Fragment) {
-        val ft: FragmentTransaction = supportFragmentManager.beginTransaction()
-        ft.addToBackStack(null)
-        ft.replace(R.id.frame_contents, fragment)
+        val ft: FragmentTransaction = supportFragmentManager.beginTransaction().apply {
+            replace(R.id.frame_contents, fragment)
+            addToBackStack(null)
+        }
         ft.commit()
     }
 
