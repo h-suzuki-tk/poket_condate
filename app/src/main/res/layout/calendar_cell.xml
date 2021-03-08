@@ -4,6 +4,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="品目名"
-        android:textSize="10sp"
-        android:textColor="#fff"
-        android:background="@color/colorAccent"/>
+        android:textSize="12sp"
+        android:textColor="@android:color/white"
+        android:background="@drawable/frame_style_2"
+        android:paddingVertical="@dimen/tiny_padding"
+        android:paddingHorizontal="@dimen/small_padding" />

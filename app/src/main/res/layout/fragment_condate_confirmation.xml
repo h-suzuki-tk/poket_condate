@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical" android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <TextView
+            android:id="@+id/fcc_no_item_msg"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:paddingHorizontal="@dimen/large_basic_padding"
+            android:paddingVertical="@dimen/large_padding"
+            android:text="献立が登録されていません"
+            android:textSize="24sp"
+            android:visibility="gone" />
+
+    <ListView
+            android:id="@+id/fcc_foods_list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_margin="@dimen/large_basic_padding"/>
+
+    <Button
+            android:id="@+id/fcc_edit_btn"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_basic_height"
+            android:background="@color/colorAccent"
+            android:text="献立を編集する"
+            android:textColor="@android:color/white"
+            android:textStyle="bold" />
+
+</LinearLayout>

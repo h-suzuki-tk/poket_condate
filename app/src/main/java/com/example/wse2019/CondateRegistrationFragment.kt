@@ -13,7 +13,6 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentTransaction
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -65,10 +64,10 @@ class CondateRegistrationFragment(): Fragment() {
     private lateinit var condateEditAdapter : CondateEditAdapter
 
     // 変数
-    private var day: Day // 日時
+    private var day: DayManager // 日時
 
     init {
-        day = Day()
+        day = DayManager()
     }
 
     // ------------------------------------------------------------
@@ -354,9 +353,9 @@ class CondateRegistrationFragment(): Fragment() {
                 // 選択された日時に献立が登録されていた場合、仮登録品目上書き確認ダイアログを表示して上書き
                 condateEditAdapter.reset(day)
             },
-            if (day.year  != Day.DEFAULT) { day.year }  else { today.get(Calendar.YEAR) },
-            if (day.month != Day.DEFAULT) { day.month-1 } else { today.get(Calendar.MONTH) },
-            if (day.date  != Day.DEFAULT) { day.date }  else { today.get(Calendar.DATE) }
+            if (day.year  != DayManager.DEFAULT) { day.year }  else { today.get(Calendar.YEAR) },
+            if (day.month != DayManager.DEFAULT) { day.month-1 } else { today.get(Calendar.MONTH) },
+            if (day.date  != DayManager.DEFAULT) { day.date }  else { today.get(Calendar.DATE) }
         ).show()
 
     }
@@ -546,8 +545,8 @@ class CondateRegistrationFragment(): Fragment() {
                             setMyCondate(position = checking)
                         }
                     }
-                    .setNegativeButton("キャン\nセル", null)
-                    .setNeutralButton("現在の仮登録品目を\nMy献立に追加") { _, _ ->
+                    .setNegativeButton("キャンセル", null)
+                    .setNeutralButton("現在の\n仮登録品目を\nMy献立に追加") { _, _ ->
 
                         if (condateEditAdapter.isEmpty) {
                             Toast.makeText(context, "!! 仮登録品目がありません !!", Toast.LENGTH_LONG).show()

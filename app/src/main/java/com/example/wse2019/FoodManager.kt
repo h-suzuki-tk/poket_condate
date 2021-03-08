@@ -1,5 +1,6 @@
 package com.example.wse2019
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Bitmap
@@ -9,23 +10,40 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
 import com.example.sample.*
+import kotlinx.android.synthetic.main.fragment_regisration_inf_edit.view.*
 import org.w3c.dom.Text
 
 const val FOOD_IMAGE_DIRECTORY = "foods"
-const val NO_IMAGE_FILENAME = "0.png"
+const val NO_IMAGE_FILENAME = "0.jpg"
 
 
 class FoodManager {
-    private val imageManager = ImageManager()
+
+    data class Food(
+        var categoryName: String        = "",
+        var foodName    : String        = "",
+        var favorite    : Int           = 0,
+        var nutrition   : Nutrition?    = null,
+        var ingredients : MutableList<Ingredient> = mutableListOf(),
+        var memo        : String        = ""
+    )
+
+    data class Ingredient(
+        val name    : String,
+        val number  : Float,
+        val unit    : String,
+        val clas    : Int
+    )
 
     /*
      * @品目画像ファイル名 -> 品目ID.png
      * @比率 -> 4:3
      */
     fun getBitmap(context: Context, foodId: Int): Bitmap {
+        val imageManager = ImageManager()
         return imageManager.getBitmap(context,
             directory   = FOOD_IMAGE_DIRECTORY,
-            fileName    = "${foodId}.png"
+            fileName    = "${foodId}.jpg"
         ) ?: imageManager.getBitmap(context,
             directory   = FOOD_IMAGE_DIRECTORY,
             fileName    = NO_IMAGE_FILENAME
@@ -36,14 +54,6 @@ class FoodManager {
     //  getFoodInformationView
     //  - 品目の情報を表示する
     // --------------------------------------------------
-    data class Food(
-        var categoryName: String        = "",
-        var foodName    : String        = "",
-        var favorite    : Int           = 0,
-        var nutrition   : Nutrition?    = null,
-        var ingredients : MutableList<IngredientAdapter.Ingredient> = mutableListOf(),
-        var memo        : String        = ""
-    )
     fun getFoodInformationView(foodId: Int, context: Context, container: ViewGroup?): View {
         val food = Food()
 
@@ -120,7 +130,7 @@ class FoodManager {
 
         // 結果の格納
         while (i < result.size) {
-            food.ingredients.add(IngredientAdapter.Ingredient(
+            food.ingredients.add(Ingredient(
                     name    = result[i++],
                     number  = result[i++].toFloat(),
                     unit    = result[i++],
@@ -133,6 +143,9 @@ class FoodManager {
         val inflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val view = inflater.inflate(R.layout.fragment_food_information, container, false)
 
+        val img      = view.findViewById<ImageView>(R.id.ffi_food_img).apply {
+            setImageBitmap(getBitmap(context, foodId))
+        }
         val category = view.findViewById<TextView>(R.id.ffi_categoryTextView).apply { text = food.categoryName }
         val foodName = view.findViewById<TextView>(R.id.ffi_foodNameTextView).apply { text = food.foodName }
         val favorite = view.findViewById<LinearLayout>(R.id.ffi_favoriteLinearLayout)
@@ -147,13 +160,10 @@ class FoodManager {
         val sugar   = view.findViewById<TextView>(R.id.ffi_sugarTextView)   .apply { text = String.format("%.1f", food.nutrition!!.sugar  ) }
         val fat     = view.findViewById<TextView>(R.id.ffi_fatTextView)     .apply { text = String.format("%.1f", food.nutrition!!.fat    ) }
         val protein = view.findViewById<TextView>(R.id.ffi_proteinTextView) .apply { text = String.format("%.1f", food.nutrition!!.protein) }
-        val vitamin = view.findViewById<TextView>(R.id.ffi_vitaminTextView) .apply { text = String.format("%.1f", food.nutrition!!.vitamin) }
-        val mineral = view.findViewById<TextView>(R.id.ffi_mineralTextView) .apply { text = String.format("%.1f", food.nutrition!!.mineral) }
         val fiber   = view.findViewById<TextView>(R.id.ffi_fiberTextView)   .apply { text = String.format("%.1f", food.nutrition!!.fiber  ) }
 
         val ingLayout = view.findViewById<LinearLayout>(R.id.ffi_ingredientLinearLayout)
-        val ingredient = view.findViewById<ListView>(R.id.ffi_ingredientListView)
-        val ingAdapter = IngredientAdapter(context)
+        val ingredient = view.findViewById<TableLayout>(R.id.ffi_ingredientListView)
         ingLayout.apply {
             visibility = if (food.ingredients.size == 1 && food.ingredients.first().clas == 1) {
                 View.GONE
@@ -161,11 +171,19 @@ class FoodManager {
                 View.VISIBLE
             }
         }
-        ingredient.apply {
-            adapter = ingAdapter
-        }
-        ingAdapter.apply {
-            ingredients.addAll(food.ingredients)
+        for ( i in 0..food.ingredients.size-1 ) {
+            inflater.inflate(R.layout.ingredient_row, ingredient)
+            ingredient.getChildAt(i).let { row ->
+                (row.findViewById(R.id.ir_nameText) as TextView).apply {
+                    text = food.ingredients[i].name
+                }
+                (row.findViewById(R.id.ir_numberText) as TextView).apply {
+                    text = food.ingredients[i].number.toString()
+                }
+                (row.findViewById(R.id.ir_unitText) as TextView).apply {
+                    text = food.ingredients[i].unit
+                }
+            }
         }
 
         val memoLayout = view.findViewById<LinearLayout>(R.id.ffi_memoLinearLayout)
@@ -183,67 +201,6 @@ class FoodManager {
         // --------------------------------------------------
         return view
     }
-    class IngredientAdapter(val context: Context) : BaseAdapter() {
-
-        // 材料情報
-        data class Ingredient(
-            val name    : String,
-            val number  : Float,
-            val unit    : String,
-            val clas    : Int
-        )
-        var ingredients: MutableList<Ingredient> = mutableListOf()
-
-        // 各行で表示するビュー
-        data class ViewHolderItem(
-            val name    : TextView,
-            val number  : TextView,
-            val unit    : TextView
-        )
-
-        override fun getCount(): Int {
-            return ingredients.size
-        }
-        override fun getItem(position: Int): Ingredient {
-            return ingredients[position]
-        }
-        override fun getItemId(position: Int): Long {
-            return 0
-        }
-
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-
-            val p = parent as ListView
-            val (viewHolder, view) = when (convertView) {
-                null -> {
-                    val view = LayoutInflater.from(context).inflate(R.layout.ingredient_row, parent, false)
-                    val viewHolder = ViewHolderItem(
-                        name    = view.findViewById(R.id.ir_nameText),
-                        number  = view.findViewById(R.id.ir_numberText),
-                        unit    = view.findViewById(R.id.ir_unitText))
-                    view.tag = viewHolder
-                    viewHolder to view
-                }
-                else -> convertView.tag as ViewHolderItem to convertView
-            }
-
-            viewHolder.apply {
-                name    .apply {
-                    text = ingredients[position].name
-                }
-                number  .apply {
-                    text = ingredients[position].number.toString()
-                }
-                unit    .apply {
-                    text = ingredients[position].unit
-                }
-            }
-
-            return view
-        }
-    }
-    // --------------------------------------------------
-
 
     // ------------------------------------------------------------
     //  delete
@@ -309,6 +266,5 @@ class FoodManager {
         return result
     }
     // ------------------------------------------------------------
-
 
 }

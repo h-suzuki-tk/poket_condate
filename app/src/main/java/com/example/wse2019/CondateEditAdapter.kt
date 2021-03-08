@@ -1,11 +1,7 @@
 package com.example.wse2019
 
-import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteException
-import android.media.Image
-import android.text.Layout
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +10,6 @@ import com.example.sample.DBContract
 import com.example.sample.SampleDBOpenHelper
 import com.example.sample.Join
 import com.example.sample.Table
-import java.lang.String.format
 
 class CondateEditAdapter(context: Context) : BaseAdapter() {
     private val inflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -65,7 +60,7 @@ class CondateEditAdapter(context: Context) : BaseAdapter() {
         return v
     }
 
-    fun reset(day: Day) {
+    fun reset(day: DayManager) {
 
         // データベース検索のための宣言・初期化
         val db      = SampleDBOpenHelper(context)
@@ -109,7 +104,7 @@ class CondateEditAdapter(context: Context) : BaseAdapter() {
         this.notifyDataSetChanged()
     }
 
-    fun update(day: Day) {
+    fun update(day: DayManager) {
 
         val db = when (context) {
             null -> throw NullPointerException()

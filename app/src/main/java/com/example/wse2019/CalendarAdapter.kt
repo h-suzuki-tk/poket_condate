@@ -17,7 +17,7 @@ import kotlin.collections.ArrayList
 
 
 class CalendarAdapter(val context: Context) : BaseAdapter() {
-    val dm: DateManager = DateManager()
+    val cm: CalendarManager = CalendarManager()
 
     // 各行で表示する情報
     private data class ViewHolderItem(
@@ -36,7 +36,7 @@ class CalendarAdapter(val context: Context) : BaseAdapter() {
     /*
      * ArrayList(Date)
      */
-    var days: ArrayList<Date> = dm.getDays()
+    var days: ArrayList<Date> = cm.getDays()
 
     // 表示する各日時の献立内容
     /*
@@ -84,7 +84,7 @@ class CalendarAdapter(val context: Context) : BaseAdapter() {
         // 登録済み献立をセット
         val c: MutableList<List<String>> = mutableListOf()
         Time.OBJECT.forEach {
-            c += condate[Pair(dm.getDate(days[position]).toInt(), it)] ?: throw AssertionError()
+            c += condate[Pair(cm.getDate(days[position]).toInt(), it)] ?: throw AssertionError()
         }
 
         // ビューの設定
@@ -92,22 +92,30 @@ class CalendarAdapter(val context: Context) : BaseAdapter() {
 
             // 日付のセット
             date.apply {
-                text = dm.getDate(days[position])
+                text = cm.getDate(days[position])
             }
 
             // 各セルのセット
             viewHolder.apply {
                 morning .apply {
                     adapter = ArrayAdapter(context, R.layout.calendar_cell, c[Time.MORNING])
+                    isVerticalScrollBarEnabled = false
+                    isHorizontalScrollBarEnabled = false
                 }
                 noon    .apply {
                     adapter = ArrayAdapter(context, R.layout.calendar_cell, c[Time.NOON])
+                    isVerticalScrollBarEnabled = false
+                    isHorizontalScrollBarEnabled = false
                 }
                 evening .apply {
                     adapter = ArrayAdapter(context, R.layout.calendar_cell, c[Time.EVENING])
+                    isVerticalScrollBarEnabled = false
+                    isHorizontalScrollBarEnabled = false
                 }
                 snack   .apply {
                     adapter = ArrayAdapter(context, R.layout.calendar_cell, c[Time.SNACK])
+                    isVerticalScrollBarEnabled = false
+                    isHorizontalScrollBarEnabled = false
                 }
                 area_morning.apply {
                     setOnClickListener { p.performItemClick(view, position, Time.MORNING.toLong()) }
@@ -135,7 +143,7 @@ class CalendarAdapter(val context: Context) : BaseAdapter() {
     //  - 献立内容を最新のものに更新
     // ------------------------------------------------------------
     fun updateCondateContents() {
-        condate = getMonthlyCondate(dm.getYear(dm.calendar.time).toInt(), dm.getMonth(dm.calendar.time).toInt())
+        condate = getMonthlyCondate(cm.getYear(cm.calendar.time).toInt(), cm.getMonth(cm.calendar.time).toInt())
         notifyDataSetChanged()
     }
 
@@ -156,7 +164,7 @@ class CalendarAdapter(val context: Context) : BaseAdapter() {
         val condate: MutableMap<Pair<Int, Int>, MutableList<String>> = mutableMapOf()
 
         // 検索の準備
-        val dm = DateManager().apply {
+        val cm = CalendarManager().apply {
             calendar.apply {
                 set(Calendar.YEAR, year)
                 set(Calendar.MONTH, month.dec())
@@ -183,8 +191,8 @@ class CalendarAdapter(val context: Context) : BaseAdapter() {
         ) ?: throw NullPointerException()
 
         // 該当日時の献立の初期化
-        dm.getDays().forEach { day ->
-            val date = dm.getDate(day).toInt()
+        cm.getDays().forEach { day ->
+            val date = cm.getDate(day).toInt()
             Time.OBJECT.forEach { time ->
                 condate[Pair(date, time)] = mutableListOf()
             }
@@ -211,7 +219,7 @@ class CalendarAdapter(val context: Context) : BaseAdapter() {
      * @return <String>yyyy/M (ex. 2019/9)
      */
     fun getCurrentYearMonth(): String {
-        return SimpleDateFormat("yyyy/M", Locale.US).format(dm.calendar.time)
+        return SimpleDateFormat("yyyy/M", Locale.US).format(cm.calendar.time)
     }
 
 
@@ -221,9 +229,9 @@ class CalendarAdapter(val context: Context) : BaseAdapter() {
     //  - カレンダーのデータを翌月のものに更新
     // ------------------------------------------------------------
     fun nextMonth() {
-        dm.nextMonth()
-        days = dm.getDays()
-        condate = getMonthlyCondate(dm.getYear(dm.calendar.time).toInt(), dm.getMonth(dm.calendar.time).toInt())
+        cm.nextMonth()
+        days = cm.getDays()
+        condate = getMonthlyCondate(cm.getYear(cm.calendar.time).toInt(), cm.getMonth(cm.calendar.time).toInt())
         this.notifyDataSetChanged()
     }
 
@@ -234,9 +242,9 @@ class CalendarAdapter(val context: Context) : BaseAdapter() {
     //  - カレンダーのデータを先月のものに更新
     // ------------------------------------------------------------
     fun prevMonth() {
-        dm.prevMonth()
-        days = dm.getDays()
-        condate = getMonthlyCondate(dm.getYear(dm.calendar.time).toInt(), dm.getMonth(dm.calendar.time).toInt())
+        cm.prevMonth()
+        days = cm.getDays()
+        condate = getMonthlyCondate(cm.getYear(cm.calendar.time).toInt(), cm.getMonth(cm.calendar.time).toInt())
         this.notifyDataSetChanged()
     }
 

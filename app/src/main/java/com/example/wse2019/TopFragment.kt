@@ -25,8 +25,8 @@ import com.github.mikephil.charting.data.PieEntry
 class TopFragment() : Fragment() {
 
     val foodManager = FoodManager()
-    val dm = DateManager()
-    val today = dm.calendar.time
+    val cm = CalendarManager()
+    val today = cm.calendar.time
     private lateinit var recommendFood: RecommendFood
 
     companion object {
@@ -46,18 +46,18 @@ class TopFragment() : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_top, container, false)
 
-        val dm = DateManager()
+        val cm = CalendarManager()
         val nh = NutritionHelper(context)
 
-        val today = dm.calendar.time
+        val today = cm.calendar.time
 
         // --------------------------------------------------
         //  今週の得点
         // --------------------------------------------------
         val score: Float = nh.recordScore(
-            dm.getYear(today)   .toInt(),
-            dm.getMonth(today)  .toInt(),
-            dm.getDate(today)   .toInt(),
+            cm.getYear(today)   .toInt(),
+            cm.getMonth(today)  .toInt(),
+            cm.getDate(today)   .toInt(),
             1) ?: throw NullPointerException()
 
         val scoreChart: PieChart = view.findViewById(R.id.ft_scorePieChart)
@@ -93,13 +93,11 @@ class TopFragment() : Fragment() {
             }
         }
         nutrition.apply {
-            text = "カロリー:\n %.0f kcal\n糖質:\n %.1f g\n脂質:\n %.1f g\nたんぱく質:\n %.1f g\nミネラル:\n %.1f g\nビタミン:\n %.1f g\n食物繊維:\n %.1f g".format(
+            text = "カロリー:\n %.0f kcal\n糖質:\n %.1f g\n脂質:\n %.1f g\nたんぱく質:\n %.1f g\n食物繊維:\n %.1f g".format(
                 recommendFood.first.nutrition.calorie,
                 recommendFood.first.nutrition.sugar,
                 recommendFood.first.nutrition.fat,
                 recommendFood.first.nutrition.protein,
-                recommendFood.first.nutrition.mineral,
-                recommendFood.first.nutrition.vitamin,
                 recommendFood.first.nutrition.fiber
             )
         }
@@ -154,16 +152,16 @@ class TopFragment() : Fragment() {
     // ==================================================
     // ==================================================
     private inner class RecommendFood {
-        private val adapter: RecommendFoodAdapter = when (context) {
+        private val adapter: FoodListAdapter = when (context) {
             null -> throw NullPointerException()
-            else -> RecommendFoodAdapter(context!!)
+            else -> FoodListAdapter(context!!)
         }
-        val first: RecommendFoodAdapter.Food
+        val first: FoodListAdapter.Food
             get() = adapter.allFoods[0]
         val count: Int
             get() = adapter.count
-        fun getAdapter() : RecommendFoodAdapter { return adapter }
-        fun getItem(position: Int) : RecommendFoodAdapter.Food { return adapter.getItem(position) }
+        fun getAdapter() : FoodListAdapter { return adapter }
+        fun getItem(position: Int) : FoodListAdapter.Food { return adapter.getItem(position) }
 
         // その他のおすすめ品目としてリストビューに表示する品目に関する定数
         val OTHER_RECOMMEND_FROM_INDEX          = 1     // 最初の品目のインデックス
@@ -171,7 +169,7 @@ class TopFragment() : Fragment() {
         val OTHER_RECOMMEND_SHOW_MORE_NUM       = 10    // 「もっと見る！」ボタンが押される毎に増加する品目表示数
 
         fun init() {
-            adapter.allFoods.addAll(search(dm.getYear(today).toInt(), dm.getMonth(today).toInt(), dm.getDate(today).toInt(), 1))
+            adapter.allFoods.addAll(search(cm.getYear(today).toInt(), cm.getMonth(today).toInt(), cm.getDate(today).toInt(), 1))
             setOtherRecommendFoodsToShow(OTHER_RECOMMEND_FROM_INDEX, OTHER_RECOMMEND_INITIAL_SHOW_NUM)
         }
 
@@ -225,8 +223,8 @@ class TopFragment() : Fragment() {
             adapter.foodsToShow = adapter.allFoods.subList(fromIndex, toIndex)
         }
 
-        private fun search(year: Int, month: Int, date: Int, span: Int) : List<RecommendFoodAdapter.Food> {
-            val foods: MutableList<RecommendFoodAdapter.Food> = mutableListOf()
+        private fun search(year: Int, month: Int, date: Int, span: Int) : List<FoodListAdapter.Food> {
+            val foods: MutableList<FoodListAdapter.Food> = mutableListOf()
 
             val db = SampleDBOpenHelper(context)
             val nh = NutritionHelper(context)
@@ -242,7 +240,7 @@ class TopFragment() : Fragment() {
                     column      = arrayOf(foodT.NAME, foodT.FAVORITE),
                     condition   = "${foodT.ID} = ${foodId}"
                 ) ?: throw NullPointerException()
-                foods.add(RecommendFoodAdapter.Food(
+                foods.add(FoodListAdapter.Food(
                     id          = foodId,
                     name        = result[0],
                     favorite    = result[1].toInt()))
@@ -268,8 +266,7 @@ class TopFragment() : Fragment() {
     fun showFoodInformationDialog(foodId: Int, context: Context, container: ViewGroup?) {
         AlertDialog.Builder(context).apply {
             setView(foodManager.getFoodInformationView(foodId, context, container))
-            show()
-        }
+        }.show()
     }
 
 

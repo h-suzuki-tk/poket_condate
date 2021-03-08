@@ -1,28 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/large_padding"
+        android:paddingVertical="@dimen/basic_padding">
 
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:orientation="vertical">
 
         <TextView
                 android:id="@+id/nameTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="My献立名"
+                android:textColor="@color/colorAccent"
                 android:textSize="24sp"
-                android:textColor="@color/colorAccent"/>
+                android:textStyle="bold"/>
+
         <TextView
                 android:id="@+id/contentsTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="My献立内容"/>
+                android:text="My献立内容" />
 
     </LinearLayout>
 
@@ -30,8 +33,8 @@
             android:id="@+id/radioButton"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:focusable="false"
             android:clickable="false"
-            android:visibility="visible"/>
+            android:focusable="false"
+            android:visibility="visible" />
 
 </LinearLayout>

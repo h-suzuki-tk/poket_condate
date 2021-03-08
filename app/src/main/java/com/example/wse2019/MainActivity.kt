@@ -93,11 +93,9 @@ class MainActivity :
         navigationView.setNavigationItemSelectedListener(this)
 
         //最初に表示する画面の設定
-        val ft = supportFragmentManager.beginTransaction().apply {
+        supportFragmentManager.beginTransaction().apply {
             replace(R.id.frame_contents, TabFragment())
-            addToBackStack(null)
-        }
-        ft.commit()
+        }.commit()
     }
 
     // ナビゲーションメニューの各項目を選択した際の動作

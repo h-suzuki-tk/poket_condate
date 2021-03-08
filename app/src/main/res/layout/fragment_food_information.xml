@@ -1,229 +1,255 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<ScrollView
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="8dp">
+        android:layout_height="match_parent">
 
-    <!-- 品目名、お気に入り、カテゴリ -->
     <LinearLayout
-            android:orientation="vertical"
-            android:gravity="center_horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-        <TextView
-                android:id="@+id/ffi_categoryTextView"
-                android:text="Category name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-        <TextView
-                android:id="@+id/ffi_foodNameTextView"
-                android:text="Food name"
-                android:textSize="30sp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:textColor="@color/colorAccent"/>
+            android:layout_height="wrap_content"
+            android:padding="@dimen/basic_padding"
+            android:orientation="vertical">
+
+        <ImageView
+                android:id="@+id/ffi_food_img"
+                android:layout_width="match_parent"
+                android:layout_height="200dp" />
+
+        <!-- 品目名、お気に入り、カテゴリ -->
         <LinearLayout
-                android:id="@+id/ffi_favoriteLinearLayout"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-            <ImageView
-                    android:src="@android:drawable/btn_star_big_on"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:paddingVertical="@dimen/basic_padding">
+
             <TextView
-                    android:text="お気に入り"
+                    android:id="@+id/ffi_categoryTextView"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:text="Category name" />
+
+            <TextView
+                    android:id="@+id/ffi_foodNameTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Food name"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="30sp"
+                    android:textStyle="bold" />
+
+            <LinearLayout
+                    android:id="@+id/ffi_favoriteLinearLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@android:drawable/btn_star_big_on" />
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="お気に入り" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- 栄養素 -->
+        <LinearLayout
+                android:id="@+id/ffi_nutritionLinearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+            <TextView
+                    android:text="栄養素"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/frame_style_1"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:paddingVertical="@dimen/tiny_padding"
+                    android:paddingHorizontal="@dimen/large_basic_padding" />
+
+            <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/large_basic_padding">
+
+                <TableRow>
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="end"
+                            android:text="@string/calorie" />
+
+                    <TextView
+                            android:id="@+id/ffi_calorieTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_horizontal"
+                            android:paddingHorizontal="8dp"
+                            android:text="Quantity" />
+
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/calorie_unit" />
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0"
+                            android:gravity="end"
+                            android:text="@string/sugar" />
+
+                    <TextView
+                            android:id="@+id/ffi_sugarTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_horizontal"
+                            android:paddingHorizontal="8dp"
+                            android:text="Quantity" />
+
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/nutrition_unit" />
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="end"
+                            android:text="@string/fat" />
+
+                    <TextView
+                            android:id="@+id/ffi_fatTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_horizontal"
+                            android:paddingHorizontal="8dp"
+                            android:text="Quantity" />
+
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:text="@string/nutrition_unit" />
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0"
+                            android:gravity="end"
+                            android:text="@string/protein" />
+
+                    <TextView
+                            android:id="@+id/ffi_proteinTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_horizontal"
+                            android:paddingHorizontal="8dp"
+                            android:text="Quantity" />
+
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/nutrition_unit" />
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0"
+                            android:gravity="end"
+                            android:text="@string/fiber" />
+
+                    <TextView
+                            android:id="@+id/ffi_fiberTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_horizontal"
+                            android:paddingHorizontal="8dp"
+                            android:text="Quantity" />
+
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/nutrition_unit" />
+
+                </TableRow>
+
+                <TableRow />
+
+            </TableLayout>
+        </LinearLayout>
+
+        <!-- 材料一覧 -->
+        <LinearLayout
+                android:id="@+id/ffi_ingredientLinearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="材料"
+                    android:background="@drawable/frame_style_1"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:paddingVertical="@dimen/tiny_padding"
+                    android:paddingHorizontal="@dimen/large_basic_padding"/>
+
+            <TableLayout
+                    android:id="@+id/ffi_ingredientListView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/large_basic_padding" />
+        </LinearLayout>
+
+        <!-- メモ -->
+        <LinearLayout
+                android:id="@+id/ffi_memoLinearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="メモ"
+                    android:background="@drawable/frame_style_1"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:paddingVertical="@dimen/tiny_padding"
+                    android:paddingHorizontal="@dimen/large_basic_padding" />
+
+            <TextView
+                    android:id="@+id/ffi_memoTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Memo"
+                    android:padding="@dimen/large_basic_padding"/>
         </LinearLayout>
 
     </LinearLayout>
 
-    <!-- 栄養素 -->
-    <LinearLayout
-            android:id="@+id/ffi_nutritionLinearLayout"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingVertical="8dp">
-        <TextView
-                android:text="栄養素"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:textSize="18sp" android:textColor="@color/colorPrimary"/>
-        <TableLayout
-                android:paddingLeft="8dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-            <TableRow>
-                <TextView
-                        android:text="@string/calorie"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="end"/>
-                <TextView
-                        android:text="Quantity"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingHorizontal="8dp"
-                        android:id="@+id/ffi_calorieTextView"
-                        android:gravity="center_horizontal"/>
-                <TextView
-                        android:text="@string/calorie_unit"
-                        android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"/>
-            </TableRow>
-            <TableRow>
-                <TextView
-                        android:text="@string/sugar"
-                        android:layout_weight="0"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="end"/>
-                <TextView
-                        android:text="Quantity"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingHorizontal="8dp"
-                        android:id="@+id/ffi_sugarTextView"
-                        android:gravity="center_horizontal"/>
-                <TextView
-                        android:text="@string/nutrition_unit"
-                        android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"/>
-                <TextView
-                        android:text="@string/fat"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="end"/>
-                <TextView
-                        android:text="Quantity"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingHorizontal="8dp"
-                        android:id="@+id/ffi_fatTextView"
-                        android:gravity="center_horizontal"/>
-                <TextView
-                        android:text="@string/nutrition_unit"
-                        android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"/>
-            </TableRow>
-            <TableRow>
-                <TextView
-                        android:text="@string/protein"
-                        android:layout_weight="0"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="end"/>
-                <TextView
-                        android:text="Quantity"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingHorizontal="8dp"
-                        android:id="@+id/ffi_proteinTextView"
-                        android:gravity="center_horizontal"/>
-                <TextView
-                        android:text="@string/nutrition_unit"
-                        android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"/>
-                <TextView
-                        android:text="@string/vitamin"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="end"/>
-                <TextView
-                        android:text="Quantity"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingHorizontal="8dp"
-                        android:id="@+id/ffi_vitaminTextView"
-                        android:gravity="center_horizontal"/>
-                <TextView
-                        android:text="@string/nutrition_unit"
-                        android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"/>
-            </TableRow>
-            <TableRow>
-                <TextView
-                        android:text="@string/mineral"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="end"/>
-                <TextView
-                        android:text="Quantity"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingHorizontal="8dp"
-                        android:id="@+id/ffi_mineralTextView"
-                        android:gravity="center_horizontal"/>
-                <TextView
-                        android:text="@string/nutrition_unit"
-                        android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"/>
-                <TextView
-                        android:text="@string/fiber"
-                        android:layout_weight="0"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="end"/>
-                <TextView
-                        android:text="Quantity"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingHorizontal="8dp"
-                        android:id="@+id/ffi_fiberTextView"
-                        android:gravity="center_horizontal"/>
-                <TextView
-                        android:text="@string/nutrition_unit"
-                        android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"/>
-            </TableRow>
-
-        </TableLayout>
-    </LinearLayout>
-
-    <!-- 材料一覧 -->
-    <LinearLayout
-            android:id="@+id/ffi_ingredientLinearLayout"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingVertical="8dp">
-        <TextView
-                android:text="材料"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:textSize="18sp" android:textColor="@color/colorPrimary"/>
-        <ListView
-                android:id="@+id/ffi_ingredientListView"
-                android:layout_marginLeft="8dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <!-- メモ -->
-    <LinearLayout
-            android:id="@+id/ffi_memoLinearLayout"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-        <TextView
-                android:text="メモ"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:textColor="@color/colorPrimary" android:textSize="18sp"/>
-        <TextView
-                android:id="@+id/ffi_memoTextView"
-                android:text="Memo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-
-</LinearLayout>
+</ScrollView>

@@ -1,6 +1,7 @@
 package com.example.wse2019
 
 
+import android.app.AlertDialog
 import android.content.Context
 import android.icu.util.Calendar
 import android.os.Bundle
@@ -20,7 +21,7 @@ private const val SCROLL_OFFSET = 3
 class CalendarFragment() : Fragment() {
     lateinit var listener: OnCellSelectedListener
     lateinit var cAdapter: CalendarAdapter
-    private val dm: DateManager = DateManager()
+    private val cm: CalendarManager = CalendarManager()
 
     // 表示位置
     lateinit var calendar: java.util.Calendar
@@ -45,8 +46,8 @@ class CalendarFragment() : Fragment() {
         /*
          * 今日の日付が上からSCROLL_OFFSET行にくるよう設定
          */
-        calendar = cAdapter.dm.calendar
-        sp = dm.getDate(dm.calendar.time).toInt() - SCROLL_OFFSET
+        calendar = cAdapter.cm.calendar
+        sp = cm.getDate(cm.calendar.time).toInt() - SCROLL_OFFSET
         sy = 0
     }
 
@@ -60,22 +61,47 @@ class CalendarFragment() : Fragment() {
         val listView: ListView = v.findViewById(R.id.calendarListView)
         listView.apply {
             adapter = cAdapter.apply {
-                dm.calendar = calendar
+                cm.calendar = calendar
             }
             setSelectionFromTop(sp, sy)
             setOnItemClickListener { adapterView, view, position, time ->
                 val day: Date = cAdapter.getItem(position)
 
                 // 表示位置の保存
-                calendar = dm.calendar
+                calendar = cm.calendar
                 sp = listView.firstVisiblePosition
                 sy = listView.getChildAt(0).top
 
-                listener.replaceFragment(CondateRegistrationFragment.newInstance(
-                    dm.getYear(day) .toInt(),
-                    dm.getMonth(day).toInt(),
-                    dm.getDate(day) .toInt(),
-                    time            .toInt()))
+                // 画面遷移
+                AlertDialog.Builder(context).apply {
+                    setView(inflater.inflate(R.layout.calendar_cell_click_dialog, null))
+                }.show().run {
+                    findViewById<Button>(R.id.cccd_confirm_btn).run {
+                        // 確認ボタンが押された場合、献立確認画面へ
+                        setOnClickListener {
+                            listener.replaceFragment(CondateConfirmationFragment.newInstance(
+                                cm.getYear(day) .toInt(),
+                                cm.getMonth(day).toInt(),
+                                cm.getDate(day) .toInt(),
+                                time            .toInt())
+                            )
+                            dismiss()
+                        }
+                    }
+                    findViewById<Button>(R.id.cccd_edit_btn).run {
+                        // 編集ボタンが押された場合、献立登録画面へ
+                        setOnClickListener {
+                            listener.replaceFragment(CondateRegistrationFragment.newInstance(
+                                cm.getYear(day) .toInt(),
+                                cm.getMonth(day).toInt(),
+                                cm.getDate(day) .toInt(),
+                                time            .toInt())
+                            )
+                            dismiss()
+                        }
+                    }
+                }
+
             }
         }
 

@@ -27,22 +27,26 @@
                 android:id="@+id/morningListView"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:divider="@null"/>
         <ListView
                 android:id="@+id/noonListView"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:divider="@null"/>
         <ListView
                 android:id="@+id/eveningListView"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:divider="@null"/>
         <ListView
                 android:id="@+id/snackListView"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:divider="@null"/>
 
     </LinearLayout>
 
@@ -73,7 +77,7 @@
                 android:id="@+id/eveningArea"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
         <FrameLayout
                 android:id="@+id/snackArea"
                 android:layout_width="0dp"

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/cccd_layout_root"
+        android:orientation="vertical" android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="@dimen/large_padding">
+
+    <Button
+            android:id="@+id/cccd_confirm_btn"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_basic_height"
+            android:background="@drawable/frame_style_1"
+            android:text="献立を確認する"
+            android:textColor="@android:color/white"
+            android:textStyle="bold" />
+
+    <Space
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/basic_space"/>
+
+    <Button
+            android:id="@+id/cccd_edit_btn"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_basic_height"
+            android:background="@drawable/frame_style_1"
+            android:text="献立を編集する"
+            android:textColor="@android:color/white"
+            android:textStyle="bold" />
+
+</LinearLayout>

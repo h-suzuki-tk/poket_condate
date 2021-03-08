@@ -18,7 +18,7 @@ import java.lang.AssertionError
 
 const val FOOD_IMAGE_DIRECTORY_NAME = "foods"
 
-class RecommendFoodAdapter(val context: Context) : BaseAdapter() {
+class FoodListAdapter(val context: Context) : BaseAdapter() {
 
     // --------------------------------------------------
     //  品目情報
@@ -59,13 +59,13 @@ class RecommendFoodAdapter(val context: Context) : BaseAdapter() {
         // ビューホルダーの設定
         val (viewHolder, view) = when (convertView) {
             null -> {
-                val view = LayoutInflater.from(context).inflate(R.layout.recommend_food_row, parent, false)
+                val view = LayoutInflater.from(context).inflate(R.layout.food_row, parent, false)
                 val viewHolder = ViewHolderItem(
-                    layout      = view.findViewById(R.id.rfr_layout),
-                    image       = view.findViewById(R.id.rfr_imageView),
-                    name        = view.findViewById(R.id.rfr_foodNameTextView),
-                    favorite    = view.findViewById(R.id.rfr_favoriteImageView),
-                    nutrition   = view.findViewById(R.id.rfr_foodNutritionTextView)
+                    layout      = view.findViewById(R.id.fr_layout),
+                    image       = view.findViewById(R.id.fr_imageView),
+                    name        = view.findViewById(R.id.fr_foodNameTextView),
+                    favorite    = view.findViewById(R.id.fr_favoriteImageView),
+                    nutrition   = view.findViewById(R.id.fr_foodNutritionTextView)
                 )
                 view.tag = viewHolder
                 viewHolder to view
@@ -75,7 +75,7 @@ class RecommendFoodAdapter(val context: Context) : BaseAdapter() {
 
         // 各ビューの設定
         viewHolder.layout.apply {
-            setOnClickListener { (parent as ListView).performItemClick(view, position, R.id.rfr_layout.toLong()) }
+            setOnClickListener { (parent as ListView).performItemClick(view, position, R.id.fr_layout.toLong()) }
         }
         val foodManager = FoodManager()
         viewHolder.image.apply {
@@ -92,13 +92,11 @@ class RecommendFoodAdapter(val context: Context) : BaseAdapter() {
             }
         }
         viewHolder.nutrition.apply {
-            text = "カロリー: %.0f kcal / 糖質: %.1f g / 脂質: %.1f g / たんぱく質: %.1f g / ミネラル: %.1f g / ビタミン: %.1f g / 食物繊維: %.1f g".format(
+            text = "カロリー: %.0f kcal / 糖質: %.1f g / 脂質: %.1f g / たんぱく質: %.1f g / 食物繊維: %.1f g".format(
                 foodsToShow[position].nutrition.calorie,
                 foodsToShow[position].nutrition.sugar,
                 foodsToShow[position].nutrition.fat,
                 foodsToShow[position].nutrition.protein,
-                foodsToShow[position].nutrition.mineral,
-                foodsToShow[position].nutrition.vitamin,
                 foodsToShow[position].nutrition.fiber
             )
         }
