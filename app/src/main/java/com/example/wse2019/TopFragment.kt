@@ -312,15 +312,4 @@ class TopFragment() : Fragment() {
         return PieData(dataSet)
     }
 
-
-
-    // --------------------------------------------------
-    //  replaceFragment - フラグメントを切り替える
-    // --------------------------------------------------
-    fun replaceFragment(
-        f: Fragment
-    ) {
-        val listener = context as TabFragment.OnRegisterNewCondateSelectedListener
-        listener.replaceFragment(f)
-    }
 }

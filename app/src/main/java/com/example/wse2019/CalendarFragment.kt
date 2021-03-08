@@ -19,7 +19,6 @@ import java.util.*
 private const val SCROLL_OFFSET = 3
 
 class CalendarFragment() : Fragment() {
-    lateinit var listener: OnCellSelectedListener
     lateinit var cAdapter: CalendarAdapter
     private val cm: CalendarManager = CalendarManager()
 
@@ -33,10 +32,6 @@ class CalendarFragment() : Fragment() {
             val fragment = CalendarFragment()
             return fragment
         }
-    }
-
-    interface OnCellSelectedListener {
-        fun replaceFragment(fragment: Fragment)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,7 +74,7 @@ class CalendarFragment() : Fragment() {
                     findViewById<Button>(R.id.cccd_confirm_btn).run {
                         // 確認ボタンが押された場合、献立確認画面へ
                         setOnClickListener {
-                            listener.replaceFragment(CondateConfirmationFragment.newInstance(
+                            (activity as? MainActivity)?.replaceFragment(CondateConfirmationFragment.newInstance(
                                 cm.getYear(day) .toInt(),
                                 cm.getMonth(day).toInt(),
                                 cm.getDate(day) .toInt(),
@@ -91,7 +86,7 @@ class CalendarFragment() : Fragment() {
                     findViewById<Button>(R.id.cccd_edit_btn).run {
                         // 編集ボタンが押された場合、献立登録画面へ
                         setOnClickListener {
-                            listener.replaceFragment(CondateRegistrationFragment.newInstance(
+                            (activity as? MainActivity)?.replaceFragment(CondateRegistrationFragment.newInstance(
                                 cm.getYear(day) .toInt(),
                                 cm.getMonth(day).toInt(),
                                 cm.getDate(day) .toInt(),
@@ -129,10 +124,6 @@ class CalendarFragment() : Fragment() {
         cAdapter = when (context) {
             null -> throw NullPointerException()
             else -> CalendarAdapter(context) }
-        when (context) {
-            is OnCellSelectedListener -> this.listener = context
-            else -> throw ClassCastException("${context.toString()} must implement OnCellSelectedListener")
-        }
     }
 
     override fun onDetach() {

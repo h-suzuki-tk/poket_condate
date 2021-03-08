@@ -125,13 +125,14 @@ class CondateConfirmationFragment(): Fragment() {
         }
         edit_btn.run {
             setOnClickListener {
+                fragmentManager?.popBackStack()
                 (requireActivity() as? MainActivity)?.replaceFragment(
                     CondateRegistrationFragment.newInstance(
                         day.year,
                         day.month,
                         day.date,
                         day.time)
-                )
+                    )
             }
         }
     }

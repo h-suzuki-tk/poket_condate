@@ -29,9 +29,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity :
     AppCompatActivity(),
-    NavigationView.OnNavigationItemSelectedListener,
-    CalendarFragment.OnCellSelectedListener,
-    TabFragment.OnRegisterNewCondateSelectedListener {
+    NavigationView.OnNavigationItemSelectedListener {
 
     companion object {
         const val TAG = "MainActivity"
@@ -93,9 +91,7 @@ class MainActivity :
         navigationView.setNavigationItemSelectedListener(this)
 
         //最初に表示する画面の設定
-        supportFragmentManager.beginTransaction().apply {
-            replace(R.id.frame_contents, TabFragment())
-        }.commit()
+        replaceFragment(TabFragment(), false)
     }
 
     // ナビゲーションメニューの各項目を選択した際の動作
@@ -172,12 +168,19 @@ class MainActivity :
     // --------------------------------------------------
 
 
-    override fun replaceFragment(fragment: Fragment) {
-        val ft: FragmentTransaction = supportFragmentManager.beginTransaction().apply {
+    fun replaceFragment(
+        fragment       : Fragment,
+        addToBackStack : Boolean = true) {
+
+        supportFragmentManager.beginTransaction().apply {
             replace(R.id.frame_contents, fragment)
-            addToBackStack(null)
-        }
-        ft.commit()
+            if (addToBackStack) { addToBackStack(null) }
+        }.commit()
+    }
+
+
+    fun updateRecommendList() {
+
     }
 
 }

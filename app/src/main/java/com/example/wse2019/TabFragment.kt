@@ -16,17 +16,12 @@ import java.lang.ClassCastException
 
 
 class TabFragment() : Fragment() {
-    var listener: OnRegisterNewCondateSelectedListener? = null
 
     companion object {
         fun newInstance(): TabFragment {
             val fragment = TabFragment()
             return fragment
         }
-    }
-
-    interface OnRegisterNewCondateSelectedListener {
-        fun replaceFragment(fragment: Fragment)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,24 +45,13 @@ class TabFragment() : Fragment() {
         // 「献立を登録する !」ボタンの設定
         val registerNewCondateButton: Button = v.findViewById(R.id.registerNewCondate)
         registerNewCondateButton.setOnClickListener {
-            when (this.listener) {
-                null -> throw NullPointerException("listener must be non-null")
-                else -> {
-                    val f: Fragment = CondateRegistrationFragment()
-                    this.listener!!.replaceFragment(f)
-                }
-            }
+            (activity as? MainActivity)?.replaceFragment(CondateRegistrationFragment())
         }
 
         return v
     }
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-
-        when (context) {
-            is OnRegisterNewCondateSelectedListener -> this.listener = context
-            else -> throw ClassCastException("${context.toString()} must implement OnCellSelectedListener")
-        }
     }
     override fun onDetach() {
         super.onDetach()
