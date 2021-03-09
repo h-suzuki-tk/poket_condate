@@ -17,13 +17,8 @@ import android.view.MenuItem
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
-import com.example.sample.DBContract
-import com.example.sample.SampleDBOpenHelper
-import com.example.sample.Table
-import com.example.sample.initializer
+import android.widget.*
+import com.example.sample.*
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -49,6 +44,10 @@ class MainActivity :
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // ツールバーをセット
+        toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
         // ユーザー情報の取得
         userName = getUserName()
 
@@ -60,19 +59,15 @@ class MainActivity :
                 Toast.LENGTH_LONG
             ).show()
             initializer(this)
-            userName = getUserName()
             Toast.makeText(
                 this,
-                "...データベースの初期化が完了しました。\nようこそ！ ${userName} さん",
+                "...データベースの初期化が完了しました。\nようこそ！",
                 Toast.LENGTH_LONG
             ).show()
+            userName = getUserName()
         }
 
-        // ツールバーをセット
-        toolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
-
-        //ナビゲーションドロワーをセット
+        // ナビゲーションドロワーのセット
         drawerLayout   = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.nav_view)
         header         = navigationView.getHeaderView(0)
@@ -90,7 +85,7 @@ class MainActivity :
         toggle.syncState()
         navigationView.setNavigationItemSelectedListener(this)
 
-        //最初に表示する画面の設定
+        // デフォルトの画面をセット
         replaceFragment(TabFragment(), false)
     }
 
@@ -176,11 +171,6 @@ class MainActivity :
             replace(R.id.frame_contents, fragment)
             if (addToBackStack) { addToBackStack(null) }
         }.commit()
-    }
-
-
-    fun updateRecommendList() {
-
     }
 
 }

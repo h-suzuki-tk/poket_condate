@@ -140,6 +140,9 @@
 
         </LinearLayout>
         <!-- 栄養 -->
+        <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
         <TableLayout
                 android:id="@+id/ffr_nutritionLayout"
                 android:layout_width="match_parent"
@@ -295,6 +298,7 @@
             </TableRow>
 
         </TableLayout>
+        </ScrollView>
     </LinearLayout>
 
     <!-- メモ -->

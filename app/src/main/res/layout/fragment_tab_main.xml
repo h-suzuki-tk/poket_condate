@@ -49,7 +49,7 @@
             android:id="@+id/registerNewCondate"
             android:text="献立を登録する !"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/button_basic_height"
             style="@style/Widget.AppCompat.Button.Colored"/>
 
 </LinearLayout>
